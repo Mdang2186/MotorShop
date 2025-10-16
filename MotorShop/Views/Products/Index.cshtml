@@ -62,41 +62,6 @@
                 </div>
 
                 <div class="flex justify-center">
-                    <div class="flex items-center justify-center space-x-2">
-                        @if (Model.HasPreviousPage)
-                        {
-                            <a asp-action="Index"
-                               asp-route-pageIndex="@(Model.PageIndex - 1)"
-                               asp-route-searchString="@Model.SearchString"
-                               asp-route-brandFilter="@Model.BrandFilter"
-                               asp-route-categoryFilter="@Model.CategoryFilter"
-                               class="px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                                <i class="fas fa-chevron-left"></i>
-                            </a>
-                        }
-
-                        @for (int i = 1; i <= Model.TotalPages; i++)
-                        {
-                            <a asp-action="Index"
-                               asp-route-pageIndex="@i"
-                               asp-route-searchString="@Model.SearchString"
-                               asp-route-brandFilter="@Model.BrandFilter"
-                               asp-route-categoryFilter="@Model.CategoryFilter"
-                               class="px-3 py-2 @(i == Model.PageIndex ? "bg-blue-600 text-white" : "bg-white border border-gray-300") rounded-lg hover:bg-gray-50">@i</a>
-                        }
-
-                        @if (Model.HasNextPage)
-                        {
-                            <a asp-action="Index"
-                               asp-route-pageIndex="@(Model.PageIndex + 1)"
-                               asp-route-searchString="@Model.SearchString"
-                               asp-route-brandFilter="@Model.BrandFilter"
-                               asp-route-categoryFilter="@Model.CategoryFilter"
-                               class="px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                                <i class="fas fa-chevron-right"></i>
-                            </a>
-                        }
-                    </div>
                 </div>
             </div>
         </div>
