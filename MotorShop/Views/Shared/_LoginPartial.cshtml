@@ -1,12 +1,19 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @using MotorShop.Models
-
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
+@inject MotorShop.Services.CartService CartService
+
+@{
+    var cartItemCount = CartService.GetCartItems().Sum(i => i.Quantity);
+}
 
 <div class="flex items-center space-x-4">
     <a asp-controller="Cart" asp-action="Index" class="relative p-2 text-gray-600 hover:text-blue-600">
         <i class="fas fa-shopping-cart text-xl"></i>
+        <span id="cart-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center @(cartItemCount == 0 ? "hidden" : "")">
+            @cartItemCount
+        </span>
     </a>
 
     @if (SignInManager.IsSignedIn(User))
@@ -14,7 +21,7 @@
         <div class="relative">
             <a class="flex items-center space-x-2 text-gray-600 hover:text-blue-600" asp-area="Identity" asp-page="/Account/Manage" title="Manage">
                 <i class="fas fa-user-circle text-xl"></i>
-                <span class="hidden md:block">@UserManager.GetUserAsync(User).Result?.FullName</span>
+                <span class="hidden md:block">@User.Identity?.Name</span>
             </a>
         </div>
         <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">

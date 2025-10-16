@@ -52,8 +52,8 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = QXJlYXNcQWRtaW5cVmlld3NcUHJvZHVjdFxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/2. THỰC TẬP LẬP TRÌNH .NET/MotorShop/MotorShop/Areas/Admin/Views/Shared/_AdminLayoutz.cshtml]
-build_metadata.AdditionalFiles.TargetPath = QXJlYXNcQWRtaW5cVmlld3NcU2hhcmVkXF9BZG1pbkxheW91dHouY3NodG1s
+[D:/2. THỰC TẬP LẬP TRÌNH .NET/MotorShop/MotorShop/Areas/Admin/Views/Shared/_AdminLayout.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcQWRtaW5cVmlld3NcU2hhcmVkXF9BZG1pbkxheW91dC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/2. THỰC TẬP LẬP TRÌNH .NET/MotorShop/MotorShop/Areas/Admin/Views/_ViewImports.cshtml]
@@ -76,12 +76,20 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcT3JkZXJcQ2hlY2tvdXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[D:/2. THỰC TẬP LẬP TRÌNH .NET/MotorShop/MotorShop/Views/Order/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcT3JkZXJcRGV0YWlscy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/2. THỰC TẬP LẬP TRÌNH .NET/MotorShop/MotorShop/Views/Order/History.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcT3JkZXJcSGlzdG9yeS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/2. THỰC TẬP LẬP TRÌNH .NET/MotorShop/MotorShop/Views/Order/OrderConfirmationz.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcT3JkZXJcT3JkZXJDb25maXJtYXRpb256LmNzaHRtbA==
+[D:/2. THỰC TẬP LẬP TRÌNH .NET/MotorShop/MotorShop/Views/Order/OrderConfirmation.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcT3JkZXJcT3JkZXJDb25maXJtYXRpb24uY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/2. THỰC TẬP LẬP TRÌNH .NET/MotorShop/MotorShop/Views/Products/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvZHVjdHNcRGV0YWlscy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/2. THỰC TẬP LẬP TRÌNH .NET/MotorShop/MotorShop/Views/Products/Index.cshtml]

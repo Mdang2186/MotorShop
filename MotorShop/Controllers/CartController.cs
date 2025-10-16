@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using MotorShop.Data;
 using MotorShop.Models;
 using MotorShop.Services;
@@ -16,18 +17,23 @@ namespace MotorShop.Controllers
             _context = context;
         }
 
-        // GET: /Cart (Standard cart page)
+        // GET: /Cart (Trang giỏ hàng chính)
         public IActionResult Index()
         {
             var cartItems = _cartService.GetCartItems();
-            // This logic is a simplified version. A real app would re-fetch product details here.
             return View(cartItems);
         }
 
-        // POST API: /Cart/AddToCartApi
+        // ✨ ENDPOINT API MỚI DÙNG CHO AJAX ✨
+        // POST: /Cart/AddToCart
         [HttpPost]
-        public async Task<IActionResult> AddToCartApi([FromBody] AddToCartRequest request)
+        public async Task<IActionResult> AddToCart([FromBody] AddToCartRequest request)
         {
+            if (request == null || request.ProductId <= 0)
+            {
+                return BadRequest(new { success = false, message = "Dữ liệu không hợp lệ." });
+            }
+
             var product = await _context.Products.FindAsync(request.ProductId);
             if (product == null)
             {
@@ -37,10 +43,15 @@ namespace MotorShop.Controllers
             _cartService.AddToCart(product);
 
             var cartItemCount = _cartService.GetCartItems().Sum(i => i.Quantity);
-            return Ok(new { success = true, message = $"Đã thêm {product.Name} vào giỏ!", cartCount = cartItemCount });
+            return Ok(new
+            {
+                success = true,
+                message = $"Đã thêm {product.Name} vào giỏ!",
+                cartCount = cartItemCount
+            });
         }
 
-        // POST: /Cart/Remove/5 (For the main cart page)
+        // Action xóa sản phẩm khỏi giỏ hàng (trên trang Cart chính)
         [HttpPost]
         public IActionResult Remove(int productId)
         {
@@ -49,6 +60,7 @@ namespace MotorShop.Controllers
         }
     }
 
+    // Class để nhận dữ liệu từ AJAX
     public class AddToCartRequest
     {
         public int ProductId { get; set; }

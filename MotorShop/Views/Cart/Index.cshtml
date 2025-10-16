@@ -2,44 +2,60 @@
 
 @{
     ViewData["Title"] = "Giỏ hàng";
-    var totalPrice = Model.Sum(item => item.UnitPrice * item.Quantity);
 }
 
 <div class="py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h1 class="text-2xl font-bold mb-6">@ViewData["Title"]</h1>
 
-        @if (Model.Any())
+        @if (Model.Count > 0)
         {
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="lg:col-span-2 space-y-4">
-                    @foreach (var item in Model)
-                    {
-                        <div class="bg-white p-4 rounded-lg border flex items-center space-x-4">
-                            <img src="@(item.Product?.ImageUrl ?? "https://via.placeholder.com/150")" alt="@item.Product?.Name" class="w-20 h-20 object-cover rounded-lg">
-                            <div class="flex-1">
-                                <h3 class="font-semibold">@item.Product?.Name</h3>
-                                <p class="text-sm text-gray-600">Số lượng: @item.Quantity</p>
-                                <p class="font-bold text-red-600">@item.UnitPrice.ToString("N0") đ</p>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2">
+                    <div class="bg-white p-4 rounded-lg border mb-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll(this.checked)" class="mr-3 h-5 w-5 rounded border-gray-300 text-blue-600">
+                            <span class="font-medium">Chọn tất cả (@Model.Count sản phẩm)</span>
+                        </label>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        @foreach (var item in Model)
+                        {
+                            <div class="bg-white p-4 rounded-lg border flex items-center space-x-4">
+                                <input type="checkbox" name="selectedItems" value="@item.ProductId" onchange="updateCartSummary()" class="cart-item-checkbox mr-3 h-5 w-5 rounded border-gray-300 text-blue-600">
+                                
+                                <img src="@(item.Product?.ImageUrl ?? "https://placehold.co/150")" alt="@item.Product?.Name" class="w-20 h-20 object-cover rounded-lg">
+                                
+                                <div class="flex-1">
+                                    <h3 class="font-semibold">@item.Product?.Name</h3>
+                                    <p class="font-bold text-red-600" data-price="@item.UnitPrice">@item.UnitPrice.ToString("N0") đ</p>
+                                </div>
+                                
+                                <div class="text-right">
+                                    <div class="flex items-center space-x-2 mb-2">
+                                        <span class="px-3 py-1 bg-gray-50 rounded min-w-[40px] text-center">SL: @item.Quantity</span>
+                                    </div>
+                                    <form asp-controller="Cart" asp-action="Remove" method="post" class="d-inline">
+                                        <input type="hidden" name="productId" value="@item.ProductId" />
+                                        <button type="submit" class="text-red-500 hover:text-red-700 text-sm">
+                                            <i class="fas fa-trash mr-1"></i>Xóa
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
-                            <form asp-controller="Cart" asp-action="Remove" method="post">
-                                <input type="hidden" name="productId" value="@item.ProductId" />
-                                <button type="submit" class="text-red-500 hover:text-red-700 text-sm">
-                                    <i class="fas fa-trash mr-1"></i>Xóa
-                                </button>
-                            </form>
-                        </div>
-                    }
+                        }
+                    </div>
                 </div>
-
+                
                 <div class="lg:col-span-1">
                     <div class="bg-white p-6 rounded-lg border sticky top-20">
                         <h3 class="font-bold text-lg mb-4">Tóm tắt đơn hàng</h3>
-                        <div class="flex justify-between text-lg font-bold mb-6">
+                        <div class="flex justify-between font-bold text-lg mb-6">
                             <span>Thành tiền:</span>
-                            <span class="text-red-600">@totalPrice.ToString("N0") đ</span>
+                            <span class="text-red-600" id="totalPrice">0 đ</span>
                         </div>
-                        <a asp-controller="Order" asp-action="Checkout" class="w-full block text-center py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold">
+                        <a id="checkoutButton" href="@Url.Action("Checkout", "Order")" class="w-full block text-center py-3 bg-gray-300 text-white rounded-lg font-semibold cursor-not-allowed">
                             Tiến hành thanh toán
                         </a>
                     </div>
@@ -57,3 +73,54 @@
         }
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', updateCartSummary);
+
+        function toggleSelectAll(checked) {
+            document.querySelectorAll('.cart-item-checkbox').forEach(checkbox => {
+                checkbox.checked = checked;
+            });
+            updateCartSummary();
+        }
+
+        function updateCartSummary() {
+            let total = 0;
+            let selectedCount = 0;
+            const checkoutButton = document.getElementById('checkoutButton');
+            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+
+            const checkboxes = document.querySelectorAll('.cart-item-checkbox');
+            checkboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    selectedCount++;
+                    const itemElement = checkbox.closest('.flex');
+                    const priceElement = itemElement.querySelector('[data-price]');
+                    const price = parseFloat(priceElement.dataset.price);
+                    
+                    // Lấy số lượng từ model, vì không có input số lượng
+                    const quantityText = itemElement.querySelector('span:not([data-price])').textContent;
+                    const quantity = parseInt(quantityText.replace('SL: ', ''));
+                    
+                    total += price * quantity;
+                }
+            });
+
+            document.getElementById('totalPrice').textContent = total.toLocaleString('vi-VN') + ' đ';
+            
+            if (selectedCount > 0) {
+                checkoutButton.classList.remove('bg-gray-300', 'cursor-not-allowed');
+                checkoutButton.classList.add('bg-blue-600', 'hover:bg-blue-700');
+            } else {
+                checkoutButton.classList.add('bg-gray-300', 'cursor-not-allowed');
+                checkoutButton.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+            }
+            
+            // Cập nhật trạng thái của checkbox "Chọn tất cả"
+            if (checkboxes.length > 0) {
+                selectAllCheckbox.checked = selectedCount === checkboxes.length;
+            }
+        }
+    </script>
+}

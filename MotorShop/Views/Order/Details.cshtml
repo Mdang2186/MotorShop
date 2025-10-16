@@ -1,0 +1,56 @@
+﻿@model MotorShop.Models.Order
+@using MotorShop.Models.Enums
+
+@{
+    ViewData["Title"] = "Chi tiết đơn hàng #" + Model.Id;
+}
+
+<div class="py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold">@ViewData["Title"]</h1>
+            <a asp-action="History" class="text-blue-600 hover:underline font-medium">&larr; Quay lại lịch sử</a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="md:col-span-2 bg-white p-6 rounded-lg border">
+                <h3 class="font-semibold text-lg mb-4">Các sản phẩm đã đặt</h3>
+                <div class="space-y-4">
+                    @foreach (var item in Model.OrderItems)
+                    {
+                        <div class="flex items-center space-x-4 border-b pb-4">
+                            <img src="@(item.Product.ImageUrl ?? "https://placehold.co/150")" alt="@item.Product.Name" class="w-16 h-16 object-cover rounded-lg">
+                            <div class="flex-1">
+                                <p class="font-semibold">@item.Product.Name</p>
+                                <p class="text-sm text-gray-600">Số lượng: @item.Quantity</p>
+                            </div>
+                            <p class="font-semibold text-red-600">@((item.Quantity * item.UnitPrice).ToString("N0")) đ</p>
+                        </div>
+                    }
+                </div>
+                <div class="flex justify-end text-xl font-bold mt-6">
+                    <span>Tổng cộng:</span>
+                    <span class="text-red-600 ml-4">@Model.TotalAmount.ToString("N0") đ</span>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-white p-6 rounded-lg border">
+                    <h3 class="font-semibold text-lg mb-4">Thông tin đơn hàng</h3>
+                    <div class="space-y-2 text-gray-700">
+                        <p><strong>Ngày đặt:</strong> @Model.OrderDate.ToLocalTime().ToString("dd/MM/yyyy")</p>
+                        <p><strong>Trạng thái:</strong> <span class="font-medium text-blue-600">@(((OrderStatus)Model.Status).ToString())</span></p>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg border">
+                    <h3 class="font-semibold text-lg mb-4">Địa chỉ giao hàng</h3>
+                    <div class="space-y-2 text-gray-700">
+                        <p><strong>Người nhận:</strong> @Model.CustomerName</p>
+                        <p><strong>Điện thoại:</strong> @Model.ShippingPhone</p>
+                        <p><strong>Địa chỉ:</strong> @Model.ShippingAddress</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,4 +1,5 @@
 ﻿@model IEnumerable<MotorShop.Models.Order>
+@using MotorShop.Models.Enums
 
 @{
     ViewData["Title"] = "Lịch sử mua hàng";
@@ -7,15 +8,42 @@
 <div class="py-8">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <h1 class="text-2xl font-bold mb-6">@ViewData["Title"]</h1>
-        <div class="space-y-4">
-            @foreach(var order in Model)
-            {
-                <div class="bg-white p-4 rounded-lg border">
-                    <p>Mã đơn hàng: <strong>#@order.Id</strong></p>
-                    <p>Ngày đặt: @order.OrderDate.ToShortDateString()</p>
-                    <p>Tổng tiền: <span class="font-bold text-red-600">@order.TotalAmount.ToString("N0") đ</span></p>
-                </div>
-            }
-        </div>
+
+        @if (Model.Any())
+        {
+            <div class="space-y-4">
+                @foreach (var order in Model)
+                {
+                    <div class="bg-white p-6 rounded-lg border card-hover">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="font-semibold text-lg">Đơn hàng #@order.Id</h3>
+                                <p class="text-gray-600 text-sm">Ngày đặt: @order.OrderDate.ToLocalTime().ToString("dd/MM/yyyy")</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="inline-block px-3 py-1 rounded-full text-sm font-medium @(((OrderStatus)order.Status) switch { OrderStatus.Pending => "bg-yellow-100 text-yellow-800", OrderStatus.Confirmed => "bg-blue-100 text-blue-800", OrderStatus.Shipping => "bg-purple-100 text-purple-800", OrderStatus.Delivered => "bg-green-100 text-green-800", _ => "bg-red-100 text-red-800" })">
+                                    @(((OrderStatus)order.Status).ToString())
+                                </span>
+                            </div>
+                        </div>
+                        <div class="border-t pt-4 flex justify-between items-center">
+                            <p class="text-lg font-bold">Tổng tiền: <span class="text-red-600">@order.TotalAmount.ToString("N0") đ</span></p>
+                            <a asp-action="Details" asp-route-id="@order.Id" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-semibold">
+                                Xem chi tiết
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-20">
+                <h2 class="text-xl font-semibold text-gray-900 mb-2">Chưa có đơn hàng</h2>
+                <a asp-controller="Products" asp-action="Index" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700">
+                    Mua sắm ngay
+                </a>
+            </div>
+        }
     </div>
 </div>

@@ -6,7 +6,7 @@ namespace MotorShop.Services
     public class CartService
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private ISession Session => _httpContextAccessor.HttpContext.Session;
+        private ISession Session => _httpContextAccessor.HttpContext!.Session;
 
         public CartService(IHttpContextAccessor httpContextAccessor)
         {
@@ -16,7 +16,7 @@ namespace MotorShop.Services
         public List<OrderItem> GetCartItems()
         {
             var jsonCart = Session.GetString("Cart");
-            return jsonCart == null ? new List<OrderItem>() : JsonSerializer.Deserialize<List<OrderItem>>(jsonCart);
+            return jsonCart == null ? [] : JsonSerializer.Deserialize<List<OrderItem>>(jsonCart)!;
         }
 
         public void SaveCartItems(List<OrderItem> cartItems)
@@ -39,12 +39,11 @@ namespace MotorShop.Services
                 cartItems.Add(new OrderItem
                 {
                     ProductId = product.Id,
-                    Product = product, // Note: For display purposes, the actual Product object might not be fully saved in the session to keep it light.
+                    Product = product,
                     Quantity = quantity,
                     UnitPrice = product.Price
                 });
             }
-
             SaveCartItems(cartItems);
         }
 
@@ -59,6 +58,8 @@ namespace MotorShop.Services
             }
         }
 
+        // ✨ PHƯƠNG THỨC CÒN THIẾU ĐÃ ĐƯỢC THÊM VÀO ✨
+        // Xóa giỏ hàng khỏi session.
         public void ClearCart()
         {
             Session.Remove("Cart");

@@ -69,8 +69,9 @@ namespace MotorShop.Controllers
 
             return View(viewModel);
         }
+        // Thêm action mới này vào trong class ProductsController
 
-        // Action to show product details in a modal
+        // GET: /Products/Details/5
         public async Task<IActionResult> Details(int id)
         {
             var product = await _context.Products
@@ -78,9 +79,27 @@ namespace MotorShop.Controllers
                                         .Include(p => p.Category)
                                         .AsNoTracking()
                                         .FirstOrDefaultAsync(p => p.Id == id);
-            if (product == null) return NotFound();
 
-            return PartialView("_ProductDetailPartial", product);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            // Lấy 4 sản phẩm liên quan (cùng loại xe, trừ sản phẩm hiện tại)
+            var relatedProducts = await _context.Products
+                                                .Include(p => p.Brand)
+                                                .Where(p => p.CategoryId == product.CategoryId && p.Id != id)
+                                                .AsNoTracking()
+                                                .Take(4)
+                                                .ToListAsync();
+
+            var viewModel = new ProductDetailViewModel
+            {
+                Product = product,
+                RelatedProducts = relatedProducts
+            };
+
+            return View(viewModel);
         }
     }
 }
