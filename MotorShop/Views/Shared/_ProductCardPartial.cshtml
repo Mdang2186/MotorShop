@@ -1,0 +1,40 @@
+﻿@model MotorShop.Models.Product
+
+<div class="bg-white rounded-lg border overflow-hidden card-hover">
+    <div class="relative">
+        <img src="@(Model.ImageUrl ?? "https://placehold.co/400x300/e2e8f0/adb5bd?text=MotorShop")" alt="@Model.Name" class="w-full h-40 object-cover">
+        @if (Model.OriginalPrice.HasValue && Model.OriginalPrice > Model.Price)
+        {
+            var discount = Math.Round((1 - Model.Price / Model.OriginalPrice.Value) * 100);
+            <div class="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">-@discount%</div>
+        }
+        <div class="absolute top-2 left-2 bg-white bg-opacity-90 text-blue-600 text-xs px-2 py-1 rounded-full">@Model.Brand.Name</div>
+    </div>
+    <div class="p-4">
+        <h3 class="font-semibold mb-2 h-12 line-clamp-2">@Model.Name</h3>
+        <div class="mb-4">
+            @if (Model.OriginalPrice.HasValue && Model.OriginalPrice > Model.Price)
+            {
+                <div class="flex items-center space-x-2">
+                    <span class="font-bold text-lg text-red-600">@Model.Price.ToString("N0") đ</span>
+                    <span class="text-sm text-gray-500 line-through">@Model.OriginalPrice?.ToString("N0") đ</span>
+                </div>
+            }
+            else
+            {
+                <span class="font-bold text-lg text-red-600">@Model.Price.ToString("N0") đ</span>
+            }
+        </div>
+        <div class="flex space-x-2">
+            <button class="add-to-cart-btn flex-1 bg-blue-600 text-white py-2 px-3 rounded-lg text-sm font-medium hover:bg-blue-700"
+                    data-product-id="@Model.Id"
+                    data-url="@Url.Action("AddToCartApi", "Cart")">
+                <i class="fas fa-shopping-cart mr-1"></i>Thêm
+            </button>
+            <button class="view-product-btn px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+                    data-url="@Url.Action("Details", "Products", new { id = Model.Id })">
+                <i class="fas fa-eye"></i>
+            </button>
+        </div>
+    </div>
+</div>

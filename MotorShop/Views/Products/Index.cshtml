@@ -1,0 +1,104 @@
+﻿@model MotorShop.ViewModels.ProductIndexViewModel
+
+@{
+    ViewData["Title"] = "Sản phẩm";
+}
+
+<div class="py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 class="text-2xl font-bold mb-6">Sản phẩm</h1>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div class="lg:col-span-1">
+                <form id="filterForm" asp-controller="Products" asp-action="Index" method="get" class="bg-white p-4 rounded-lg border sticky top-20">
+                    <h3 class="font-semibold mb-4">Bộ lọc</h3>
+
+                    <div class="relative mb-4">
+                        <input type="text" name="searchString" value="@Model.SearchString" placeholder="Tìm kiếm..."
+                               class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    </div>
+
+                    <div class="mb-6">
+                        <h4 class="font-medium mb-3">Thương hiệu</h4>
+                        <select name="brandFilter" asp-items="Model.Brands" class="w-full border border-gray-300 rounded px-3 py-2">
+                            <option value="">Tất cả thương hiệu</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-6">
+                        <h4 class="font-medium mb-3">Loại xe</h4>
+                        <select name="categoryFilter" asp-items="Model.Categories" class="w-full border border-gray-300 rounded px-3 py-2">
+                            <option value="">Tất cả loại xe</option>
+                        </select>
+                    </div>
+
+                    <a asp-controller="Products" asp-action="Index" class="w-full text-center py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
+                        Xóa bộ lọc
+                    </a>
+                </form>
+            </div>
+
+            <div class="lg:col-span-3">
+                <div class="bg-white p-4 rounded-lg border mb-6 flex justify-between items-center">
+                    <span class="text-gray-600">Hiển thị @Model.Products.Count sản phẩm</span>
+                    <form asp-controller="Products" asp-action="Index" method="get" id="sortForm" class="flex items-center">
+                        <input type="hidden" name="searchString" value="@Model.SearchString" />
+                        <input type="hidden" name="brandFilter" value="@Model.BrandFilter" />
+                        <input type="hidden" name="categoryFilter" value="@Model.CategoryFilter" />
+                        <select name="sortBy" onchange="this.form.submit()" class="border border-gray-300 rounded px-3 py-1">
+                            <option value="newest">Mới nhất</option>
+                            <option value="price-low">Giá thấp đến cao</option>
+                            <option value="price-high">Giá cao đến thấp</option>
+                        </select>
+                    </form>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                    @foreach (var product in Model.Products)
+                    {
+                        <partial name="_ProductCardPartial" model="product" />
+                    }
+                </div>
+
+                <div class="flex justify-center">
+                    <div class="flex items-center justify-center space-x-2">
+                        @if (Model.HasPreviousPage)
+                        {
+                            <a asp-action="Index"
+                               asp-route-pageIndex="@(Model.PageIndex - 1)"
+                               asp-route-searchString="@Model.SearchString"
+                               asp-route-brandFilter="@Model.BrandFilter"
+                               asp-route-categoryFilter="@Model.CategoryFilter"
+                               class="px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        }
+
+                        @for (int i = 1; i <= Model.TotalPages; i++)
+                        {
+                            <a asp-action="Index"
+                               asp-route-pageIndex="@i"
+                               asp-route-searchString="@Model.SearchString"
+                               asp-route-brandFilter="@Model.BrandFilter"
+                               asp-route-categoryFilter="@Model.CategoryFilter"
+                               class="px-3 py-2 @(i == Model.PageIndex ? "bg-blue-600 text-white" : "bg-white border border-gray-300") rounded-lg hover:bg-gray-50">@i</a>
+                        }
+
+                        @if (Model.HasNextPage)
+                        {
+                            <a asp-action="Index"
+                               asp-route-pageIndex="@(Model.PageIndex + 1)"
+                               asp-route-searchString="@Model.SearchString"
+                               asp-route-brandFilter="@Model.BrandFilter"
+                               asp-route-categoryFilter="@Model.CategoryFilter"
+                               class="px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

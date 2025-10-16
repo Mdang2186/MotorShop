@@ -1,0 +1,59 @@
+﻿@model List<MotorShop.Models.OrderItem>
+
+@{
+    ViewData["Title"] = "Giỏ hàng";
+    var totalPrice = Model.Sum(item => item.UnitPrice * item.Quantity);
+}
+
+<div class="py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 class="text-2xl font-bold mb-6">@ViewData["Title"]</h1>
+
+        @if (Model.Any())
+        {
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 space-y-4">
+                    @foreach (var item in Model)
+                    {
+                        <div class="bg-white p-4 rounded-lg border flex items-center space-x-4">
+                            <img src="@(item.Product?.ImageUrl ?? "https://via.placeholder.com/150")" alt="@item.Product?.Name" class="w-20 h-20 object-cover rounded-lg">
+                            <div class="flex-1">
+                                <h3 class="font-semibold">@item.Product?.Name</h3>
+                                <p class="text-sm text-gray-600">Số lượng: @item.Quantity</p>
+                                <p class="font-bold text-red-600">@item.UnitPrice.ToString("N0") đ</p>
+                            </div>
+                            <form asp-controller="Cart" asp-action="Remove" method="post">
+                                <input type="hidden" name="productId" value="@item.ProductId" />
+                                <button type="submit" class="text-red-500 hover:text-red-700 text-sm">
+                                    <i class="fas fa-trash mr-1"></i>Xóa
+                                </button>
+                            </form>
+                        </div>
+                    }
+                </div>
+
+                <div class="lg:col-span-1">
+                    <div class="bg-white p-6 rounded-lg border sticky top-20">
+                        <h3 class="font-bold text-lg mb-4">Tóm tắt đơn hàng</h3>
+                        <div class="flex justify-between text-lg font-bold mb-6">
+                            <span>Thành tiền:</span>
+                            <span class="text-red-600">@totalPrice.ToString("N0") đ</span>
+                        </div>
+                        <a asp-controller="Order" asp-action="Checkout" class="w-full block text-center py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold">
+                            Tiến hành thanh toán
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-20">
+                <h2 class="text-xl font-semibold text-gray-900 mb-2">Giỏ hàng của bạn đang trống</h2>
+                <a asp-controller="Products" asp-action="Index" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700">
+                    Tiếp tục mua sắm
+                </a>
+            </div>
+        }
+    </div>
+</div>

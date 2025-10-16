@@ -1,0 +1,41 @@
+﻿@model MotorShop.ViewModels.ProductIndexViewModel
+
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+    @if (Model.Products.Any())
+    {
+        @foreach (var product in Model.Products)
+        {
+            <partial name="_ProductCardPartial" model="product" />
+        }
+    }
+    else
+    {
+        <p class="col-span-full text-center text-gray-500">Không tìm thấy sản phẩm nào.</p>
+    }
+</div>
+
+<div class="flex justify-center">
+    <div class="flex items-center justify-center space-x-2">
+        @if (Model.HasPreviousPage)
+        {
+            <a href="@Url.Action("Index", new { pageIndex = Model.PageIndex - 1, searchString = Model.SearchString, brandFilter = Model.BrandFilter, categoryFilter = Model.CategoryFilter, sortBy = Model.SortBy })"
+               class="pagination-link px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+        }
+
+        @for (int i = 1; i <= Model.TotalPages; i++)
+        {
+            <a href="@Url.Action("Index", new { pageIndex = i, searchString = Model.SearchString, brandFilter = Model.BrandFilter, categoryFilter = Model.CategoryFilter, sortBy = Model.SortBy })"
+               class="pagination-link px-3 py-2 @(i == Model.PageIndex ? "bg-blue-600 text-white" : "bg-white border border-gray-300") rounded-lg hover:bg-gray-50">@i</a>
+        }
+
+        @if (Model.HasNextPage)
+        {
+            <a href="@Url.Action("Index", new { pageIndex = Model.PageIndex + 1, searchString = Model.SearchString, brandFilter = Model.BrandFilter, categoryFilter = Model.CategoryFilter, sortBy = Model.SortBy })"
+               class="pagination-link px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        }
+    </div>
+</div>

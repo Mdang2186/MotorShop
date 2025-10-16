@@ -1,0 +1,54 @@
+﻿@model MotorShop.ViewModels.CheckoutViewModel
+
+@{
+    ViewData["Title"] = "Thanh toán";
+    var totalPrice = Model.CartItems.Sum(item => item.UnitPrice * item.Quantity);
+}
+
+<div class="py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 class="text-2xl font-bold mb-6">@ViewData["Title"]</h1>
+        <form asp-action="Checkout" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-4"></div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div>
+                    <h2 class="text-lg font-semibold mb-4">Thông tin giao hàng</h2>
+                    <div class="bg-white p-6 rounded-lg border space-y-4">
+                        <div class="form-group">
+                            <label asp-for="CustomerName" class="font-medium">Họ tên</label>
+                            <input asp-for="CustomerName" class="w-full mt-1 border rounded px-3 py-2" />
+                            <span asp-validation-for="CustomerName" class="text-danger text-sm"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="ShippingPhone" class="font-medium">Số điện thoại</label>
+                            <input asp-for="ShippingPhone" class="w-full mt-1 border rounded px-3 py-2" />
+                            <span asp-validation-for="ShippingPhone" class="text-danger text-sm"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="ShippingAddress" class="font-medium">Địa chỉ giao hàng</label>
+                            <textarea asp-for="ShippingAddress" class="w-full mt-1 border rounded px-3 py-2" rows="3"></textarea>
+                            <span asp-validation-for="ShippingAddress" class="text-danger text-sm"></span>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h2 class="text-lg font-semibold mb-4">Đơn hàng của bạn</h2>
+                    <div class="bg-white p-6 rounded-lg border">
+                        @foreach (var item in Model.CartItems)
+                        {
+                            <p>@item.Product.Name x @item.Quantity</p>
+                        }
+                        <hr class="my-4" />
+                        <div class="flex justify-between text-lg font-bold">
+                            <span>Tổng cộng:</span>
+                            <span class="text-red-600">@totalPrice.ToString("N0") đ</span>
+                        </div>
+                        <button type="submit" class="w-full mt-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold">
+                            Xác nhận đặt hàng
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

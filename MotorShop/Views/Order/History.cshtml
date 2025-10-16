@@ -1,0 +1,21 @@
+﻿@model IEnumerable<MotorShop.Models.Order>
+
+@{
+    ViewData["Title"] = "Lịch sử mua hàng";
+}
+
+<div class="py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 class="text-2xl font-bold mb-6">@ViewData["Title"]</h1>
+        <div class="space-y-4">
+            @foreach(var order in Model)
+            {
+                <div class="bg-white p-4 rounded-lg border">
+                    <p>Mã đơn hàng: <strong>#@order.Id</strong></p>
+                    <p>Ngày đặt: @order.OrderDate.ToShortDateString()</p>
+                    <p>Tổng tiền: <span class="font-bold text-red-600">@order.TotalAmount.ToString("N0") đ</span></p>
+                </div>
+            }
+        </div>
+    </div>
+</div>

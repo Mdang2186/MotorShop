@@ -1,0 +1,30 @@
+﻿@model MotorShop.Models.Product
+
+<div class="p-6">
+    <div class="flex justify-between items-center mb-6">
+        <h3 class="text-xl font-bold">@Model.Name</h3>
+        <button onclick="closeModal('productModal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div><img src="@(Model.ImageUrl ?? "https://placehold.co/400x300/e2e8f0/adb5bd?text=MotorShop")" alt="@Model.Name" class="w-full h-64 object-cover rounded-lg mb-4"></div>
+        <div>
+            <p class="text-gray-600 mb-4">@Model.Description</p>
+            <div class="mb-6">
+                @if (Model.OriginalPrice.HasValue)
+                {
+                    <div class="flex items-center space-x-3"><span class="text-2xl font-bold text-red-600">@Model.Price.ToString("N0") đ</span><span class="text-lg text-gray-500 line-through">@Model.OriginalPrice?.ToString("N0") đ</span></div>
+                }
+                else
+                {
+                    <span class="text-2xl font-bold text-red-600">@Model.Price.ToString("N0") đ</span>
+                }
+            </div>
+            <button class="add-to-cart-btn w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700"
+                    data-product-id="@Model.Id"
+                    data-url="@Url.Action("AddToCartApi", "Cart")">
+                <i class="fas fa-shopping-cart mr-2"></i>Thêm vào giỏ hàng
+            </button>
+        </div>
+    </div>
+</div>

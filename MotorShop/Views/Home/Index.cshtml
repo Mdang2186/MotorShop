@@ -1,0 +1,32 @@
+﻿@model IEnumerable<MotorShop.Models.Product>
+
+@{
+    ViewData["Title"] = "Trang chủ";
+}
+
+<section class="hero-gradient text-white py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h1 class="text-4xl md:text-5xl font-bold mb-4">Showroom xe máy chính hãng #1</h1>
+        <p class="text-xl mb-8 text-blue-100 max-w-2xl mx-auto">Hơn 10.000+ xe máy chính hãng • Giá tốt nhất • Bảo hành toàn quốc</p>
+        <a asp-controller="Products" asp-action="Index" class="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100">
+            <i class="fas fa-motorcycle mr-2"></i>Xem sản phẩm
+        </a>
+    </div>
+</section>
+
+<section class="py-12 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-2xl font-bold text-center mb-8">Sản phẩm nổi bật</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            @foreach (var product in Model)
+            {
+                <partial name="_ProductCardPartial" model="product" />
+            }
+        </div>
+        <div class="text-center mt-8">
+            <a asp-controller="Products" asp-action="Index" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700">
+                Xem tất cả sản phẩm
+            </a>
+        </div>
+    </div>
+</section>
