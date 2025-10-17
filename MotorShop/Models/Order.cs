@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using MotorShop.Models.Enums; // <-- THÊM DÒNG NÀY
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MotorShop.Models
 {
@@ -7,7 +8,9 @@ namespace MotorShop.Models
     {
         public int Id { get; set; }
         public DateTime OrderDate { get; set; }
-        public int Status { get; set; }
+
+        // THAY ĐỔI Ở ĐÂY:
+        public OrderStatus Status { get; set; } // Đổi từ "int" sang "OrderStatus"
 
         [Column(TypeName = "decimal(18, 2)")]
         public decimal TotalAmount { get; set; }

@@ -1,0 +1,32 @@
+﻿@model MotorShop.ViewModels.ProductIndexViewModel
+
+@if (Model.TotalPages > 1)
+{
+    <nav aria-label="Page navigation" class="flex justify-center">
+        <ul class="inline-flex items-center -space-x-px text-sm">
+            <li>
+                <a asp-action="Index" asp-all-route-data="@Context.Request.Query.ToDictionary(q => q.Key, q => q.Value.ToString())" asp-route-page="@(Model.PageIndex - 1)"
+                   class="flex items-center justify-center px-3 h-8 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 @(Model.HasPreviousPage ? "" : "pointer-events-none opacity-50")">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            </li>
+
+            @for (int i = 1; i <= Model.TotalPages; i++)
+            {
+                <li>
+                    <a asp-action="Index" asp-all-route-data="@Context.Request.Query.ToDictionary(q => q.Key, q => q.Value.ToString())" asp-route-page="@i"
+                       class="flex items-center justify-center px-3 h-8 leading-tight border @(i == Model.PageIndex ? "text-blue-600 bg-blue-50 border-blue-300" : "text-gray-500 bg-white border-gray-300 hover:bg-gray-100")">
+                        @i
+                    </a>
+                </li>
+            }
+
+            <li>
+                <a asp-action="Index" asp-all-route-data="@Context.Request.Query.ToDictionary(q => q.Key, q => q.Value.ToString())" asp-route-page="@(Model.PageIndex + 1)"
+                   class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 @(Model.HasNextPage ? "" : "pointer-events-none opacity-50")">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+}

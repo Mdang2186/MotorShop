@@ -30,9 +30,82 @@
         @RenderBody()
     </main>
 
-    <footer class="bg-gray-900 text-white py-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center border-t border-gray-800 pt-6">
-            <p class="text-gray-400 text-sm">&copy; @DateTime.Now.Year - MotorShop</p>
+    <footer class="bg-gray-900 text-gray-300 pt-16 pb-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+
+                <div class="space-y-4">
+                    <a asp-controller="Home" asp-action="Index" class="flex items-center">
+                        <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-motorcycle text-white text-lg"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-xl font-bold text-white">MotorShop</h1>
+                            <p class="text-xs text-gray-400">Xe máy chính hãng</p>
+                        </div>
+                    </a>
+                    <p class="text-sm">Showroom xe máy chính hãng hàng đầu Việt Nam. Cung cấp sản phẩm từ các thương hiệu lớn với giá cả tốt nhất và dịch vụ hậu mãi chuyên nghiệp.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors"><i class="fab fa-facebook-f fa-lg"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors"><i class="fab fa-youtube fa-lg"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors"><i class="fab fa-tiktok fa-lg"></i></a>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-400 tracking-wider uppercase mb-4">Hỗ trợ khách hàng</h3>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="hover:text-white transition-colors">Câu hỏi thường gặp</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Chính sách bảo hành</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Hướng dẫn trả góp</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Chính sách đổi trả</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Liên hệ</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-400 tracking-wider uppercase mb-4">Liên kết</h3>
+                    <ul class="space-y-3">
+                        <li><a asp-controller="Products" asp-action="Index" class="hover:text-white transition-colors">Tất cả sản phẩm</a></li>
+                        <li><a asp-controller="Home" asp-action="Index" class="hover:text-white transition-colors">Trang chủ</a></li>
+                        <li><a asp-controller="Order" asp-action="History" class="hover:text-white transition-colors">Lịch sử đơn hàng</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Tin tức & Khuyến mãi</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Về chúng tôi</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-400 tracking-wider uppercase mb-4">Thông tin liên hệ</h3>
+                    <ul class="space-y-3 text-sm">
+                        <li class="flex items-start">
+                            <i class="fas fa-map-marker-alt w-5 mt-1 text-blue-400"></i>
+                            <span>123 Đường ABC, Phường XYZ, Quận Hoàn Kiếm, Hà Nội</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-phone-alt w-5 mt-1 text-blue-400"></i>
+                            <span>Hotline: 1900 1234</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-envelope w-5 mt-1 text-blue-400"></i>
+                            <span>Email: contact@motorshop.vn</span>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <div class="border-t border-gray-800 pt-6">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <p class="text-gray-400 text-sm mb-4 md:mb-0">&copy; @DateTime.Now.Year MotorShop. All Rights Reserved.</p>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm mr-2">Chấp nhận thanh toán:</span>
+                        <div class="h-6 w-10 bg-white rounded-sm flex items-center justify-center"><img src="~/images/payments/visa.svg" alt="Visa"></div>
+                        <div class="h-6 w-10 bg-white rounded-sm flex items-center justify-center"><img src="~/images/payments/mastercard.svg" alt="Mastercard"></div>
+                        <div class="h-6 w-10 bg-white rounded-sm flex items-center justify-center"><img src="~/images/payments/momo.svg" alt="MoMo"></div>
+                        <div class="h-6 w-10 bg-white rounded-sm flex items-center justify-center"><img src="~/images/payments/vnpay.svg" alt="VNPay"></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </footer>
 

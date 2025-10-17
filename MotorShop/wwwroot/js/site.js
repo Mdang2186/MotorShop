@@ -80,3 +80,18 @@ function showNotification(message, type = 'success') {
         notification.classList.remove('show');
     }, 3000);
 }
+/* Styling for the AJAX notification toast */
+.notification {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z - index: 1000;
+    opacity: 0;
+    transform: translateX(100 %);
+    transition: all 0.5s ease -in -out;
+}
+
+.notification.show {
+    opacity: 1;
+    transform: translateX(0);
+}

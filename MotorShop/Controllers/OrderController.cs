@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MotorShop.Data;
 using MotorShop.Models;
+using MotorShop.Models.Enums;
 using MotorShop.Services;
 using MotorShop.ViewModels;
 using System.Security.Claims;
@@ -39,8 +40,8 @@ namespace MotorShop.Controllers
             };
             return View(viewModel);
         }
-
-        // Action xử lý POST từ form thanh toán
+        // POST: /Order/Checkout
+        // Xử lý việc đặt hàng
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Checkout(CheckoutViewModel viewModel)
@@ -58,25 +59,25 @@ namespace MotorShop.Controllers
                 {
                     UserId = user.Id,
                     OrderDate = DateTime.UtcNow,
-                    Status = 0, // 0: Pending
+                    Status = OrderStatus.Pending,
                     CustomerName = viewModel.CustomerName,
                     ShippingAddress = viewModel.ShippingAddress,
                     ShippingPhone = viewModel.ShippingPhone,
-                    TotalAmount = cartItems.Sum(item => item.UnitPrice * item.Quantity),
 
-                    // ✨✨✨ SỬA LỖI Ở ĐÂY ✨✨✨
-                    // Tạo danh sách OrderItem mới thay vì gán trực tiếp từ giỏ hàng.
-                    // Điều này ngăn EF Core theo dõi và cố gắng tạo lại các Product đã có.
+                    // SỬA LỖI Ở ĐÂY: Dùng "item.Price"
+                    TotalAmount = cartItems.Sum(item => item.Price * item.Quantity),
+
                     OrderItems = cartItems.Select(cartItem => new OrderItem
                     {
-                        ProductId = cartItem.ProductId, // Chỉ cần ID để tạo mối quan hệ
+                        ProductId = cartItem.ProductId,
                         Quantity = cartItem.Quantity,
-                        UnitPrice = cartItem.UnitPrice
+                        // VÀ SỬA LỖI Ở ĐÂY: Dùng "cartItem.Price"
+                        UnitPrice = cartItem.Price
                     }).ToList()
                 };
 
                 _context.Orders.Add(order);
-                await _context.SaveChangesAsync(); // <-- Lỗi sẽ không còn xảy ra ở đây
+                await _context.SaveChangesAsync();
 
                 _cartService.ClearCart();
                 return RedirectToAction(nameof(OrderConfirmation), new { id = order.Id });
@@ -95,11 +96,20 @@ namespace MotorShop.Controllers
         // Action lịch sử đơn hàng
         public async Task<IActionResult> History()
         {
+            // Lấy ID của người dùng đang đăng nhập
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            // Truy vấn CSDL để lấy các đơn hàng của người dùng này
             var orders = await _context.Orders
-                                    .Where(o => o.UserId == userId)
-                                    .OrderByDescending(o => o.OrderDate)
-                                    .ToListAsync();
+                .Where(o => o.UserId == userId)
+                // YÊU CẦU QUAN TRỌNG: Lấy kèm theo danh sách các mục trong đơn hàng
+                .Include(o => o.OrderItems)
+                    // VỚI MỖI MỤC, LẤY KÈM THEO THÔNG TIN CHI TIẾT CỦA SẢN PHẨM
+                    .ThenInclude(oi => oi.Product)
+                .OrderByDescending(o => o.OrderDate) // Sắp xếp đơn hàng mới nhất lên đầu
+                .AsNoTracking() // Tối ưu hiệu năng vì chỉ đọc dữ liệu
+                .ToListAsync();
+
             return View(orders);
         }
 

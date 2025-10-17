@@ -1,3 +1,4 @@
+// using statements giữ nguyên...
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MotorShop.Data;
@@ -11,35 +12,36 @@ var builder = WebApplication.CreateBuilder(args);
 // 1. KHU VỰC ĐĂNG KÝ CÁC DỊCH VỤ (SERVICE REGISTRATION)
 //================================================================//
 
-// Lấy chuỗi kết nối từ appsettings.json
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-// Đăng ký DbContext với SQL Server
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-// Đăng ký ASP.NET Core Identity để quản lý người dùng và vai trò
-builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
-    .AddRoles<IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+// THAY ĐỔI 1: Sử dụng AddIdentity thay cho AddDefaultIdentity để có toàn quyền kiểm soát
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>() // Bỏ (options => options.SignIn.RequireConfirmedAccount = false) nếu không cần
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders(); // Thêm AddDefaultTokenProviders để hỗ trợ các chức năng như reset password
 
-// Đăng ký các dịch vụ của MVC (Controllers, Views)
+// THÊM MỚI: Cấu hình đường dẫn cho Identity để trỏ tới AccountController của chúng ta
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Account/Login";
+    options.LogoutPath = "/Account/Logout";
+    options.AccessDeniedPath = "/Account/AccessDenied";
+});
+
 builder.Services.AddControllersWithViews();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<CartService>();
+builder.Services.AddScoped<DbInitializer>();
 
-// Đăng ký các dịch vụ tùy chỉnh
-builder.Services.AddHttpContextAccessor(); // Cần thiết để truy cập HttpContext từ các service
-builder.Services.AddScoped<CartService>();    // Đăng ký dịch vụ giỏ hàng
-builder.Services.AddScoped<DbInitializer>();  // Đăng ký dịch vụ khởi tạo CSDL
-
-// Cấu hình Session để lưu trữ giỏ hàng
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30); // Thời gian chờ của session
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
-
 
 //================================================================//
 // 2. KHU VỰC CẤU HÌNH PIPELINE XỬ LÝ HTTP REQUEST
@@ -47,7 +49,6 @@ builder.Services.AddSession(options =>
 
 var app = builder.Build();
 
-// Cấu hình pipeline cho môi trường Development và Production
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -55,41 +56,43 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles(); // Cho phép sử dụng các file trong wwwroot (css, js, images)
+app.UseStaticFiles();
 
 app.UseRouting();
-
-// Kích hoạt Session (phải đứng trước UseAuthorization)
 app.UseSession();
 
-// Kích hoạt Xác thực và Phân quyền (thứ tự này rất quan trọng)
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Cấu hình các route (đường dẫn URL)
-// Ưu tiên route cho khu vực Admin
+// Route cho khu vực Admin (đã chính xác)
 app.MapControllerRoute(
     name: "Admin",
     pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
 
-// Route mặc định cho người dùng
+// Route mặc định cho người dùng (đã chính xác)
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// Hỗ trợ các trang giao diện của Identity (đăng nhập, đăng ký,...)
-app.MapRazorPages();
+// BỎ ĐI: Không cần MapRazorPages() nữa vì chúng ta đã dùng MVC Controller
+// app.MapRazorPages();
 
 //================================================================//
-// 3. KHỞI TẠO CƠ SỞ DỮ LIỆU (CHẠY 1 LẦN KHI ỨNG DỤNG KHỞI ĐỘNG)
+// 3. KHỞI TẠO CƠ SỞ DỮ LIỆU
 //================================================================//
 
-using (var scope = app.Services.CreateScope())
+// Đổi tên phương thức thành InitializeAsync() để tuân thủ quy tắc đặt tên
+async Task SeedDatabaseAsync()
 {
-    var services = scope.ServiceProvider;
-    var initializer = services.GetRequiredService<DbInitializer>();
-    await initializer.Initialize();
+    using (var scope = app.Services.CreateScope())
+    {
+        var services = scope.ServiceProvider;
+        var initializer = services.GetRequiredService<DbInitializer>();
+        await initializer.Initialize(); 
+    }
 }
 
-// Chạy ứng dụng
+// Gọi hàm khởi tạo CSDL
+await SeedDatabaseAsync();
+
 app.Run();

@@ -13,6 +13,190 @@
       "PackagePath": "staticwebassets\\favicon.ico"
     },
     {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\brands\\SYM.png",
+      "PackagePath": "staticwebassets\\images\\brands\\SYM.png"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\brands\\bmw-motorrad.png",
+      "PackagePath": "staticwebassets\\images\\brands\\bmw-motorrad.png"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\brands\\ducati.png",
+      "PackagePath": "staticwebassets\\images\\brands\\ducati.png"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\brands\\honda.png",
+      "PackagePath": "staticwebassets\\images\\brands\\honda.png"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\brands\\kymco.png",
+      "PackagePath": "staticwebassets\\images\\brands\\kymco.png"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\brands\\piaggio.png",
+      "PackagePath": "staticwebassets\\images\\brands\\piaggio.png"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\brands\\suzuki.png",
+      "PackagePath": "staticwebassets\\images\\brands\\suzuki.png"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\brands\\sym.jpg",
+      "PackagePath": "staticwebassets\\images\\brands\\sym.jpg"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\brands\\yamaha.png",
+      "PackagePath": "staticwebassets\\images\\brands\\yamaha.png"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\content\\A cinematicmotorcycle.jpg",
+      "PackagePath": "staticwebassets\\images\\content\\A cinematicmotorcycle.jpg"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\content\\product-banner.jpg",
+      "PackagePath": "staticwebassets\\images\\content\\product-banner.jpg"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\payments\\mastercard.svg",
+      "PackagePath": "staticwebassets\\images\\payments\\mastercard.svg"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\payments\\momo.svg",
+      "PackagePath": "staticwebassets\\images\\payments\\momo.svg"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\payments\\visa.svg",
+      "PackagePath": "staticwebassets\\images\\payments\\visa.svg"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\payments\\vnpay.svg",
+      "PackagePath": "staticwebassets\\images\\payments\\vnpay.svg"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\products\\honda\\adv-160.png",
+      "PackagePath": "staticwebassets\\images\\products\\honda\\adv-160.png"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\products\\honda\\africa-twin.png",
+      "PackagePath": "staticwebassets\\images\\products\\honda\\africa-twin.png"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\products\\honda\\air-blade-160-dac-biet.png",
+      "PackagePath": "staticwebassets\\images\\products\\honda\\air-blade-160-dac-biet.png"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\products\\honda\\blade-110-the-thao.png",
+      "PackagePath": "staticwebassets\\images\\products\\honda\\blade-110-the-thao.png"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\products\\honda\\cb150r-the-streetster.jpg",
+      "PackagePath": "staticwebassets\\images\\products\\honda\\cb150r-the-streetster.jpg"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\products\\honda\\cb300r.png",
+      "PackagePath": "staticwebassets\\images\\products\\honda\\cb300r.png"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\products\\honda\\cb500x.png",
+      "PackagePath": "staticwebassets\\images\\products\\honda\\cb500x.png"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\products\\honda\\cbr150r-the-thao.png",
+      "PackagePath": "staticwebassets\\images\\products\\honda\\cbr150r-the-thao.png"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\products\\honda\\cbr250rr.png",
+      "PackagePath": "staticwebassets\\images\\products\\honda\\cbr250rr.png"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\products\\honda\\crf300l.png",
+      "PackagePath": "staticwebassets\\images\\products\\honda\\crf300l.png"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\products\\honda\\future-125-fi-dac-biet.png",
+      "PackagePath": "staticwebassets\\images\\products\\honda\\future-125-fi-dac-biet.png"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\products\\honda\\gold-wing.png",
+      "PackagePath": "staticwebassets\\images\\products\\honda\\gold-wing.png"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\products\\honda\\lead-125-dac-biet",
+      "PackagePath": "staticwebassets\\images\\products\\honda"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\products\\honda\\monkey.png",
+      "PackagePath": "staticwebassets\\images\\products\\honda\\monkey.png"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\products\\honda\\msx-125.png",
+      "PackagePath": "staticwebassets\\images\\products\\honda\\msx-125.png"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\products\\honda\\pcx-160.png",
+      "PackagePath": "staticwebassets\\images\\products\\honda\\pcx-160.png"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\products\\honda\\rebel-300.png",
+      "PackagePath": "staticwebassets\\images\\products\\honda\\rebel-300.png"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\products\\honda\\rebel-500.png",
+      "PackagePath": "staticwebassets\\images\\products\\honda\\rebel-500.png"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\products\\honda\\sh-125i-the-thao.png",
+      "PackagePath": "staticwebassets\\images\\products\\honda\\sh-125i-the-thao.png"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\products\\honda\\sh-160i-dac-biet.png",
+      "PackagePath": "staticwebassets\\images\\products\\honda\\sh-160i-dac-biet.png"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\products\\honda\\sh-mode-the-thao.png",
+      "PackagePath": "staticwebassets\\images\\products\\honda\\sh-mode-the-thao.png"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\products\\honda\\shadow-phantom-750.png",
+      "PackagePath": "staticwebassets\\images\\products\\honda\\shadow-phantom-750.png"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\products\\honda\\super-cub-c125.png",
+      "PackagePath": "staticwebassets\\images\\products\\honda\\super-cub-c125.png"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\products\\honda\\transalp.png",
+      "PackagePath": "staticwebassets\\images\\products\\honda\\transalp.png"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\products\\honda\\vario-160-the-thao.png",
+      "PackagePath": "staticwebassets\\images\\products\\honda\\vario-160-the-thao.png"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\products\\honda\\vision-2024-cao-cap.png",
+      "PackagePath": "staticwebassets\\images\\products\\honda\\vision-2024-cao-cap.png"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\products\\honda\\wave-alpha-110-dac-biet.png",
+      "PackagePath": "staticwebassets\\images\\products\\honda\\wave-alpha-110-dac-biet.png"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\products\\honda\\wave-rsx-fi-110.png",
+      "PackagePath": "staticwebassets\\images\\products\\honda\\wave-rsx-fi-110.png"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\products\\honda\\winner-x-150-dac-biet.png",
+      "PackagePath": "staticwebassets\\images\\products\\honda\\winner-x-150-dac-biet.png"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\products\\yamaha\\grande-gioi-han.png",
+      "PackagePath": "staticwebassets\\images\\products\\yamaha\\grande-gioi-han.png"
+    },
+    {
+      "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\images\\products\\yamaha\\janus-gioi-han.png",
+      "PackagePath": "staticwebassets\\images\\products\\yamaha\\janus-gioi-han.png"
+    },
+    {
       "Id": "D:\\MotoShop\\MotorShop\\MotorShop\\wwwroot\\js\\site.js",
       "PackagePath": "staticwebassets\\js\\site.js"
     },
