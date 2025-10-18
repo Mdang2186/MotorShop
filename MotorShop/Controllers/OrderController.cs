@@ -9,123 +9,185 @@ using MotorShop.Services;
 using MotorShop.ViewModels;
 using System.Security.Claims;
 
-namespace MotorShop.Controllers
+namespace MotorShop.Controllers;
+
+[Authorize]
+public class OrderController(
+    CartService cartService,
+    ApplicationDbContext context,
+    UserManager<ApplicationUser> userManager) : Controller
 {
-    [Authorize]
-    public class OrderController : Controller
+    // GET: /Order/Checkout
+    // Nhận danh sách ID sản phẩm được chọn từ giỏ hàng
+    public async Task<IActionResult> Checkout(string selectedProductIds)
     {
-        private readonly CartService _cartService;
-        private readonly ApplicationDbContext _context;
-        private readonly UserManager<ApplicationUser> _userManager;
+        var allCartItems = cartService.GetCartItems();
+        List<CartItem> itemsToCheckout = [];
 
-        public OrderController(CartService cartService, ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        if (!string.IsNullOrEmpty(selectedProductIds))
         {
-            _cartService = cartService;
-            _context = context;
-            _userManager = userManager;
+            var ids = selectedProductIds.Split(',')
+                                        .Select(int.Parse)
+                                        .ToList();
+            itemsToCheckout = allCartItems.Where(ci => ids.Contains(ci.ProductId)).ToList();
+        }
+        else // Nếu không có ID nào được gửi, có thể lấy tất cả (tùy logic mong muốn)
+        {
+            itemsToCheckout = allCartItems;
         }
 
-        // Action xử lý trang thanh toán
-        public async Task<IActionResult> Checkout()
-        {
-            var cartItems = _cartService.GetCartItems();
-            if (!cartItems.Any()) return RedirectToAction("Index", "Cart");
-            var user = await _userManager.GetUserAsync(User);
-            var viewModel = new CheckoutViewModel
-            {
-                CartItems = cartItems,
-                CustomerName = user?.FullName ?? "",
-                ShippingAddress = user?.Address ?? "",
-                ShippingPhone = user?.PhoneNumber ?? ""
-            };
-            return View(viewModel);
-        }
-        // POST: /Order/Checkout
-        // Xử lý việc đặt hàng
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Checkout(CheckoutViewModel viewModel)
-        {
-            var cartItems = _cartService.GetCartItems();
-            if (!cartItems.Any())
-            {
-                ModelState.AddModelError("", "Giỏ hàng của bạn đang trống.");
-            }
 
-            if (ModelState.IsValid)
+        if (itemsToCheckout.Count == 0)
+        {
+            TempData["error"] = "Vui lòng chọn sản phẩm trong giỏ hàng để thanh toán.";
+            return RedirectToAction("Index", "Cart");
+        }
+
+        var user = await userManager.GetUserAsync(User);
+
+        var viewModel = new CheckoutViewModel
+        {
+            CartItems = itemsToCheckout, // Chỉ chứa các item được chọn
+            CustomerName = user?.FullName ?? "",
+            ShippingAddress = user?.Address ?? "",
+            ShippingPhone = user?.PhoneNumber ?? ""
+        };
+
+        return View(viewModel);
+    }
+
+    // POST: /Order/Checkout
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Checkout(CheckoutViewModel viewModel)
+    {
+        // Lấy lại các items được chọn dựa trên thông tin ẩn hoặc logic khác nếu cần kiểm tra lại
+        // Ở đây, ta tin tưởng viewModel đã chứa đúng các items cần checkout
+        var itemsToCheckout = viewModel.CartItems ?? []; // Cần đảm bảo viewModel.CartItems không null
+
+        if (itemsToCheckout.Count == 0)
+        {
+            ModelState.AddModelError("", "Không có sản phẩm nào được chọn để thanh toán.");
+            // Cần lấy lại tất cả cart items để hiển thị lại form nếu lỗi
+            viewModel.CartItems = cartService.GetCartItems();
+            return View(viewModel); // Trả về view với lỗi
+        }
+
+        if (ModelState.IsValid)
+        {
+            var user = await userManager.GetUserAsync(User);
+            if (user == null) return Challenge(); // Chưa đăng nhập
+
+            var order = new Order
             {
-                var user = await _userManager.GetUserAsync(User);
-                var order = new Order
+                UserId = user.Id,
+                OrderDate = DateTime.UtcNow,
+                Status = OrderStatus.Pending,
+                CustomerName = viewModel.CustomerName,
+                ShippingAddress = viewModel.ShippingAddress,
+                ShippingPhone = viewModel.ShippingPhone,
+                TotalAmount = itemsToCheckout.Sum(item => item.Subtotal), // Tính tổng từ CartItem
+
+                // Chuyển đổi từ CartItem (ViewModel/Session) sang OrderItem (Database Model)
+                OrderItems = itemsToCheckout.Select(cartItem => new OrderItem
                 {
-                    UserId = user.Id,
-                    OrderDate = DateTime.UtcNow,
-                    Status = OrderStatus.Pending,
-                    CustomerName = viewModel.CustomerName,
-                    ShippingAddress = viewModel.ShippingAddress,
-                    ShippingPhone = viewModel.ShippingPhone,
+                    ProductId = cartItem.ProductId,
+                    Quantity = cartItem.Quantity,
+                    UnitPrice = cartItem.Price // Lấy giá từ CartItem
+                }).ToList()
+            };
 
-                    // SỬA LỖI Ở ĐÂY: Dùng "item.Price"
-                    TotalAmount = cartItems.Sum(item => item.Price * item.Quantity),
+            //----- KIỂM TRA TỒN KHO TRƯỚC KHI LƯU (QUAN TRỌNG) -----
+            var productIds = order.OrderItems.Select(oi => oi.ProductId).ToList();
+            var productsInDb = await context.Products
+                                        .Where(p => productIds.Contains(p.Id))
+                                        .ToDictionaryAsync(p => p.Id, p => p.StockQuantity);
 
-                    OrderItems = cartItems.Select(cartItem => new OrderItem
+            foreach (var item in order.OrderItems)
+            {
+                if (!productsInDb.TryGetValue(item.ProductId, out var stock) || stock < item.Quantity)
+                {
+                    ModelState.AddModelError("", $"Sản phẩm '{context.Products.Find(item.ProductId)?.Name ?? item.ProductId.ToString()}' không đủ số lượng tồn kho (còn {stock}).");
+                    viewModel.CartItems = cartService.GetCartItems(); // Lấy lại giỏ hàng đầy đủ
+                    return View(viewModel); // Trả về view với lỗi
+                }
+            }
+            //----- KẾT THÚC KIỂM TRA TỒN KHO -----
+
+
+            using var transaction = await context.Database.BeginTransactionAsync();
+            try
+            {
+                // Lưu đơn hàng
+                context.Orders.Add(order);
+                await context.SaveChangesAsync();
+
+                // Cập nhật tồn kho
+                foreach (var item in order.OrderItems)
+                {
+                    var product = await context.Products.FindAsync(item.ProductId);
+                    if (product != null)
                     {
-                        ProductId = cartItem.ProductId,
-                        Quantity = cartItem.Quantity,
-                        // VÀ SỬA LỖI Ở ĐÂY: Dùng "cartItem.Price"
-                        UnitPrice = cartItem.Price
-                    }).ToList()
-                };
+                        product.StockQuantity -= item.Quantity;
+                    }
+                }
+                await context.SaveChangesAsync();
 
-                _context.Orders.Add(order);
-                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
 
-                _cartService.ClearCart();
+                // Xóa các sản phẩm đã mua khỏi giỏ hàng
+                cartService.RemovePurchasedItems(order.OrderItems.Select(oi => oi.ProductId));
+
                 return RedirectToAction(nameof(OrderConfirmation), new { id = order.Id });
             }
-
-            viewModel.CartItems = cartItems;
-            return View(viewModel);
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                // Ghi log lỗi
+                ModelState.AddModelError("", "Đã có lỗi xảy ra trong quá trình đặt hàng. Vui lòng thử lại.");
+                viewModel.CartItems = cartService.GetCartItems(); // Lấy lại giỏ hàng đầy đủ
+                return View(viewModel);
+            }
         }
 
-        // Action xác nhận đơn hàng thành công
-        public IActionResult OrderConfirmation(int id)
-        {
-            return View(id);
-        }
+        // Nếu ModelState không hợp lệ, trả lại view với dữ liệu và lỗi
+        viewModel.CartItems = cartService.GetCartItems(); // Lấy lại giỏ hàng đầy đủ
+        return View(viewModel);
+    }
 
-        // Action lịch sử đơn hàng
-        public async Task<IActionResult> History()
-        {
-            // Lấy ID của người dùng đang đăng nhập
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    // GET: /Order/OrderConfirmation/5
+    public IActionResult OrderConfirmation(int id)
+    {
+        // Có thể lấy thông tin đơn hàng ở đây để hiển thị chi tiết hơn
+        return View(id);
+    }
 
-            // Truy vấn CSDL để lấy các đơn hàng của người dùng này
-            var orders = await _context.Orders
-                .Where(o => o.UserId == userId)
-                // YÊU CẦU QUAN TRỌNG: Lấy kèm theo danh sách các mục trong đơn hàng
-                .Include(o => o.OrderItems)
-                    // VỚI MỖI MỤC, LẤY KÈM THEO THÔNG TIN CHI TIẾT CỦA SẢN PHẨM
-                    .ThenInclude(oi => oi.Product)
-                .OrderByDescending(o => o.OrderDate) // Sắp xếp đơn hàng mới nhất lên đầu
-                .AsNoTracking() // Tối ưu hiệu năng vì chỉ đọc dữ liệu
-                .ToListAsync();
+    // GET: /Order/History
+    public async Task<IActionResult> History()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var orders = await context.Orders
+                                .Where(o => o.UserId == userId)
+                                .Include(o => o.OrderItems)
+                                    .ThenInclude(oi => oi.Product) // Tải kèm sản phẩm
+                                .OrderByDescending(o => o.OrderDate)
+                                .AsNoTracking()
+                                .ToListAsync();
+        return View(orders);
+    }
 
-            return View(orders);
-        }
+    // GET: /Order/Details/5
+    public async Task<IActionResult> Details(int? id)
+    {
+        if (id == null) return NotFound();
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var order = await context.Orders
+            .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product) // Tải kèm sản phẩm
+            .FirstOrDefaultAsync(m => m.Id == id);
 
-        // Action xem chi tiết đơn hàng
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null) return NotFound();
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var order = await _context.Orders
-                .Include(o => o.OrderItems)
-                .ThenInclude(oi => oi.Product)
-                .FirstOrDefaultAsync(m => m.Id == id);
+        if (order == null || order.UserId != userId) return Forbid(); // Đảm bảo đúng chủ đơn hàng
 
-            if (order == null || order.UserId != userId) return Forbid();
-
-            return View(order);
-        }
+        return View(order);
     }
 }

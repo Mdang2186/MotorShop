@@ -7,21 +7,61 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        /* Add smooth transitions */
+        button, a {
+            transition: all 0.2s ease-in-out;
+        }
+
+        .header-icon:hover {
+            color: #2563eb; /* blue-600 */
+        }
+        /* Style for active nav link (optional) */
+        .nav-link-active {
+            color: #2563eb;
+            font-weight: 600;
+        }
+    </style>
 </head>
-<body class="bg-gray-50">
-    <header class="sticky top-0 z-40 sticky-header border-b border-gray-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <a asp-controller="Home" asp-action="Index" class="flex items-center">
-                    <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center mr-3"><i class="fas fa-motorcycle text-white text-lg"></i></div>
-                    <div><h1 class="text-xl font-bold text-blue-600">MotorShop</h1><p class="text-xs text-gray-500">Xe máy chính hãng</p></div>
-                </a>
-                <nav class="hidden lg:flex items-center space-x-6">
-                    <a asp-controller="Home" asp-action="Index" class="nav-link text-gray-700 hover:text-blue-600 font-medium">Trang chủ</a>
-                    <a asp-controller="Products" asp-action="Index" class="nav-link text-gray-700 hover:text-blue-600 font-medium">Sản phẩm</a>
-                    <a asp-controller="Order" asp-action="History" class="nav-link text-gray-700 hover:text-blue-600 font-medium">Đơn hàng</a>
-                </nav>
-                <partial name="_LoginPartial" />
+<body class="bg-gray-100">
+    <header class="sticky top-0 z-50 bg-white shadow-sm">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex-shrink-0">
+                    <a asp-controller="Home" asp-action="Index" class="flex items-center gap-2">
+                        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow">
+                            <i class="fas fa-motorcycle text-white text-md"></i>
+                        </div>
+                        <span class="font-bold text-xl text-gray-800 hidden sm:inline">MotorShop</span>
+                    </a>
+                </div>
+
+                <div class="hidden md:flex md:items-center md:space-x-8">
+                    <a asp-controller="Home" asp-action="Index" class="text-gray-600 hover:text-blue-600 font-medium px-3 py-2 rounded-md text-sm"
+                       asp-active-route>Trang chủ</a>
+                    <a asp-controller="Products" asp-action="Index" class="text-gray-600 hover:text-blue-600 font-medium px-3 py-2 rounded-md text-sm"
+                       asp-active-route>Sản phẩm</a>
+                    <a asp-controller="Order" asp-action="History" class="text-gray-600 hover:text-blue-600 font-medium px-3 py-2 rounded-md text-sm"
+                       asp-active-route>Đơn hàng</a>
+                </div>
+
+                <div class="flex items-center space-x-3 sm:space-x-4">
+                    <button class="text-gray-500 hover:text-blue-600 p-2 header-icon" title="Tìm kiếm">
+                        <i class="fas fa-search text-xl"></i>
+                    </button>
+                    <partial name="_LoginPartial" />
+                    <button id="mobile-menu-button" class="md:hidden text-gray-500 hover:text-blue-600 p-2 focus:outline-none">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <div id="mobile-menu" class="md:hidden hidden bg-white border-t border-gray-100">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a asp-controller="Home" asp-action="Index" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-blue-600">Trang chủ</a>
+                <a asp-controller="Products" asp-action="Index" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-blue-600">Sản phẩm</a>
+                <a asp-controller="Order" asp-action="History" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-blue-600">Đơn hàng</a>
             </div>
         </div>
     </header>
@@ -30,93 +70,80 @@
         @RenderBody()
     </main>
 
-    <footer class="bg-gray-900 text-gray-300 pt-16 pb-6">
+    <footer class="bg-gray-800 text-gray-300 pt-16 pb-6 mt-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
-
                 <div class="space-y-4">
-                    <a asp-controller="Home" asp-action="Index" class="flex items-center">
-                        <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
-                            <i class="fas fa-motorcycle text-white text-lg"></i>
+                    <a asp-controller="Home" asp-action="Index" class="flex items-center gap-2">
+                        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow">
+                            <i class="fas fa-motorcycle text-white text-md"></i>
                         </div>
-                        <div>
-                            <h1 class="text-xl font-bold text-white">MotorShop</h1>
-                            <p class="text-xs text-gray-400">Xe máy chính hãng</p>
-                        </div>
+                        <span class="font-bold text-lg text-white">MotorShop</span>
                     </a>
-                    <p class="text-sm">Showroom xe máy chính hãng hàng đầu Việt Nam. Cung cấp sản phẩm từ các thương hiệu lớn với giá cả tốt nhất và dịch vụ hậu mãi chuyên nghiệp.</p>
+                    <p class="text-sm">Showroom xe máy chính hãng hàng đầu Việt Nam. Giá tốt nhất, dịch vụ chuyên nghiệp.</p>
                     <div class="flex space-x-4">
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors"><i class="fab fa-facebook-f fa-lg"></i></a>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors"><i class="fab fa-youtube fa-lg"></i></a>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors"><i class="fab fa-tiktok fa-lg"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors" title="Facebook"><i class="fab fa-facebook-f fa-lg"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors" title="Youtube"><i class="fab fa-youtube fa-lg"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors" title="TikTok"><i class="fab fa-tiktok fa-lg"></i></a>
                     </div>
                 </div>
-
                 <div>
-                    <h3 class="text-sm font-semibold text-gray-400 tracking-wider uppercase mb-4">Hỗ trợ khách hàng</h3>
-                    <ul class="space-y-3">
+                    <h3 class="text-sm font-semibold text-gray-400 tracking-wider uppercase mb-4">Hỗ trợ</h3>
+                    <ul class="space-y-3 text-sm">
                         <li><a href="#" class="hover:text-white transition-colors">Câu hỏi thường gặp</a></li>
                         <li><a href="#" class="hover:text-white transition-colors">Chính sách bảo hành</a></li>
                         <li><a href="#" class="hover:text-white transition-colors">Hướng dẫn trả góp</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Chính sách đổi trả</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Liên hệ</a></li>
                     </ul>
                 </div>
-
                 <div>
                     <h3 class="text-sm font-semibold text-gray-400 tracking-wider uppercase mb-4">Liên kết</h3>
-                    <ul class="space-y-3">
+                    <ul class="space-y-3 text-sm">
                         <li><a asp-controller="Products" asp-action="Index" class="hover:text-white transition-colors">Tất cả sản phẩm</a></li>
-                        <li><a asp-controller="Home" asp-action="Index" class="hover:text-white transition-colors">Trang chủ</a></li>
-                        <li><a asp-controller="Order" asp-action="History" class="hover:text-white transition-colors">Lịch sử đơn hàng</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Tin tức & Khuyến mãi</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Tin tức</a></li>
                         <li><a href="#" class="hover:text-white transition-colors">Về chúng tôi</a></li>
                     </ul>
                 </div>
-
                 <div>
-                    <h3 class="text-sm font-semibold text-gray-400 tracking-wider uppercase mb-4">Thông tin liên hệ</h3>
+                    <h3 class="text-sm font-semibold text-gray-400 tracking-wider uppercase mb-4">Liên hệ</h3>
                     <ul class="space-y-3 text-sm">
-                        <li class="flex items-start">
-                            <i class="fas fa-map-marker-alt w-5 mt-1 text-blue-400"></i>
-                            <span>123 Đường ABC, Phường XYZ, Quận Hoàn Kiếm, Hà Nội</span>
-                        </li>
-                        <li class="flex items-start">
-                            <i class="fas fa-phone-alt w-5 mt-1 text-blue-400"></i>
-                            <span>Hotline: 1900 1234</span>
-                        </li>
-                        <li class="flex items-start">
-                            <i class="fas fa-envelope w-5 mt-1 text-blue-400"></i>
-                            <span>Email: contact@motorshop.vn</span>
-                        </li>
+                        <li class="flex items-start gap-2"><i class="fas fa-map-marker-alt w-4 mt-1 text-blue-400 flex-shrink-0"></i><span>123 ABC, Hoàn Kiếm, Hà Nội</span></li>
+                        <li class="flex items-start gap-2"><i class="fas fa-phone-alt w-4 mt-1 text-blue-400 flex-shrink-0"></i><span>Hotline: 1900 1234</span></li>
+                        <li class="flex items-start gap-2"><i class="fas fa-envelope w-4 mt-1 text-blue-400 flex-shrink-0"></i><span>contact@motorshop.vn</span></li>
                     </ul>
                 </div>
-
             </div>
-
-            <div class="border-t border-gray-800 pt-6">
-                <div class="flex flex-col md:flex-row justify-between items-center">
-                    <p class="text-gray-400 text-sm mb-4 md:mb-0">&copy; @DateTime.Now.Year MotorShop. All Rights Reserved.</p>
-                    <div class="flex items-center space-x-2">
-                        <span class="text-sm mr-2">Chấp nhận thanh toán:</span>
-                        <div class="h-6 w-10 bg-white rounded-sm flex items-center justify-center"><img src="~/images/payments/visa.svg" alt="Visa"></div>
-                        <div class="h-6 w-10 bg-white rounded-sm flex items-center justify-center"><img src="~/images/payments/mastercard.svg" alt="Mastercard"></div>
-                        <div class="h-6 w-10 bg-white rounded-sm flex items-center justify-center"><img src="~/images/payments/momo.svg" alt="MoMo"></div>
-                        <div class="h-6 w-10 bg-white rounded-sm flex items-center justify-center"><img src="~/images/payments/vnpay.svg" alt="VNPay"></div>
-                    </div>
-                </div>
+            <div class="border-t border-gray-700 pt-6 mt-8 text-center text-sm text-gray-400">
+                &copy; @DateTime.Now.Year MotorShop. All Rights Reserved.
             </div>
         </div>
     </footer>
 
-    <div id="notification" class="notification"><div class="flex items-center"><i class="fas fa-check-circle mr-2"></i><span id="notificationText"></span></div></div>
 
-    <div id="productModal" class="fixed inset-0 bg-black bg-opacity-60 hidden z-50 flex items-center justify-center p-4" onclick="closeModal('productModal')">
-        <div id="productModalContent" class="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-xl" onclick="event.stopPropagation()">
+    <div id="notification" class="notification fixed top-[80px] right-5 z-[1000] opacity-0 transform translate-x-full transition-all duration-500 ease-in-out min-w-[250px]">
+        <div class="flex items-center bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg">
+            <i class="fas fa-check-circle mr-2"></i>
+            <span id="notificationText"></span>
         </div>
     </div>
 
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        // Simple Mobile Menu Toggle Script
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        if (mobileMenuButton && mobileMenu) {
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            // Close menu when clicking a link inside it
+            mobileMenu.addEventListener('click', (e) => {
+                 if (e.target.tagName === 'A') {
+                     mobileMenu.classList.add('hidden');
+                 }
+            });
+        }
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

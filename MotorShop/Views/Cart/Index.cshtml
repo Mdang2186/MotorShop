@@ -1,4 +1,4 @@
-﻿@model List<MotorShop.Models.OrderItem>
+﻿@model List<MotorShop.Models.CartItem>
 
 @{
     ViewData["Title"] = "Giỏ hàng";
@@ -10,63 +10,74 @@
 
         @if (Model.Count > 0)
         {
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div class="lg:col-span-2">
-                    <div class="bg-white p-4 rounded-lg border mb-4">
-                        <label class="flex items-center">
-                            <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll(this.checked)" class="mr-3 h-5 w-5 rounded border-gray-300 text-blue-600">
-                            <span class="font-medium">Chọn tất cả (@Model.Count sản phẩm)</span>
-                        </label>
-                    </div>
-                    
-                    <div class="space-y-4">
-                        @foreach (var item in Model)
-                        {
-                            <div class="bg-white p-4 rounded-lg border flex items-center space-x-4">
-                                <input type="checkbox" name="selectedItems" value="@item.ProductId" onchange="updateCartSummary()" class="cart-item-checkbox mr-3 h-5 w-5 rounded border-gray-300 text-blue-600">
-                                
-                                <img src="@(item.Product?.ImageUrl ?? "https://placehold.co/150")" alt="@item.Product?.Name" class="w-20 h-20 object-cover rounded-lg">
-                                
-                                <div class="flex-1">
-                                    <h3 class="font-semibold">@item.Product?.Name</h3>
-                                    <p class="font-bold text-red-600" data-price="@item.UnitPrice">@item.UnitPrice.ToString("N0") đ</p>
-                                </div>
-                                
-                                <div class="text-right">
-                                    <div class="flex items-center space-x-2 mb-2">
-                                        <span class="px-3 py-1 bg-gray-50 rounded min-w-[40px] text-center">SL: @item.Quantity</span>
+            <form id="cartForm" asp-controller="Order" asp-action="Checkout" method="get">
+                <input type="hidden" name="selectedProductIds" id="selectedProductIdsInput" />
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2">
+                        <div class="bg-white p-4 rounded-lg border mb-4">
+                            <label class="flex items-center">
+                                <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll(this.checked)" class="mr-3 h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                <span class="font-medium">Chọn tất cả (@Model.Count sản phẩm)</span>
+                            </label>
+                        </div>
+
+                        <div id="cartItemsContainer" class="space-y-4">
+                            @foreach (var item in Model)
+                            {
+                                <div class="bg-white p-4 rounded-lg border flex items-center space-x-4 cart-item-row" data-product-id="@item.ProductId">
+                                    <input type="checkbox" name="selectedItems" value="@item.ProductId" onchange="updateCartSummary()" class="cart-item-checkbox mr-3 h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+
+                                    <img src="@(item.ImageUrl ?? "https://placehold.co/150")" alt="@item.ProductName" class="w-20 h-20 object-cover rounded-lg">
+
+                                    <div class="flex-1">
+                                        <h3 class="font-semibold">@item.ProductName</h3>
+                                        <p class="font-bold text-red-600 item-price" data-price="@item.Price">@item.Price.ToString("N0") đ</p>
                                     </div>
-                                    <form asp-controller="Cart" asp-action="Remove" method="post" class="d-inline">
-                                        <input type="hidden" name="productId" value="@item.ProductId" />
-                                        <button type="submit" class="text-red-500 hover:text-red-700 text-sm">
+
+                                    <div class="text-right">
+                                        <div class="flex items-center justify-end space-x-2 mb-2">
+                                            <button type="button" onclick="updateQuantity(event, @item.ProductId, -1)" class="w-8 h-8 bg-gray-200 rounded flex items-center justify-center hover:bg-gray-300 text-gray-700 disabled:opacity-50" @(item.Quantity <= 1 ? "disabled" : "")>
+                                                <i class="fas fa-minus text-sm"></i>
+                                            </button>
+                                            <input type="number" value="@item.Quantity" min="1" max="100" class="w-12 text-center border rounded py-1 quantity-input" data-product-id="@item.ProductId" onchange="handleQuantityInputChange(event, @item.ProductId)">
+                                            <button type="button" onclick="updateQuantity(event, @item.ProductId, 1)" class="w-8 h-8 bg-blue-600 text-white rounded flex items-center justify-center hover:bg-blue-700">
+                                                <i class="fas fa-plus text-sm"></i>
+                                            </button>
+                                        </div>
+                                        <button type="button" onclick="removeItem(event, @item.ProductId)" class="text-red-500 hover:text-red-700 text-sm">
                                             <i class="fas fa-trash mr-1"></i>Xóa
                                         </button>
-                                    </form>
+                                    </div>
                                 </div>
-                            </div>
-                        }
-                    </div>
-                </div>
-                
-                <div class="lg:col-span-1">
-                    <div class="bg-white p-6 rounded-lg border sticky top-20">
-                        <h3 class="font-bold text-lg mb-4">Tóm tắt đơn hàng</h3>
-                        <div class="flex justify-between font-bold text-lg mb-6">
-                            <span>Thành tiền:</span>
-                            <span class="text-red-600" id="totalPrice">0 đ</span>
+                            }
                         </div>
-                        <a id="checkoutButton" href="@Url.Action("Checkout", "Order")" class="w-full block text-center py-3 bg-gray-300 text-white rounded-lg font-semibold cursor-not-allowed">
-                            Tiến hành thanh toán
-                        </a>
+                    </div>
+
+                    <div class="lg:col-span-1">
+                        <div class="bg-white p-6 rounded-lg border sticky top-20">
+                            <h3 class="font-bold text-lg mb-4">Tóm tắt đơn hàng</h3>
+                            <div class="flex justify-between font-bold text-lg mb-6">
+                                <span>Thành tiền:</span>
+                                <span class="text-red-600" id="totalPrice">0 đ</span>
+                            </div>
+                            <button type="submit" id="checkoutButton" class="w-full text-center py-3 bg-gray-300 text-white rounded-lg font-semibold cursor-not-allowed" disabled>
+                                Tiến hành thanh toán
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </form>
+            // Kết thúc form checkout
         }
         else
         {
-            <div class="text-center py-20">
+            <div class="text-center py-20 bg-white border rounded-lg">
+                <div class="flex items-center justify-center h-16 w-16 mx-auto bg-blue-100 rounded-full mb-4">
+                    <i class="fas fa-shopping-cart text-3xl text-blue-600"></i>
+                </div>
                 <h2 class="text-xl font-semibold text-gray-900 mb-2">Giỏ hàng của bạn đang trống</h2>
-                <a asp-controller="Products" asp-action="Index" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700">
+                <a asp-controller="Products" asp-action="Index" class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-300">
                     Tiếp tục mua sắm
                 </a>
             </div>
@@ -88,39 +99,165 @@
         function updateCartSummary() {
             let total = 0;
             let selectedCount = 0;
+            const selectedProductIds = [];
             const checkoutButton = document.getElementById('checkoutButton');
             const selectAllCheckbox = document.getElementById('selectAllCheckbox');
-
             const checkboxes = document.querySelectorAll('.cart-item-checkbox');
+
             checkboxes.forEach(checkbox => {
+                const itemRow = checkbox.closest('.cart-item-row');
+                const quantityInput = itemRow.querySelector('.quantity-input');
+                const priceElement = itemRow.querySelector('.item-price');
+                const quantity = parseInt(quantityInput.value);
+                const price = parseFloat(priceElement.dataset.price);
+
                 if (checkbox.checked) {
                     selectedCount++;
-                    const itemElement = checkbox.closest('.flex');
-                    const priceElement = itemElement.querySelector('[data-price]');
-                    const price = parseFloat(priceElement.dataset.price);
-                    
-                    // Lấy số lượng từ model, vì không có input số lượng
-                    const quantityText = itemElement.querySelector('span:not([data-price])').textContent;
-                    const quantity = parseInt(quantityText.replace('SL: ', ''));
-                    
                     total += price * quantity;
+                    selectedProductIds.push(checkbox.value);
                 }
             });
 
             document.getElementById('totalPrice').textContent = total.toLocaleString('vi-VN') + ' đ';
-            
+            document.getElementById('selectedProductIdsInput').value = selectedProductIds.join(',');
+
             if (selectedCount > 0) {
                 checkoutButton.classList.remove('bg-gray-300', 'cursor-not-allowed');
                 checkoutButton.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                checkoutButton.disabled = false;
             } else {
                 checkoutButton.classList.add('bg-gray-300', 'cursor-not-allowed');
                 checkoutButton.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                checkoutButton.disabled = true;
             }
-            
-            // Cập nhật trạng thái của checkbox "Chọn tất cả"
+
             if (checkboxes.length > 0) {
                 selectAllCheckbox.checked = selectedCount === checkboxes.length;
+            } else {
+                selectAllCheckbox.checked = false; // Bỏ check nếu không còn item nào
+            }
+             updateCartIconCount(); // Cập nhật icon giỏ hàng header
+        }
+
+        function updateQuantity(event, productId, change) {
+            event.preventDefault();
+            const row = event.target.closest('.cart-item-row');
+            const quantityInput = row.querySelector('.quantity-input');
+            let currentQuantity = parseInt(quantityInput.value);
+            let newQuantity = currentQuantity + change;
+            if (newQuantity < 1) newQuantity = 1; // Giới hạn tối thiểu là 1
+
+            sendQuantityUpdate(productId, newQuantity, quantityInput);
+        }
+
+        function handleQuantityInputChange(event, productId){
+            let newQuantity = parseInt(event.target.value);
+            if (isNaN(newQuantity) || newQuantity < 1) {
+                newQuantity = 1; // Reset về 1 nếu nhập không hợp lệ
+                event.target.value = 1;
+            }
+             if (newQuantity > 100) { // Giới hạn max (ví dụ)
+                newQuantity = 100;
+                event.target.value = 100;
+            }
+            sendQuantityUpdate(productId, newQuantity, event.target);
+        }
+
+        function sendQuantityUpdate(productId, newQuantity, inputElement) {
+             const row = inputElement.closest('.cart-item-row');
+             const minusButton = row.querySelector('button[onclick*="-1"]');
+
+             // Vô hiệu hóa nút trong khi gửi request
+             const buttons = row.querySelectorAll('button');
+             buttons.forEach(btn => btn.disabled = true);
+             inputElement.disabled = true;
+
+             fetch('/Cart/UpdateQuantity', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productId: productId, quantity: newQuantity })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    inputElement.value = newQuantity; // Cập nhật input nếu server ok
+                    showNotification(data.message, 'success');
+                    updateCartSummary(); // Tính lại tổng tiền
+                    // Cập nhật trạng thái nút trừ
+                    if(minusButton) minusButton.disabled = newQuantity <= 1;
+                } else {
+                    showNotification(data.message, 'error');
+                    // Reset input về giá trị cũ nếu lỗi (cần lưu giá trị cũ trước khi gửi)
+                    // Hoặc hiển thị số lượng tồn kho nếu server trả về
+                    if(data.currentStock !== undefined){
+                         inputElement.value = data.currentStock; // Cập nhật về max tồn kho
+                         if(minusButton) minusButton.disabled = data.currentStock <= 1;
+                    }
+                }
+            })
+            .catch(error => {
+                console.error("Update quantity error:", error);
+                showNotification("Lỗi cập nhật số lượng.", "error");
+            })
+             .finally(() => {
+                 // Kích hoạt lại nút sau khi request hoàn tất
+                 buttons.forEach(btn => btn.disabled = false);
+                 inputElement.disabled = false;
+                 // Riêng nút trừ cần check lại giá trị
+                 if(minusButton) minusButton.disabled = parseInt(inputElement.value) <= 1;
+             });
+        }
+
+        function removeItem(event, productId) {
+             event.preventDefault();
+             if (!confirm("Bạn có chắc muốn xóa sản phẩm này khỏi giỏ hàng?")) {
+                 return;
+             }
+             const row = event.target.closest('.cart-item-row');
+
+             fetch('/Cart/RemoveItem', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productId: productId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.success) {
+                    row.remove(); // Xóa dòng khỏi HTML
+                    showNotification(data.message, 'success');
+                    updateCartSummary(); // Tính lại tổng
+                    // Kiểm tra nếu giỏ hàng rỗng
+                    if(document.querySelectorAll('.cart-item-row').length === 0){
+                        // Hiển thị trạng thái giỏ hàng trống (cần code HTML cho phần này)
+                        location.reload(); // Cách đơn giản là tải lại trang
+                    }
+                } else {
+                     showNotification(data.message, 'error');
+                }
+            })
+             .catch(error => {
+                 console.error("Remove item error:", error);
+                 showNotification("Lỗi xóa sản phẩm.", "error");
+             });
+        }
+
+         // Hàm cập nhật số lượng trên icon header (gọi từ updateCartSummary và AJAX callbacks)
+        function updateCartIconCount() {
+            let totalQuantity = 0;
+            document.querySelectorAll('.quantity-input').forEach(input => {
+                totalQuantity += parseInt(input.value);
+            });
+
+            const cartCountSpan = document.getElementById('cart-count');
+            if (cartCountSpan) {
+                cartCountSpan.textContent = totalQuantity;
+                if (totalQuantity > 0) {
+                    cartCountSpan.classList.remove('hidden');
+                } else {
+                    cartCountSpan.classList.add('hidden');
+                }
             }
         }
+
     </script>
 }

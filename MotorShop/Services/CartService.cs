@@ -1,139 +1,133 @@
-﻿using Microsoft.AspNetCore.Http;
-using MotorShop.Data;
-using MotorShop.Models;
-using Newtonsoft.Json;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Text.Json;
+using MotorShop.Models; // Namespace chứa CartItem và Product
 
-namespace MotorShop.Services
+namespace MotorShop.Services;
+
+public class CartService(IHttpContextAccessor httpContextAccessor)
 {
+    private const string CartSessionKey = "MotorShopCart";
+    private ISession Session => httpContextAccessor.HttpContext!.Session;
+
     /// <summary>
-    /// Dịch vụ quản lý logic giỏ hàng, lưu trữ dữ liệu trong Session.
-    /// Sử dụng một model 'CartItem' riêng biệt để tối ưu và bảo mật.
+    /// Lấy danh sách CartItem từ Session.
     /// </summary>
-    public class CartService
+    public List<CartItem> GetCartItems()
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private ISession Session => _httpContextAccessor.HttpContext!.Session;
-        private const string CartSessionKey = "MotorShopCart";
-
-        public CartService(IHttpContextAccessor httpContextAccessor)
+        var jsonCart = Session.GetString(CartSessionKey);
+        try
         {
-            _httpContextAccessor = httpContextAccessor;
+            return string.IsNullOrEmpty(jsonCart) ? [] : JsonSerializer.Deserialize<List<CartItem>>(jsonCart)!;
         }
-
-        // === CÁC PHƯƠNG THỨC CỐT LÕI ===
-
-        /// <summary>
-        /// Lấy danh sách các sản phẩm trong giỏ hàng từ Session.
-        /// </summary>
-        public List<CartItem> GetCartItems()
+        catch (JsonException) // Xử lý nếu dữ liệu Session bị hỏng
         {
-            var jsonCart = Session.GetString(CartSessionKey);
-            return jsonCart == null ? new List<CartItem>() : JsonConvert.DeserializeObject<List<CartItem>>(jsonCart);
+            Session.Remove(CartSessionKey); // Xóa dữ liệu hỏng
+            return [];
         }
+    }
 
-        /// <summary>
-        /// Thêm một sản phẩm vào giỏ hàng hoặc cập nhật số lượng nếu đã tồn tại.
-        /// </summary>
-        public void AddToCart(Product product, int quantity = 1)
-        {
-            var cart = GetCartItems();
-            var cartItem = cart.FirstOrDefault(i => i.ProductId == product.Id);
-
-            if (cartItem != null)
-            {
-                // Nếu đã có, chỉ tăng số lượng
-                cartItem.Quantity += quantity;
-            }
-            else
-            {
-                // Nếu chưa có, tạo một CartItem mới với các thông tin cần thiết
-                cart.Add(new CartItem
-                {
-                    ProductId = product.Id,
-                    ProductName = product.Name,
-                    Price = product.Price, // "Chụp lại" giá tại thời điểm thêm vào giỏ
-                    Quantity = quantity,
-                    ImageUrl = product.ImageUrl ?? ""
-                });
-            }
-            SaveCartItems(cart);
-        }
-
-        /// <summary>
-        /// Cập nhật số lượng cho một sản phẩm trong giỏ.
-        /// </summary>
-        public void UpdateQuantity(int productId, int quantity)
-        {
-            var cart = GetCartItems();
-            var cartItem = cart.FirstOrDefault(i => i.ProductId == productId);
-            if (cartItem != null)
-            {
-                if (quantity > 0)
-                {
-                    cartItem.Quantity = quantity;
-                }
-                else
-                {
-                    // Nếu số lượng <= 0, coi như xóa sản phẩm
-                    cart.Remove(cartItem);
-                }
-                SaveCartItems(cart);
-            }
-        }
-
-        /// <summary>
-        /// Xóa một sản phẩm khỏi giỏ hàng.
-        /// </summary>
-        public void RemoveFromCart(int productId)
-        {
-            var cart = GetCartItems();
-            var itemToRemove = cart.FirstOrDefault(i => i.ProductId == productId);
-            if (itemToRemove != null)
-            {
-                cart.Remove(itemToRemove);
-                SaveCartItems(cart);
-            }
-        }
-
-        /// <summary>
-        /// Xóa sạch tất cả sản phẩm khỏi giỏ hàng.
-        /// </summary>
-        public void ClearCart()
+    /// <summary>
+    /// Lưu danh sách CartItem vào Session.
+    /// </summary>
+    private void SaveCartItems(List<CartItem> cartItems)
+    {
+        if (cartItems == null || cartItems.Count == 0)
         {
             Session.Remove(CartSessionKey);
         }
-
-        // === CÁC PHƯƠNG THỨC TIỆN ÍCH ===
-
-        /// <summary>
-        /// Lấy số lượng của một sản phẩm cụ thể đang có trong giỏ.
-        /// </summary>
-        public int GetItemQuantity(int productId)
+        else
         {
-            var cart = GetCartItems();
-            var cartItem = cart.FirstOrDefault(i => i.ProductId == productId);
-            return cartItem?.Quantity ?? 0;
-        }
-
-        /// <summary>
-        /// Tính tổng giá trị của giỏ hàng.
-        /// </summary>
-        public decimal GetTotalAmount()
-        {
-            return GetCartItems().Sum(item => item.Subtotal);
-        }
-
-        // === PHƯƠNG THỨC RIÊNG TƯ ===
-
-        /// <summary>
-        /// Lưu danh sách giỏ hàng vào Session dưới dạng chuỗi JSON.
-        /// </summary>
-        private void SaveCartItems(List<CartItem> cartItems)
-        {
-            var jsonCart = JsonConvert.SerializeObject(cartItems);
+            var jsonCart = JsonSerializer.Serialize(cartItems);
             Session.SetString(CartSessionKey, jsonCart);
         }
+    }
+
+    /// <summary>
+    /// Thêm một sản phẩm vào giỏ hàng hoặc tăng số lượng.
+    /// </summary>
+    public void AddToCart(Product product, int quantity = 1)
+    {
+        if (product == null || quantity <= 0) return;
+
+        var cartItems = GetCartItems();
+        var existingItem = cartItems.FirstOrDefault(item => item.ProductId == product.Id);
+
+        if (existingItem != null)
+        {
+            existingItem.Quantity += quantity;
+        }
+        else
+        {
+            // Tạo CartItem mới
+            cartItems.Add(new CartItem
+            {
+                ProductId = product.Id,
+                ProductName = product.Name,
+                Quantity = quantity,
+                Price = product.Price, // Lấy giá bán hiện tại
+                ImageUrl = product.ImageUrl
+            });
+        }
+        SaveCartItems(cartItems);
+    }
+
+    /// <summary>
+    /// Xóa một sản phẩm khỏi giỏ hàng.
+    /// </summary>
+    public void RemoveFromCart(int productId)
+    {
+        var cartItems = GetCartItems();
+        cartItems.RemoveAll(item => item.ProductId == productId); // Xóa tất cả item có productId này
+        SaveCartItems(cartItems);
+    }
+
+    /// <summary>
+    /// Cập nhật số lượng cho một sản phẩm trong giỏ.
+    /// </summary>
+    public bool UpdateQuantity(int productId, int quantity)
+    {
+        if (quantity <= 0)
+        {
+            RemoveFromCart(productId);
+            return true;
+        }
+
+        var cartItems = GetCartItems();
+        var itemToUpdate = cartItems.FirstOrDefault(item => item.ProductId == productId);
+
+        if (itemToUpdate != null)
+        {
+            itemToUpdate.Quantity = quantity;
+            SaveCartItems(cartItems);
+            return true;
+        }
+        return false; // Không tìm thấy sản phẩm để cập nhật
+    }
+
+    /// <summary>
+    /// Lấy số lượng hiện tại của một sản phẩm trong giỏ.
+    /// </summary>
+    public int GetItemQuantity(int productId)
+    {
+        var cartItems = GetCartItems();
+        return cartItems.FirstOrDefault(item => item.ProductId == productId)?.Quantity ?? 0;
+    }
+
+    /// <summary>
+    /// Xóa toàn bộ giỏ hàng.
+    /// </summary>
+    public void ClearCart()
+    {
+        Session.Remove(CartSessionKey);
+    }
+
+    /// <summary>
+    /// Xóa các sản phẩm đã được mua khỏi giỏ hàng.
+    /// </summary>
+    public void RemovePurchasedItems(IEnumerable<int> purchasedProductIds)
+    {
+        if (purchasedProductIds == null || !purchasedProductIds.Any()) return;
+        var cartItems = GetCartItems();
+        cartItems.RemoveAll(item => purchasedProductIds.Contains(item.ProductId));
+        SaveCartItems(cartItems);
     }
 }

@@ -1,119 +1,187 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using MotorShop.Data;
-using MotorShop.Models;
+using MotorShop.Models; // Namespace chứa CartItem và Product
 using MotorShop.Services;
-using System;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations; // Cần cho AddToCartRequest
 
-namespace MotorShop.Controllers
+namespace MotorShop.Controllers;
+
+public class CartController(CartService cartService, ApplicationDbContext context, ILogger<CartController> logger) : Controller
 {
-    public class CartController : Controller
+    // GET: /Cart (Hiển thị trang giỏ hàng)
+    public IActionResult Index()
     {
-        private readonly CartService _cartService;
-        private readonly ApplicationDbContext _context;
-        private readonly ILogger<CartController> _logger; // Thêm ILogger để ghi log lỗi
+        var cartItems = cartService.GetCartItems();
+        // Lấy thông tin Product đầy đủ để hiển thị (tùy chọn, có thể bỏ qua nếu CartItem đã đủ thông tin)
+        // var productIds = cartItems.Select(ci => ci.ProductId).ToList();
+        // var products = context.Products.Where(p => productIds.Contains(p.Id)).AsNoTracking().ToList();
+        // // Gán lại Product cho cartItems nếu cần (ví dụ: lấy Brand.Name)
 
-        public CartController(CartService cartService, ApplicationDbContext context, ILogger<CartController> logger)
+        return View(cartItems);
+    }
+
+    // --- API ENDPOINTS CHO AJAX ---
+
+    [HttpPost]
+    // [ValidateAntiForgeryToken] // Cần thêm cơ chế gửi token từ JS nếu bật
+    public async Task<IActionResult> AddToCart([FromBody] AddToCartRequest request)
+    {
+        if (!ModelState.IsValid)
         {
-            _cartService = cartService;
-            _context = context;
-            _logger = logger;
+            return BadRequest(new { success = false, message = "Dữ liệu không hợp lệ." });
         }
 
-        // GET: /Cart (Hiển thị trang giỏ hàng)
-        public IActionResult Index()
+        try
         {
-            var cartItems = _cartService.GetCartItems();
-            return View(cartItems);
-        }
-
-        /// <summary>
-        /// API Endpoint để thêm sản phẩm vào giỏ hàng bằng AJAX.
-        /// </summary>
-        [HttpPost]
-        [ValidateAntiForgeryToken] // Tăng cường bảo mật, chống tấn công CSRF
-        public async Task<IActionResult> AddToCart([FromBody] AddToCartRequest request)
-        {
-            if (!ModelState.IsValid)
+            var product = await context.Products.FindAsync(request.ProductId);
+            if (product == null)
             {
-                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
-                return BadRequest(new { success = false, message = "Dữ liệu không hợp lệ.", errors });
+                return NotFound(new { success = false, message = "Sản phẩm không tồn tại." });
             }
 
-            try
+            // Kiểm tra tồn kho trước khi thêm
+            var currentQuantityInCart = cartService.GetItemQuantity(request.ProductId);
+            if (product.StockQuantity < currentQuantityInCart + request.Quantity)
             {
-                var product = await _context.Products.FindAsync(request.ProductId);
-                if (product == null)
-                {
-                    return NotFound(new { success = false, message = "Sản phẩm không tồn tại." });
-                }
+                return BadRequest(new { success = false, message = $"Số lượng tồn kho không đủ! Chỉ còn {product.StockQuantity} sản phẩm." });
+            }
 
-                var currentQuantityInCart = _cartService.GetItemQuantity(request.ProductId);
-                if (product.StockQuantity < currentQuantityInCart + request.Quantity)
-                {
-                    return BadRequest(new { success = false, message = $"Số lượng tồn kho không đủ! Chỉ còn {product.StockQuantity} sản phẩm." });
-                }
+            cartService.AddToCart(product, request.Quantity);
 
-                _cartService.AddToCart(product, request.Quantity);
+            var totalQuantity = cartService.GetCartItems().Sum(i => i.Quantity);
+            return Ok(new
+            {
+                success = true,
+                message = $"Đã thêm '{product.Name}' vào giỏ!",
+                cartCount = totalQuantity
+            });
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Lỗi khi thêm vào giỏ hàng (API)");
+            return StatusCode(500, new { success = false, message = "Lỗi máy chủ khi thêm vào giỏ." });
+        }
+    }
 
-                var cartItemCount = _cartService.GetCartItems().Sum(i => i.Quantity);
+    [HttpPost]
+    // [ValidateAntiForgeryToken]
+    public IActionResult UpdateQuantity([FromBody] UpdateQuantityRequest request)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(new { success = false, message = "Số lượng không hợp lệ." });
+        }
+
+        try
+        {
+            var product = context.Products.AsNoTracking().FirstOrDefault(p => p.Id == request.ProductId);
+            if (product == null)
+            {
+                return NotFound(new { success = false, message = "Sản phẩm không tồn tại." });
+            }
+
+            // Kiểm tra tồn kho
+            if (product.StockQuantity < request.Quantity)
+            {
+                return BadRequest(new { success = false, message = $"Số lượng tồn kho không đủ (còn {product.StockQuantity}).", currentStock = product.StockQuantity });
+            }
+
+            bool updated = cartService.UpdateQuantity(request.ProductId, request.Quantity);
+
+            if (updated)
+            {
+                var cartItems = cartService.GetCartItems();
+                var totalQuantity = cartItems.Sum(i => i.Quantity);
+                // Tính lại tổng tiền cho toàn bộ giỏ hàng (nếu cần trả về)
+                var newTotalAmount = cartItems.Sum(i => i.Subtotal);
+
                 return Ok(new
                 {
                     success = true,
-                    message = $"Đã thêm '{product.Name}' vào giỏ!",
-                    cartCount = cartItemCount
+                    message = "Cập nhật số lượng thành công!",
+                    cartCount = totalQuantity,
+                    newTotalAmount = newTotalAmount // Gửi về tổng tiền mới
                 });
             }
-            catch (Exception ex)
+            else
             {
-                _logger.LogError(ex, "Lỗi xảy ra khi thêm sản phẩm vào giỏ hàng.");
-                return StatusCode(500, new { success = false, message = "Đã có lỗi xảy ra ở máy chủ. Vui lòng thử lại." });
+                return NotFound(new { success = false, message = "Không tìm thấy sản phẩm trong giỏ." });
             }
         }
-
-        /// <summary>
-        /// Action xóa một sản phẩm khỏi giỏ hàng.
-        /// </summary>
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Remove(int productId)
+        catch (Exception ex)
         {
-            _cartService.RemoveFromCart(productId);
-            TempData["success"] = "Đã xóa sản phẩm khỏi giỏ hàng.";
-            return RedirectToAction("Index");
-        }
-
-        /// <summary>
-        /// Action cập nhật số lượng của một sản phẩm trong giỏ hàng.
-        /// </summary>
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Update(int productId, int quantity)
-        {
-            if (quantity <= 0)
-            {
-                // Nếu số lượng là 0 hoặc âm, coi như xóa sản phẩm
-                return Remove(productId);
-            }
-            _cartService.UpdateQuantity(productId, quantity);
-            return RedirectToAction("Index");
+            logger.LogError(ex, "Lỗi khi cập nhật số lượng (API)");
+            return StatusCode(500, new { success = false, message = "Lỗi máy chủ khi cập nhật số lượng." });
         }
     }
 
-    /// <summary>
-    /// DTO (Data Transfer Object) để nhận dữ liệu từ yêu cầu AJAX AddToCart.
-    /// </summary>
-    public class AddToCartRequest
+    [HttpPost]
+    // [ValidateAntiForgeryToken]
+    public IActionResult RemoveItem([FromBody] RemoveItemRequest request)
     {
-        [Required]
-        public int ProductId { get; set; }
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(new { success = false, message = "ID sản phẩm không hợp lệ." });
+        }
 
-        [Required]
-        [Range(1, 100, ErrorMessage = "Số lượng phải từ 1 đến 100.")]
-        public int Quantity { get; set; } = 1;
+        try
+        {
+            cartService.RemoveFromCart(request.ProductId);
+            var cartItems = cartService.GetCartItems();
+            var totalQuantity = cartItems.Sum(i => i.Quantity);
+            var newTotalAmount = cartItems.Sum(i => i.Subtotal);
+
+            return Ok(new
+            {
+                success = true,
+                message = "Đã xóa sản phẩm khỏi giỏ!",
+                cartCount = totalQuantity,
+                newTotalAmount = newTotalAmount
+            });
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Lỗi khi xóa sản phẩm khỏi giỏ (API)");
+            return StatusCode(500, new { success = false, message = "Lỗi máy chủ khi xóa sản phẩm." });
+        }
     }
+
+    // --- Action Xóa (submit form từ trang Cart Index) ---
+    // Giữ lại action này nếu bạn vẫn muốn có nút xóa submit form truyền thống
+    // Hoặc xóa đi nếu chỉ dùng AJAX
+    [HttpPost]
+    // [ValidateAntiForgeryToken]
+    public IActionResult Remove(int productId)
+    {
+        cartService.RemoveFromCart(productId);
+        TempData["success"] = "Đã xóa sản phẩm khỏi giỏ hàng.";
+        return RedirectToAction("Index");
+    }
+}
+
+// --- Request Models cho API ---
+public class AddToCartRequest
+{
+    [Required]
+    public int ProductId { get; set; }
+
+    [Range(1, 100, ErrorMessage = "Số lượng phải từ 1 đến 100.")]
+    public int Quantity { get; set; } = 1;
+}
+
+public class UpdateQuantityRequest
+{
+    [Required]
+    public int ProductId { get; set; }
+
+    [Required]
+    [Range(0, 100, ErrorMessage = "Số lượng phải từ 0 đến 100.")] // Cho phép quantity = 0 để xóa
+    public int Quantity { get; set; }
+}
+
+public class RemoveItemRequest
+{
+    [Required]
+    public int ProductId { get; set; }
 }

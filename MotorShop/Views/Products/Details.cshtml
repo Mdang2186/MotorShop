@@ -70,8 +70,11 @@
                             <input type="number" id="quantity-input" class="bg-gray-100 border-x-0 border-gray-300 h-11 text-center text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5" value="1" min="1" required>
                         </div>
                     </div>
-                    <button data-product-id="@Model.Product.Id" class="add-to-cart-btn w-full sm:flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center">
-                        <i class="fas fa-shopping-cart mr-2"></i>Thêm vào giỏ hàng
+                    <button onclick="handleAddToCartFromDetail(event, @Model.Product.Id)"
+                            class="w-full sm:flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center shadow focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            @(Model.Product.StockQuantity <= 0 ? "disabled" : "")>
+                        <i class="fas fa-cart-plus mr-2"></i>
+                        @(Model.Product.StockQuantity > 0 ? "Thêm vào giỏ hàng" : "Hết hàng")
                     </button>
                 </div>
 
