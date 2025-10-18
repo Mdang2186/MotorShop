@@ -4,70 +4,93 @@
     ViewData["Title"] = Model.Product.Name;
 }
 
-<div class="py-12 bg-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+        <nav class="text-sm text-gray-500 mb-8" aria-label="Breadcrumb">
+            <ol class="list-none p-0 inline-flex space-x-2">
+                <li class="flex items-center">
+                    <a asp-controller="Home" asp-action="Index" class="hover:text-blue-600">Trang chủ</a>
+                    <i class="fas fa-chevron-right mx-2"></i>
+                </li>
+                <li class="flex items-center">
+                    <a asp-controller="Products" asp-action="Index" class="hover:text-blue-600">Sản phẩm</a>
+                    <i class="fas fa-chevron-right mx-2"></i>
+                </li>
+                <li class="flex items-center">
+                    <a asp-controller="Products" asp-action="Index" asp-route-categoryFilter="@Model.Product.CategoryId" class="hover:text-blue-600">@Model.Product.Category.Name</a>
+                    <i class="fas fa-chevron-right mx-2"></i>
+                </li>
+                <li class="font-medium text-gray-700">@Model.Product.Name</li>
+            </ol>
+        </nav>
+
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+
             <div>
-                <div class="aspect-w-4 aspect-h-3 rounded-lg overflow-hidden border mb-4">
-                    <img src="@(Model.Product.ImageUrl ?? "https://placehold.co/800x600/e2e8f0/adb5bd?text=MotorShop")" alt="@Model.Product.Name" class="w-full h-full object-cover">
+                <div class="aspect-w-4 aspect-h-3 rounded-xl overflow-hidden border shadow-sm mb-4">
+                    <img id="mainProductImage" src="@(Model.Product.ImageUrl ?? "https://placehold.co/800x600/e2e8f0/adb5bd?text=MotorShop")" alt="@Model.Product.Name" class="w-full h-full object-cover">
+                </div>
+                <div class="grid grid-cols-5 gap-2">
+                    <img src="@(Model.Product.ImageUrl)" class="w-full aspect-square object-cover rounded-md border-2 border-blue-500 cursor-pointer">
+                    <img src="~/images/products/honda/vision-2024-cao-cap-side.png" class="w-full aspect-square object-cover rounded-md border hover:border-blue-500 cursor-pointer opacity-70 hover:opacity-100">
+                    <img src="~/images/products/honda/vision-2024-cao-cap-front.png" class="w-full aspect-square object-cover rounded-md border hover:border-blue-500 cursor-pointer opacity-70 hover:opacity-100">
                 </div>
             </div>
 
             <div>
-                <a asp-controller="Products" asp-action="Index" asp-route-brandFilter="@Model.Product.BrandId" class="text-sm font-medium text-blue-600 hover:text-blue-800">@Model.Product.Brand.Name</a>
-                <h1 class="text-3xl font-bold mt-2 mb-4">@Model.Product.Name</h1>
+                <a asp-controller="Products" asp-action="Index" asp-route-brandFilter="@Model.Product.BrandId" class="text-sm font-semibold text-blue-600 hover:text-blue-800 uppercase tracking-wide">@Model.Product.Brand.Name</a>
+                <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 mt-2 mb-4">@Model.Product.Name</h1>
 
-                <div class="mb-6">
-                    @if (Model.Product.OriginalPrice.HasValue)
-                    {
-                        <div class="flex items-center space-x-3">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        @if (Model.Product.OriginalPrice.HasValue)
+                        {
+                            <div class="flex items-baseline space-x-3">
+                                <span class="text-3xl font-bold text-red-600">@Model.Product.Price.ToString("N0") đ</span>
+                                <span class="text-xl text-gray-400 line-through">@Model.Product.OriginalPrice?.ToString("N0") đ</span>
+                            </div>
+                        }
+                        else
+                        {
                             <span class="text-3xl font-bold text-red-600">@Model.Product.Price.ToString("N0") đ</span>
-                            <span class="text-xl text-gray-400 line-through">@Model.Product.OriginalPrice?.ToString("N0") đ</span>
+                        }
+                    </div>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800">
+                        <i class="fas fa-check-circle mr-2"></i>Còn hàng
+                    </span>
+                </div>
+
+                <p class="text-gray-600 mb-8 leading-relaxed">@Model.Product.Description</p>
+
+                <div class="bg-gray-50 p-4 rounded-lg border flex flex-col sm:flex-row items-center gap-4">
+                    <div class="flex items-center">
+                        <label for="quantity-input" class="mr-4 font-medium">Số lượng:</label>
+                        <div class="relative flex items-center max-w-[8rem]">
+                            <input type="number" id="quantity-input" class="bg-gray-100 border-x-0 border-gray-300 h-11 text-center text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5" value="1" min="1" required>
                         </div>
-                    }
-                    else
-                    {
-                        <span class="text-3xl font-bold text-red-600">@Model.Product.Price.ToString("N0") đ</span>
-                    }
-                </div>
-
-                <p class="text-gray-600 mb-6">@Model.Product.Description</p>
-
-                <div class="mb-6">
-                    <h3 class="font-semibold mb-3">Thông số kỹ thuật</h3>
-                    <table class="w-full text-sm">
-                        <tbody>
-                            <tr class="border-b">
-                                <td class="py-2 font-medium text-gray-500">Thương hiệu</td>
-                                <td class="py-2 text-right">@Model.Product.Brand.Name</td>
-                            </tr>
-                            <tr class="border-b">
-                                <td class="py-2 font-medium text-gray-500">Loại xe</td>
-                                <td class="py-2 text-right">@Model.Product.Category.Name</td>
-                            </tr>
-                            <tr class="border-b">
-                                <td class="py-2 font-medium text-gray-500">Năm sản xuất</td>
-                                <td class="py-2 text-right">@Model.Product.Year</td>
-                            </tr>
-                            <tr>
-                                <td class="py-2 font-medium text-gray-500">Tình trạng</td>
-                                <td class="py-2 text-right text-green-600 font-semibold">Còn hàng</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <form asp-controller="Cart" asp-action="Add" method="post">
-                    <input type="hidden" name="productId" value="@Model.Product.Id" />
-                    <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors">
-                        <i class="fas fa-shopping-cart mr-2"></i>Thêm vào giỏ hàng
+                    </div>
+                    <button onclick="handleAddToCartFromDetail(event, @Model.Product.Id)"
+                            class="w-full sm:flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center shadow focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            @(Model.Product.StockQuantity <= 0 ? "disabled" : "")>
+                        <i class="fas fa-cart-plus mr-2"></i>
+                        @(Model.Product.StockQuantity > 0 ? "Thêm vào giỏ hàng" : "Hết hàng")
                     </button>
-                </form>
+                </div>
+
+                <div class="mt-6 flex items-center space-x-4">
+                    <span class="text-sm font-medium text-gray-600">Chia sẻ:</span>
+                    <a href="#" class="text-gray-400 hover:text-blue-600"><i class="fab fa-facebook-f fa-lg"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-blue-600"><i class="fab fa-twitter fa-lg"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-blue-600"><i class="fas fa-link fa-lg"></i></a>
+                </div>
             </div>
         </div>
 
-        <div class="mt-20">
-            <h2 class="text-2xl font-bold text-center mb-8">Sản phẩm liên quan</h2>
+        <div class="mt-24">
+            <div class="border-b mb-8">
+                <h2 class="text-2xl font-bold text-gray-900 pb-4 inline-block border-b-2 border-blue-600">Sản phẩm liên quan</h2>
+            </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 @foreach (var relatedProduct in Model.RelatedProducts)
                 {
@@ -77,3 +100,25 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        // Script để xử lý việc nhấn nút "Thêm vào giỏ"
+        // Nó sẽ gọi đến hàm trong site.js nhưng truyền thêm số lượng
+        document.addEventListener('DOMContentLoaded', function () {
+            const addToCartButton = document.querySelector('.add-to-cart-btn');
+            const quantityInput = document.getElementById('quantity-input');
+
+            if (addToCartButton) {
+                addToCartButton.addEventListener('click', function(event) {
+                    const productId = this.dataset.productId;
+                    const quantity = parseInt(quantityInput.value) || 1;
+
+                    // Giờ chúng ta sẽ gọi hàm handleAddToCart từ site.js với đầy đủ thông tin
+                    // Bạn cần sửa lại hàm handleAddToCart một chút để nhận object
+                    handleAddToCart(event, { productId: productId, quantity: quantity });
+                });
+            }
+        });
+    </script>
+}

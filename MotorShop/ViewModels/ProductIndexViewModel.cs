@@ -15,7 +15,12 @@ namespace MotorShop.ViewModels
         public int? BrandFilter { get; set; }
         public int? CategoryFilter { get; set; }
         public string? SortBy { get; set; }
-
+        public decimal? MinPrice { get; set; }
+        public decimal? MaxPrice { get; set; }
+        public int TotalProductCount
+        {
+            get; set;
+        }
         public int PageIndex { get; set; }
         public int TotalPages { get; set; }
         public bool HasPreviousPage => PageIndex > 1;

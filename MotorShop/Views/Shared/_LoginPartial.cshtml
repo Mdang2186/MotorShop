@@ -1,5 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @using MotorShop.Models
+@using MotorShop.Utilities
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 @inject MotorShop.Services.CartService CartService
@@ -18,23 +19,43 @@
 
     @if (SignInManager.IsSignedIn(User))
     {
-        <div class="relative">
-            <a class="flex items-center space-x-2 text-gray-600 hover:text-blue-600" asp-area="Identity" asp-page="/Account/Manage" title="Manage">
+        // Lấy thông tin đầy đủ của người dùng một cách an toàn
+        var user = await UserManager.GetUserAsync(User);
+
+        <div class="relative group">
+            <div class="flex items-center space-x-2 text-gray-600 cursor-pointer">
                 <i class="fas fa-user-circle text-xl"></i>
-                <span class="hidden md:block">@User.Identity?.Name</span>
-            </a>
+                @* Kiểm tra xem user có tồn tại không trước khi hiển thị tên *@
+                <span class="hidden md:block font-medium">@(user?.FullName ?? user?.UserName)</span>
+            </div>
+
+            <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
+                @if (User.IsInRole(SD.Role_Admin))
+                {
+                    <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fas fa-tachometer-alt w-4 mr-2"></i>Trang Quản trị
+                    </a>
+                }
+                <a asp-controller="Order" asp-action="History" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                    <i class="fas fa-history w-4 mr-2"></i>Lịch sử đơn hàng
+                </a>
+                <div class="border-t my-1"></div>
+                <form asp-controller="Account" asp-action="Logout" method="post" class="w-full">
+                    <button type="submit" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fas fa-sign-out-alt w-4 mr-2"></i>Đăng xuất
+                    </button>
+                </form>
+            </div>
         </div>
-        <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-            <button type="submit" class="text-gray-600 hover:text-red-600" title="Đăng xuất">
-                <i class="fas fa-sign-out-alt text-xl"></i>
-            </button>
-        </form>
     }
     else
     {
         <div class="flex items-center space-x-2">
-            <a class="text-gray-600 hover:text-blue-600" title="Đăng nhập / Đăng ký" asp-area="Identity" asp-page="/Account/Login">
-                <i class="fas fa-user text-xl"></i>
+            <a class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium" asp-controller="Account" asp-action="Login">
+                Đăng nhập
+            </a>
+            <a class="bg-blue-600 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700" asp-controller="Account" asp-action="Register">
+                Đăng ký
             </a>
         </div>
     }

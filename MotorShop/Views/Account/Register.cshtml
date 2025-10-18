@@ -1,0 +1,100 @@
+﻿@model MotorShop.ViewModels.RegisterViewModel
+
+@{
+    ViewData["Title"] = "Tạo tài khoản mới";
+}
+
+<div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-md text-center">
+        <a asp-controller="Home" asp-action="Index">
+            <div class="w-16 h-16 bg-blue-600 rounded-lg flex items-center justify-center mx-auto shadow-lg">
+                <i class="fas fa-motorcycle text-white text-3xl"></i>
+            </div>
+        </a>
+        <h2 class="mt-6 text-3xl font-extrabold text-gray-900">
+            @ViewData["Title"]
+        </h2>
+        <p class="mt-2 text-sm text-gray-600">
+            Hoặc
+            <a asp-controller="Account" asp-action="Login" class="font-medium text-blue-600 hover:text-blue-500">
+                đăng nhập vào tài khoản của bạn
+            </a>
+        </p>
+    </div>
+
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-lg">
+        <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+            <form asp-action="Register" method="post" class="space-y-6">
+
+                <div asp-validation-summary="ModelOnly" class="rounded-md bg-red-50 p-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fa fa-exclamation-triangle text-red-400"></i>
+                        </div>
+                        <div class="ml-3">
+                            <div class="text-sm text-red-700">
+                                Vui lòng sửa các lỗi sau:
+                                <ul class="list-disc pl-5 mt-2">
+                                    <li class="validation-summary-errors"></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label asp-for="FullName" class="block text-sm font-medium text-gray-700"></label>
+                    <div class="mt-1">
+                        <input asp-for="FullName" class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Nguyễn Văn A">
+                        <span asp-validation-for="FullName" class="text-sm text-red-600"></span>
+                    </div>
+                </div>
+
+                <div>
+                    <label asp-for="Email" class="block text-sm font-medium text-gray-700"></label>
+                    <div class="mt-1">
+                        <input asp-for="Email" autocomplete="email" class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="you@example.com">
+                        <span asp-validation-for="Email" class="text-sm text-red-600"></span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label asp-for="PhoneNumber" class="block text-sm font-medium text-gray-700"></label>
+                        <div class="mt-1">
+                            <input asp-for="PhoneNumber" class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        </div>
+                    </div>
+                    <div>
+                        <label asp-for="Address" class="block text-sm font-medium text-gray-700"></label>
+                        <div class="mt-1">
+                            <input asp-for="Address" class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label asp-for="Password" class="block text-sm font-medium text-gray-700"></label>
+                    <div class="mt-1">
+                        <input asp-for="Password" autocomplete="new-password" class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        <span asp-validation-for="Password" class="text-sm text-red-600"></span>
+                    </div>
+                </div>
+
+                <div>
+                    <label asp-for="ConfirmPassword" class="block text-sm font-medium text-gray-700"></label>
+                    <div class="mt-1">
+                        <input asp-for="ConfirmPassword" autocomplete="new-password" class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        <span asp-validation-for="ConfirmPassword" class="text-sm text-red-600"></span>
+                    </div>
+                </div>
+
+                <div>
+                    <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Đăng ký
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

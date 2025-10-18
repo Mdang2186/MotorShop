@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -21,6 +21,10 @@
   <ItemGroup>
     <Folder Include="Areas\Admin\Data\" />
     <Folder Include="Areas\Admin\Models\" />
+    <Folder Include="wwwroot\images\brands\" />
+    <Folder Include="wwwroot\images\content\" />
+    <Folder Include="wwwroot\images\products\" />
+    <Folder Include="wwwroot\images\payments\" />
   </ItemGroup>
 
 </Project>

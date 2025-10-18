@@ -1,14 +1,24 @@
-﻿using MotorShop.Models;
+﻿using MotorShop.Models; // Namespace chứa CartItem
+using System.ComponentModel.DataAnnotations;
 
 namespace MotorShop.ViewModels
 {
     public class CheckoutViewModel
     {
-        public List<OrderItem> CartItems { get; set; } = new List<OrderItem>();
+        // Sử dụng CartItem thay vì OrderItem
+        public List<CartItem> CartItems { get; set; } = [];
 
-        // Thông tin giao hàng
-        public required string CustomerName { get; set; }
-        public required string ShippingAddress { get; set; }
-        public required string ShippingPhone { get; set; }
+        [Required(ErrorMessage = "Vui lòng nhập họ tên.")]
+        [Display(Name = "Họ và Tên")]
+        public string CustomerName { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Vui lòng nhập địa chỉ.")]
+        [Display(Name = "Địa chỉ giao hàng")]
+        public string ShippingAddress { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Vui lòng nhập số điện thoại.")]
+        [Phone(ErrorMessage = "Số điện thoại không hợp lệ.")]
+        [Display(Name = "Số điện thoại")]
+        public string ShippingPhone { get; set; } = string.Empty;
     }
 }
