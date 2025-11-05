@@ -1,0 +1,65 @@
+﻿@using MotorShop.Utilities
+@{
+    ViewData["Title"] = "Xác nhận đổi email";
+    var msgOk = TempData[SD.Temp_Success] as string;
+    var msgInfo = TempData[SD.Temp_Info] as string;
+    var msgWarn = TempData[SD.Temp_Warning] as string;
+    var msgErr = TempData[SD.Temp_Error] as string;
+    var hasMsg = !string.IsNullOrEmpty(msgOk) || !string.IsNullOrEmpty(msgInfo) || !string.IsNullOrEmpty(msgWarn) || !string.IsNullOrEmpty(msgErr);
+}
+
+<section class="min-h-[70vh] bg-gray-50 flex items-center py-12 sm:px-6 lg:px-8">
+    <div class="mx-auto w-full max-w-xl">
+        <div class="bg-white/90 backdrop-blur border border-gray-100 shadow-xl rounded-2xl p-6 sm:p-8 text-center">
+            <div class="w-16 h-16 bg-blue-600 rounded-xl grid place-items-center mx-auto shadow-lg">
+                <i class="fa-solid fa-at text-white text-2xl"></i>
+            </div>
+
+            <h1 class="mt-4 text-3xl font-extrabold text-gray-900">@ViewData["Title"]</h1>
+            <p class="mt-2 text-sm text-gray-600">Kết quả thao tác đã được cập nhật bên dưới.</p>
+
+            <div class="mt-6 space-y-3 text-left">
+                @if (hasMsg)
+                {
+                    if (!string.IsNullOrEmpty(msgOk))
+                    {
+                        <div class="rounded-md bg-green-50 p-4 text-green-700">@msgOk</div>
+                    }
+                    if (!string.IsNullOrEmpty(msgInfo))
+                    {
+
+                        <div class="rounded-md bg-blue-50 p-4 text-blue-700">@msgInfo</div>
+                    }
+                    if (!string.IsNullOrEmpty(msgWarn))
+                    {
+
+                        <div class="rounded-md bg-yellow-50 p-4 text-yellow-800">@msgWarn</div>
+                    }
+                    if (!string.IsNullOrEmpty(msgErr))
+                    {
+
+                        <div class="rounded-md bg-red-50 p-4 text-red-700">@msgErr</div>
+                    }
+                }
+                else
+                {
+                    <div class="rounded-md bg-blue-50 p-4 text-blue-700">
+                        Liên kết đã được xử lý. Nếu bạn vừa thay đổi email, vui lòng dùng email mới để đăng nhập lần sau.
+                    </div>
+                }
+            </div>
+
+            <div class="mt-8 flex gap-3 justify-center">
+                <a asp-action="Email" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 hover:bg-gray-50">
+                    <i class="fa-solid fa-at text-gray-700"></i> Quản lý email
+                </a>
+                <a asp-controller="Account" asp-action="Login" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 hover:bg-gray-50">
+                    <i class="fa-solid fa-right-to-bracket text-gray-700"></i> Đăng nhập
+                </a>
+                <a asp-action="Index" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 hover:bg-gray-50">
+                    <i class="fa-regular fa-user text-gray-700"></i> Về Hồ sơ
+                </a>
+            </div>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,117 @@
+﻿@using MotorShop.Utilities
+@inject Microsoft.AspNetCore.Mvc.ViewFeatures.IHtmlGenerator HtmlGen
+@{
+    // Gom các thông điệp từ TempData & ModelState
+    var toasts = new List<(string Type, string Text)>();
+
+    void AddFromTemp(string key, string type)
+    {
+        if (TempData[key] is string s && !string.IsNullOrWhiteSpace(s))
+        {
+            toasts.Add((type, s));
+        }
+        else if (TempData[key] is string[] arr)
+        {
+            foreach (var m in arr)
+                if (!string.IsNullOrWhiteSpace(m)) toasts.Add((type, m));
+        }
+        else if (TempData[key] is IEnumerable<object> any)
+        {
+            foreach (var m in any)
+            {
+                var t = m?.ToString();
+                if (!string.IsNullOrWhiteSpace(t)) toasts.Add((type, t!));
+            }
+        }
+    }
+
+    AddFromTemp(SD.Temp_Success, "success");
+    AddFromTemp(SD.Temp_Error, "error");
+    AddFromTemp(SD.Temp_Warning, "warning");
+    AddFromTemp(SD.Temp_Info, "info");
+
+    // Đưa lỗi ModelState (nếu có) vào toast Error (tránh trống trải)
+    var modelErrors = ViewData?.ModelState?
+        .Values.SelectMany(v => v.Errors)
+        .Select(e => string.IsNullOrWhiteSpace(e.ErrorMessage) ? "Có lỗi xảy ra." : e.ErrorMessage)
+        .Distinct()
+        .ToList() ?? new List<string>();
+
+    foreach (var err in modelErrors)
+        toasts.Add(("error", err));
+
+    // Map style theo loại
+    string Bg(string t) => t switch
+    {
+        "success" => "bg-emerald-600",
+        "error" => "bg-rose-600",
+        "warning" => "bg-amber-500",
+        _ => "bg-slate-700" // info
+    };
+    string Icon(string t) => t switch
+    {
+        "success" => "M4.5 12.75l6 6 9-13.5",               // check
+        "error" => "M6 18L18 6M6 6l12 12",               // x
+        "warning" => "M12 9v3.75m0 3.75h.007",             // !
+        _ => "M13 16h-1v-4h-1m1-4h.01"             // i
+    };
+}
+
+@if (toasts.Count > 0)
+{
+    <div id="toast-root"
+         class="fixed z-[1000] top-4 right-4 flex flex-col gap-3 w-[calc(100vw-2rem)] sm:w-[380px] pointer-events-none">
+        @for (int i = 0; i < toasts.Count; i++)
+        {
+            var id = $"toast-{Guid.NewGuid():N}";
+            var t = toasts[i];
+            <div id="@id"
+                 class="pointer-events-auto shadow-xl rounded-xl text-white @Bg(t.Type) overflow-hidden ring-1 ring-black/5 animate-[fadeIn_.2s_ease-out]"
+                 role="status" aria-live="polite">
+                <div class="p-4 pl-3 pr-2 flex items-start gap-3">
+                    <div class="shrink-0 mt-0.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                             class="w-5 h-5 opacity-90" fill="none" stroke="currentColor" stroke-width="1.8"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <path d="@Icon(t.Type)" />
+                        </svg>
+                    </div>
+                    <div class="flex-1 text-sm leading-5">
+                        @t.Text
+                    </div>
+                    <button type="button"
+                            class="rounded-md p-1/2 hover:bg-white/10 transition focus:outline-none focus:ring-2 focus:ring-white/60"
+                            aria-label="Đóng" onclick="(function(el){hideToast(el.closest('.pointer-events-auto'));})(this)">
+                        <svg viewBox="0 0 24 24" class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="1.8"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="h-1 w-full bg-black/10">
+                    <div class="h-full bg-white/70 origin-left" style="animation: toastbar 4.2s linear forwards"></div>
+                </div>
+            </div>
+        }
+    </div>
+
+    
+    <script>
+        (function () {
+            const root = document.getElementById('toast-root');
+            if (!root) return;
+
+            // Tự ẩn từng toast sau 4.5s
+            root.querySelectorAll('.pointer-events-auto').forEach((el, idx) => {
+                const timeout = 3200 + idx * 200; // so le một chút cho đẹp
+                setTimeout(() => hideToast(el), timeout);
+            });
+        })();
+
+        function hideToast(el) {
+            if (!el || el.classList.contains('toast-hide')) return;
+            el.classList.add('toast-hide');
+            setTimeout(() => { el.remove(); }, 200);
+        }
+    </script>
+}

@@ -11,6 +11,7 @@ wwwroot\images\brands\SYM.png
 wwwroot\images\brands\yamaha.png
 wwwroot\images\content\A cinematicmotorcycle.jpg
 wwwroot\images\content\product-banner.jpg
+wwwroot\images\payments\bidv.svg
 wwwroot\images\payments\mastercard.svg
 wwwroot\images\payments\momo.svg
 wwwroot\images\payments\visa.svg
@@ -46,6 +47,7 @@ wwwroot\images\products\honda\wave-rsx-fi-110.png
 wwwroot\images\products\honda\winner-x-150-dac-biet.png
 wwwroot\images\products\yamaha\grande-gioi-han.png
 wwwroot\images\products\yamaha\janus-gioi-han.png
+wwwroot\js\site.js
 wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css
 wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css.map
 wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css
@@ -106,70 +108,70 @@ wwwroot\lib\jquery\dist\jquery.slim.js
 wwwroot\lib\jquery\dist\jquery.slim.min.js
 wwwroot\lib\jquery\dist\jquery.slim.min.map
 wwwroot\lib\jquery\LICENSE.txt
-wwwroot\js\site.js
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\css\site.css
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\favicon.ico
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\images\payments\mastercard.svg
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\images\payments\momo.svg
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\images\payments\visa.svg
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\images\payments\vnpay.svg
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.css
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.css.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.min.css
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.min.css.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.css
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.css.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.min.css
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.min.css.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.css
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.css.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.min.css
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.min.css.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.css
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.css.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.min.css
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.min.css.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.css
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.css.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.min.css
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.min.css.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap.css
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap.css.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap.min.css
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap.min.css.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.css
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.css.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.min.css
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.min.css.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.js
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.js.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.min.js
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.min.js.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.esm.js
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.esm.js.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.esm.min.js
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.esm.min.js.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.js
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.js.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.min.js
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.min.js.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\jquery-validation-unobtrusive\dist\jquery.validate.unobtrusive.js
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\jquery-validation-unobtrusive\dist\jquery.validate.unobtrusive.min.js
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\jquery-validation-unobtrusive\LICENSE.txt
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\jquery-validation\dist\additional-methods.js
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\jquery-validation\dist\additional-methods.min.js
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\jquery-validation\dist\jquery.validate.js
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\jquery-validation\dist\jquery.validate.min.js
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\jquery-validation\LICENSE.md
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\jquery\dist\jquery.js
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\jquery\dist\jquery.min.js
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\jquery\dist\jquery.min.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\jquery\dist\jquery.slim.js
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\jquery\dist\jquery.slim.min.js
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\jquery\dist\jquery.slim.min.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\jquery\LICENSE.txt
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\js\site.js
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\jquery\LICENSE.txt
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\jquery\dist\jquery.slim.min.js
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\jquery\dist\jquery.slim.js
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\jquery\dist\jquery.min.map
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\jquery\dist\jquery.min.js
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\jquery\dist\jquery.js
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\jquery-validation\LICENSE.md
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\jquery-validation\dist\jquery.validate.min.js
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\jquery-validation\dist\jquery.validate.js
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\jquery-validation\dist\additional-methods.min.js
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\jquery-validation\dist\additional-methods.js
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\jquery-validation-unobtrusive\LICENSE.txt
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\jquery-validation-unobtrusive\dist\jquery.validate.unobtrusive.min.js
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\jquery-validation-unobtrusive\dist\jquery.validate.unobtrusive.js
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.min.js.map
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.min.js
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.js.map
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.js
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.esm.min.js.map
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.esm.min.js
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.esm.js.map
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.esm.js
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.min.js.map
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.min.js
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.js.map
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.js
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.min.css.map
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.min.css
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.css.map
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.css
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap.min.css.map
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap.min.css
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap.css.map
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap.css
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.min.css.map
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.min.css
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.css.map
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.css
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.min.css.map
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.min.css
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.css.map
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.css
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.min.css.map
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.min.css
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.css.map
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.css
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.min.css.map
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.min.css
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.css.map
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.css
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.min.css.map
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.min.css
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.css.map
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.css
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css.map
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css.map
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css
+E:\MotorShop\MotorShop\MotorShop\wwwroot\js\site.js
+E:\MotorShop\MotorShop\MotorShop\wwwroot\images\payments\vnpay.svg
+E:\MotorShop\MotorShop\MotorShop\wwwroot\images\payments\bidv.svg
+E:\MotorShop\MotorShop\MotorShop\wwwroot\favicon.ico
+E:\MotorShop\MotorShop\MotorShop\wwwroot\css\site.css
+E:\MotorShop\MotorShop\MotorShop\wwwroot\images\payments\mastercard.svg
+E:\MotorShop\MotorShop\MotorShop\wwwroot\images\payments\momo.svg
+E:\MotorShop\MotorShop\MotorShop\wwwroot\images\payments\visa.svg
+E:\MotorShop\MotorShop\MotorShop\wwwroot\lib\jquery\dist\jquery.slim.min.map

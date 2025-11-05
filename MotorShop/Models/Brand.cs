@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿// Models/Brand.cs
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace MotorShop.Models
@@ -7,11 +8,11 @@ namespace MotorShop.Models
     {
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "Tên thương hiệu là bắt buộc.")]
-        [StringLength(100)]
-        public required string Name { get; set; }
+        [Required, StringLength(100)]
+        public string Name { get; set; } = "";
 
-        // Dòng 'Slug' đã được xóa
+        [StringLength(120)]
+        public string? Slug { get; set; }
 
         public ICollection<Product> Products { get; set; } = new List<Product>();
     }

@@ -1,7 +1,217 @@
-﻿@{
-    ViewData["Title"] = "Dashboard";
-    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml"; // Sử dụng layout của Admin
+﻿@using MotorShop.Models.Enums
+@model MotorShop.ViewModels.DashboardViewModel
+
+@{
+    ViewData["Title"] = "Tổng quan";
 }
 
-<h1>Chào mừng đến trang quản trị!</h1>
-<p>Đây là khu vực dành cho Administrator.</p>
+@if (TempData["Error"] != null)
+{
+    <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg border border-red-300" role="alert">
+        <span class="font-medium">Lỗi!</span> @TempData["Error"]
+    </div>
+}
+
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
+    <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-xl shadow-lg flex flex-col justify-between">
+        <div class="flex justify-between items-center">
+            <i class="fas fa-dollar-sign text-3xl opacity-70"></i>
+            <span class="text-xs font-semibold uppercase tracking-wider">Doanh thu (Tháng)</span>
+        </div>
+        <p class="text-3xl font-bold mt-4">@Model.MonthlyRevenue.ToString("N0")<span class="text-lg"> đ</span></p>
+    </div>
+    <div class="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-xl shadow-lg flex flex-col justify-between">
+        <div class="flex justify-between items-center">
+            <i class="fas fa-calendar-day text-3xl opacity-70"></i>
+            <span class="text-xs font-semibold uppercase tracking-wider">Doanh thu (Hôm nay)</span>
+        </div>
+        <p class="text-3xl font-bold mt-4">@Model.TodayRevenue.ToString("N0")<span class="text-lg"> đ</span></p>
+    </div>
+    <div class="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white p-6 rounded-xl shadow-lg flex flex-col justify-between">
+        <div class="flex justify-between items-center">
+            <i class="fas fa-receipt text-3xl opacity-70"></i>
+            <span class="text-xs font-semibold uppercase tracking-wider">Đơn mới (Hôm nay)</span>
+        </div>
+        <p class="text-3xl font-bold mt-4">@Model.NewOrdersToday</p>
+    </div>
+    <div class="bg-gradient-to-r from-red-500 to-red-600 text-white p-6 rounded-xl shadow-lg flex flex-col justify-between">
+        <div class="flex justify-between items-center">
+            <i class="fas fa-hourglass-half text-3xl opacity-70"></i>
+            <span class="text-xs font-semibold uppercase tracking-wider">Đơn chờ xử lý</span>
+        </div>
+        <p class="text-3xl font-bold mt-4">@Model.PendingOrders</p>
+    </div>
+    <div class="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-6 rounded-xl shadow-lg flex flex-col justify-between">
+        <div class="flex justify-between items-center">
+            <i class="fas fa-users text-3xl opacity-70"></i>
+            <span class="text-xs font-semibold uppercase tracking-wider">Khách mới (Hôm nay)</span>
+        </div>
+        <p class="text-3xl font-bold mt-4">@Model.NewCustomersToday</p>
+    </div>
+    <div class="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white p-6 rounded-xl shadow-lg flex flex-col justify-between">
+        <div class="flex justify-between items-center">
+            <i class="fas fa-box-open text-3xl opacity-70"></i>
+            <span class="text-xs font-semibold uppercase tracking-wider">Tổng sản phẩm</span>
+        </div>
+        <p class="text-3xl font-bold mt-4">@Model.TotalProducts</p>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8">
+    <div class="lg:col-span-3 bg-white p-6 rounded-xl shadow border border-gray-200">
+        <h3 class="text-lg font-semibold mb-4 text-gray-700">Doanh thu 6 tháng gần nhất (Triệu đ)</h3>
+        <div class="h-80">
+            <canvas id="revenueChart"></canvas>
+        </div>
+    </div>
+    <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow border border-gray-200">
+        <h3 class="text-lg font-semibold mb-4 text-gray-700">Trạng thái Đơn hàng</h3>
+        <div class="h-80 flex items-center justify-center">
+            <canvas id="orderStatusChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="bg-white p-6 rounded-xl shadow border border-gray-200">
+        <h3 class="text-lg font-semibold mb-4 text-gray-700">Đơn hàng gần đây</h3>
+        <div class="space-y-4">
+            @if (Model.RecentOrders.Any())
+            {
+                @foreach (var order in Model.RecentOrders)
+                {
+                    var statusInfo = GetStatusDetails(order.Status); // Cần hàm helper này
+                                                                     <div class="flex justify-between items-center text-sm border-b pb-3 last:border-b-0 last:pb-0">
+                                                                         <div>
+                                                                             <a asp-action="Details" asp-controller="Order" asp-route-id="@order.Id" class="font-medium text-blue-600 hover:underline">#@order.Id</a>
+                                                                             <p class="text-xs text-gray-500">@order.User?.FullName (@order.OrderDate.ToLocalTime().ToString("dd/MM HH:mm"))</p>
+                                                                         </div>
+                                                                         <span class="text-xs font-semibold px-2 py-0.5 rounded @statusInfo.CssClass">@statusInfo.DisplayText</span>
+                                                                         <span class="text-gray-700 font-semibold">@order.TotalAmount.ToString("N0") đ</span>
+                                                                     </div>
+                }
+                <div class="text-center pt-4">
+                    <a asp-action="Index" asp-controller="Order" asp-area="Admin" class="text-blue-600 hover:underline text-sm font-medium">
+                        Xem tất cả đơn hàng <i class="fas fa-arrow-right text-xs ml-1"></i>
+                    </a>
+                </div>
+            }
+            else
+            {
+                <p class="text-sm text-gray-500 text-center py-4">Chưa có đơn hàng nào.</p>
+            }
+        </div>
+    </div>
+    <div class="bg-white p-6 rounded-xl shadow border border-gray-200">
+        <h3 class="text-lg font-semibold mb-4 text-gray-700">Khách hàng mới đăng ký</h3>
+        <div class="space-y-3">
+            @if (Model.RecentCustomers.Any())
+            {
+                @foreach (var customer in Model.RecentCustomers)
+                {
+                    <div class="flex items-center space-x-3 text-sm border-b pb-2 last:border-b-0 last:pb-0">
+                        <div class="w-8 h-8 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center font-semibold text-xs">
+                            @((customer.FullName?.FirstOrDefault() ?? customer.Email?.FirstOrDefault() ?? '?').ToString().ToUpper())
+                        </div>
+                        <div class="flex-grow">
+                            <p class="font-medium text-gray-800">@(customer.FullName ?? "Chưa có tên")</p>
+                            <p class="text-xs text-gray-500">@customer.Email</p>
+                        </div>
+                        <span class="text-xs text-gray-400">@customer.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy")</span>
+                    </div>
+                }
+                <div class="text-center pt-3">
+                    <a href="#" class="text-blue-600 hover:underline text-sm font-medium">
+                        @* Link đến trang quản lý user *@
+                        Xem tất cả khách hàng <i class="fas fa-arrow-right text-xs ml-1"></i>
+                    </a>
+                </div>
+            }
+            else
+            {
+                <p class="text-sm text-gray-500 text-center py-4">Chưa có khách hàng mới nào.</p>
+            }
+        </div>
+    </div>
+</div>
+
+
+@* Thêm hàm helper GetStatusDetails vào đây hoặc vào _ViewImports *@
+@{
+    (string CssClass, string Icon, string DisplayText) GetStatusDetails(OrderStatus status)
+    {
+        return status switch
+        {
+            OrderStatus.Pending => ("bg-yellow-100 text-yellow-800", "fas fa-hourglass-half", "Chờ xử lý"),
+            OrderStatus.Confirmed => ("bg-blue-100 text-blue-800", "fas fa-check-circle", "Đã xác nhận"),
+            OrderStatus.Shipping => ("bg-purple-100 text-purple-800", "fas fa-truck", "Đang giao"),
+            OrderStatus.Delivered => ("bg-green-100 text-green-800", "fas fa-clipboard-check", "Đã giao"),
+            OrderStatus.Cancelled => ("bg-red-100 text-red-800", "fas fa-times-circle", "Đã hủy"),
+            _ => ("bg-gray-100 text-gray-800", "fas fa-question-circle", "Không xác định")
+        };
+    }
+}
+
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Biểu đồ Doanh thu (Line)
+            const revenueCtx = document.getElementById('revenueChart');
+            if (revenueCtx) {
+                new Chart(revenueCtx, {
+                    type: 'line',
+                    data: {
+                        labels: @Html.Raw(Json.Serialize(Model.RevenueChartLabels)),
+                        datasets: [{
+                            label: 'Doanh thu (Triệu đ)',
+                            data: @Html.Raw(Json.Serialize(Model.RevenueChartData)),
+                            fill: true,
+                            borderColor: 'rgb(59, 130, 246)',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.3,
+                            pointBackgroundColor: 'rgb(59, 130, 246)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgb(59, 130, 246)'
+                        }]
+                    },
+                    options: { /* ... options như trước ... */ }
+                });
+            }
+
+            // Biểu đồ Trạng thái Đơn hàng (Pie)
+            const statusCtx = document.getElementById('orderStatusChart');
+            if (statusCtx) {
+                 new Chart(statusCtx, {
+                    type: 'doughnut', // Hoặc 'pie'
+                    data: {
+                        labels: @Html.Raw(Json.Serialize(Model.OrderStatusLabels)),
+                        datasets: [{
+                            label: 'Số lượng đơn',
+                            data: @Html.Raw(Json.Serialize(Model.OrderStatusCounts)),
+                            backgroundColor: [ // Mảng màu tương ứng
+                                'rgb(253, 186, 116)', // yellow-300 (Pending)
+                                'rgb(96, 165, 250)',  // blue-400 (Confirmed)
+                                'rgb(167, 139, 250)', // purple-400 (Shipping)
+                                'rgb(52, 211, 153)',  // green-400 (Delivered)
+                                'rgb(248, 113, 113)'  // red-400 (Cancelled)
+                            ],
+                            hoverOffset: 4
+                        }]
+                    },
+                     options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom', // Hiển thị chú thích ở dưới
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+}

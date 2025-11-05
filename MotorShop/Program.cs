@@ -1,5 +1,5 @@
-// using statements giữ nguyên...
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using MotorShop.Data;
 using MotorShop.Models;
@@ -8,45 +8,78 @@ using MotorShop.Utilities;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//================================================================//
-// 1. KHU VỰC ĐĂNG KÝ CÁC DỊCH VỤ (SERVICE REGISTRATION)
-//================================================================//
+// =============================
+// 1) REGISTER SERVICES
+// =============================
 
+// Email (IEmailSender)
+builder.Services.Configure<MailSettings>(
+    builder.Configuration.GetSection("MailSettings"));
+builder.Services.AddTransient<IEmailSender, EmailSender>();
+
+// DbContext
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
-
-// THAY ĐỔI 1: Sử dụng AddIdentity thay cho AddDefaultIdentity để có toàn quyền kiểm soát
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>() // Bỏ (options => options.SignIn.RequireConfirmedAccount = false) nếu không cần
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders(); // Thêm AddDefaultTokenProviders để hỗ trợ các chức năng như reset password
-
-// THÊM MỚI: Cấu hình đường dẫn cho Identity để trỏ tới AccountController của chúng ta
-builder.Services.ConfigureApplicationCookie(options =>
+builder.Services.AddDbContext<ApplicationDbContext>(opt =>
 {
-    options.LoginPath = "/Account/Login";
-    options.LogoutPath = "/Account/Logout";
-    options.AccessDeniedPath = "/Account/AccessDenied";
+    opt.UseSqlServer(connectionString);
+#if DEBUG
+    opt.EnableSensitiveDataLogging();
+#endif
+});
+builder.Services.AddAntiforgery(o => { o.HeaderName = "RequestVerificationToken"; });
+
+// Identity
+builder.Services
+    .AddIdentity<ApplicationUser, IdentityRole>(opt =>
+    {
+        opt.SignIn.RequireConfirmedEmail = true;
+        opt.Lockout.AllowedForNewUsers = true;
+        opt.Lockout.MaxFailedAccessAttempts = 5;
+        opt.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+    })
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+
+// ❗️Thêm Authorization (bắt buộc khi dùng UseAuthorization)
+builder.Services.AddAuthorization(options =>
+{
+    // Tùy chọn: ví dụ policy cho Admin
+    options.AddPolicy("AdminOnly", p => p.RequireRole(SD.Role_Admin));
+    // Có thể thêm FallbackPolicy nếu muốn toàn site yêu cầu đăng nhập:
+    // options.FallbackPolicy = new AuthorizationPolicyBuilder()
+    //     .RequireAuthenticatedUser()
+    //     .Build();
 });
 
+// Token lifespan cho email/change-email
+builder.Services.Configure<DataProtectionTokenProviderOptions>(o =>
+{
+    o.TokenLifespan = TimeSpan.FromHours(3);
+});
+
+// MVC
 builder.Services.AddControllersWithViews();
+
+// Session
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(opt =>
+{
+    opt.IdleTimeout = TimeSpan.FromMinutes(30);
+    opt.Cookie.HttpOnly = true;
+    opt.Cookie.IsEssential = true;
+    opt.Cookie.Name = ".MotorShop.Session";
+});
+
+// Helpers/DI khác
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<CartService>();
 builder.Services.AddScoped<DbInitializer>();
 
-builder.Services.AddSession(options =>
-{
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-});
-
-//================================================================//
-// 2. KHU VỰC CẤU HÌNH PIPELINE XỬ LÝ HTTP REQUEST
-//================================================================//
-
+// =============================
+// 2) HTTP PIPELINE
+// =============================
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
@@ -59,40 +92,30 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-app.UseSession();
 
+// ✅ Thứ tự đúng:
+app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Route cho khu vực Admin (đã chính xác)
+// Areas
 app.MapControllerRoute(
-    name: "Admin",
+    name: "areas",
     pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
 
-// Route mặc định cho người dùng (đã chính xác)
+// Default
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// BỎ ĐI: Không cần MapRazorPages() nữa vì chúng ta đã dùng MVC Controller
-// app.MapRazorPages();
-
-//================================================================//
-// 3. KHỞI TẠO CƠ SỞ DỮ LIỆU
-//================================================================//
-
-// Đổi tên phương thức thành InitializeAsync() để tuân thủ quy tắc đặt tên
-async Task SeedDatabaseAsync()
+// =============================
+// 3) SEED DATABASE
+// =============================
+using (var scope = app.Services.CreateScope())
 {
-    using (var scope = app.Services.CreateScope())
-    {
-        var services = scope.ServiceProvider;
-        var initializer = services.GetRequiredService<DbInitializer>();
-        await initializer.Initialize(); 
-    }
+    var services = scope.ServiceProvider;
+    var initializer = services.GetRequiredService<DbInitializer>();
+    await initializer.InitializeAsync();
 }
-
-// Gọi hàm khởi tạo CSDL
-await SeedDatabaseAsync();
 
 app.Run();

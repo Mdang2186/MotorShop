@@ -1,133 +1,235 @@
-﻿using System.Text.Json;
-using MotorShop.Models; // Namespace chứa CartItem và Product
+﻿// File: Services/CartService.cs
+using System.Text.Json;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using MotorShop.Data;
+using MotorShop.Models;
+using MotorShop.Models.Enums; // DeliveryMethod, PaymentMethod
+using MotorShop.Utilities;
 
-namespace MotorShop.Services;
-
-public class CartService(IHttpContextAccessor httpContextAccessor)
+namespace MotorShop.Services
 {
-    private const string CartSessionKey = "MotorShopCart";
-    private ISession Session => httpContextAccessor.HttpContext!.Session;
-
     /// <summary>
-    /// Lấy danh sách CartItem từ Session.
+    /// Quản lý giỏ hàng & phiên checkout lưu trong Session (không lưu DB).
     /// </summary>
-    public List<CartItem> GetCartItems()
+    public class CartService
     {
-        var jsonCart = Session.GetString(CartSessionKey);
-        try
-        {
-            return string.IsNullOrEmpty(jsonCart) ? [] : JsonSerializer.Deserialize<List<CartItem>>(jsonCart)!;
-        }
-        catch (JsonException) // Xử lý nếu dữ liệu Session bị hỏng
-        {
-            Session.Remove(CartSessionKey); // Xóa dữ liệu hỏng
-            return [];
-        }
-    }
+        private readonly IHttpContextAccessor _http;
+        private readonly ApplicationDbContext _db; // <-- để Add(productId, qty)
 
-    /// <summary>
-    /// Lưu danh sách CartItem vào Session.
-    /// </summary>
-    private void SaveCartItems(List<CartItem> cartItems)
-    {
-        if (cartItems == null || cartItems.Count == 0)
+        public CartService(IHttpContextAccessor httpContextAccessor, ApplicationDbContext db)
         {
-            Session.Remove(CartSessionKey);
+            _http = httpContextAccessor;
+            _db = db;
         }
-        else
+
+        private ISession? Session => _http.HttpContext?.Session;
+
+        private const string FallbackCartKey = "MotorShopCart";
+        private const string FallbackCheckoutKey = "MotorShopCheckout";
+
+        private static string CartKey => SD.SessionCart ?? FallbackCartKey;
+        private static string CheckoutKey => SD.SessionCheckout ?? FallbackCheckoutKey;
+
+        private static readonly JsonSerializerOptions JsonOpt = new() { };
+
+        // ====== Kiểu phiên checkout phù hợp CheckoutController/CheckoutViewModel ======
+        public sealed class CheckoutSession
         {
-            var jsonCart = JsonSerializer.Serialize(cartItems);
-            Session.SetString(CartSessionKey, jsonCart);
+            // Giao nhận
+            public DeliveryMethod DeliveryMethod { get; set; } = DeliveryMethod.HomeDelivery;
+            public int? PickupBranchId { get; set; }
+            public string? ShippingAddress { get; set; }
+
+            // Người nhận
+            public string? ReceiverName { get; set; }
+            public string? ReceiverPhone { get; set; }
+            public string? ReceiverEmail { get; set; }
+
+            // Thanh toán (mock)
+            public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.Card;
+            public string? SelectedBankCode { get; set; } // ví dụ "tcb", "vcb"
+            public string? CardHolder { get; set; }
+            public string? CardExpiry { get; set; } // MM/YY
         }
-    }
 
-    /// <summary>
-    /// Thêm một sản phẩm vào giỏ hàng hoặc tăng số lượng.
-    /// </summary>
-    public void AddToCart(Product product, int quantity = 1)
-    {
-        if (product == null || quantity <= 0) return;
-
-        var cartItems = GetCartItems();
-        var existingItem = cartItems.FirstOrDefault(item => item.ProductId == product.Id);
-
-        if (existingItem != null)
+        // ====== Session: Checkout ======
+        public CheckoutSession? GetCheckoutSession()
         {
-            existingItem.Quantity += quantity;
+            if (Session is null) return null;
+            var json = Session.GetString(CheckoutKey);
+            if (string.IsNullOrEmpty(json)) return null;
+            try { return JsonSerializer.Deserialize<CheckoutSession>(json, JsonOpt); }
+            catch { Session.Remove(CheckoutKey); return null; }
         }
-        else
+
+        public void SaveCheckoutSession(CheckoutSession state)
         {
-            // Tạo CartItem mới
-            cartItems.Add(new CartItem
+            if (Session is null) return;
+            Session.SetString(CheckoutKey, JsonSerializer.Serialize(state, JsonOpt));
+        }
+
+        public void ClearCheckoutSession() => Session?.Remove(CheckoutKey);
+
+        // ====== Session: Cart ======
+        public List<CartItem> GetCartItems()
+        {
+            if (Session == null) return new();
+            var json = Session.GetString(CartKey);
+            if (string.IsNullOrEmpty(json)) return new();
+            try { return JsonSerializer.Deserialize<List<CartItem>>(json, JsonOpt) ?? new(); }
+            catch { Session.Remove(CartKey); return new(); }
+        }
+
+        private void SaveCartItems(List<CartItem> items)
+        {
+            if (Session == null) return;
+            if (items == null || items.Count == 0) { Session.Remove(CartKey); return; }
+            Session.SetString(CartKey, JsonSerializer.Serialize(items, JsonOpt));
+        }
+
+        // ====== API giỏ hàng ======
+
+        /// <summary>Thêm sản phẩm theo Id (load Product từ DB). Bỏ qua nếu không tìm thấy hoặc không bán.</summary>
+        public void Add(int productId, int quantity = 1)
+        {
+            if (quantity <= 0 || Session == null) return;
+
+            // Chỉ lấy sản phẩm đang publish
+            var p = _db.Products
+                       .AsNoTracking()
+                       .FirstOrDefault(x => x.Id == productId && x.IsPublished);
+            if (p == null) return;
+
+            Add(p, quantity);
+        }
+
+        /// <summary>Thêm sản phẩm với dữ liệu hiện có (giữ tương thích ngược với code cũ).</summary>
+        public void Add(Product product, int quantity = 1) => AddToCart(product, quantity);
+
+        /// <summary>Giữ lại hàm cũ để tương thích ngược.</summary>
+        public void AddToCart(Product product, int quantity = 1)
+        {
+            if (Session == null || product == null || quantity <= 0) return;
+
+            var items = GetCartItems();
+            var existing = items.FirstOrDefault(i => i.ProductId == product.Id);
+
+            if (existing != null)
             {
-                ProductId = product.Id,
-                ProductName = product.Name,
-                Quantity = quantity,
-                Price = product.Price, // Lấy giá bán hiện tại
-                ImageUrl = product.ImageUrl
-            });
+                try { checked { existing.Quantity = Math.Min(existing.Quantity + quantity, 9999); } }
+                catch { existing.Quantity = 9999; }
+            }
+            else
+            {
+                items.Add(new CartItem
+                {
+                    ProductId = product.Id,
+                    ProductName = product.Name,
+                    Quantity = Math.Min(quantity, 9999),
+                    Price = Math.Max(0, product.Price),
+                    ImageUrl = product.ImageUrl // dùng ảnh chính
+                });
+            }
+
+            SaveCartItems(items);
         }
-        SaveCartItems(cartItems);
-    }
 
-    /// <summary>
-    /// Xóa một sản phẩm khỏi giỏ hàng.
-    /// </summary>
-    public void RemoveFromCart(int productId)
-    {
-        var cartItems = GetCartItems();
-        cartItems.RemoveAll(item => item.ProductId == productId); // Xóa tất cả item có productId này
-        SaveCartItems(cartItems);
-    }
-
-    /// <summary>
-    /// Cập nhật số lượng cho một sản phẩm trong giỏ.
-    /// </summary>
-    public bool UpdateQuantity(int productId, int quantity)
-    {
-        if (quantity <= 0)
+        public void RemoveFromCart(int productId)
         {
-            RemoveFromCart(productId);
+            if (Session == null) return;
+            var items = GetCartItems();
+            items.RemoveAll(i => i.ProductId == productId);
+            SaveCartItems(items);
+        }
+
+        /// <summary>Đặt số lượng tuyệt đối (không kiểm kho). &lt;=0 sẽ xoá item.</summary>
+        public bool UpdateQuantity(int productId, int quantity)
+        {
+            if (Session == null) return false;
+
+            var items = GetCartItems();
+            var item = items.FirstOrDefault(i => i.ProductId == productId);
+            if (item == null) return false;
+
+            if (quantity <= 0) items.Remove(item);
+            else item.Quantity = Math.Min(quantity, 9999);
+
+            SaveCartItems(items);
             return true;
         }
 
-        var cartItems = GetCartItems();
-        var itemToUpdate = cartItems.FirstOrDefault(item => item.ProductId == productId);
-
-        if (itemToUpdate != null)
+        /// <summary>Set số lượng có kẹp bởi tồn kho (maxStock). requestedQty &lt;=0 xoá.</summary>
+        public bool SetQuantityWithClamp(int productId, int requestedQty, int maxStock, out int appliedQty)
         {
-            itemToUpdate.Quantity = quantity;
-            SaveCartItems(cartItems);
+            appliedQty = 0;
+            if (Session == null) return false;
+
+            var items = GetCartItems();
+            var item = items.FirstOrDefault(i => i.ProductId == productId);
+            if (item == null) return false;
+
+            if (requestedQty <= 0 || maxStock <= 0)
+            {
+                items.Remove(item);
+                SaveCartItems(items);
+                return true;
+            }
+
+            var clamped = Math.Min(Math.Max(1, requestedQty), Math.Max(1, maxStock));
+            item.Quantity = clamped;
+            appliedQty = clamped;
+            SaveCartItems(items);
             return true;
         }
-        return false; // Không tìm thấy sản phẩm để cập nhật
-    }
 
-    /// <summary>
-    /// Lấy số lượng hiện tại của một sản phẩm trong giỏ.
-    /// </summary>
-    public int GetItemQuantity(int productId)
-    {
-        var cartItems = GetCartItems();
-        return cartItems.FirstOrDefault(item => item.ProductId == productId)?.Quantity ?? 0;
-    }
+        public int GetItemQuantity(int productId)
+            => GetCartItems().FirstOrDefault(i => i.ProductId == productId)?.Quantity ?? 0;
 
-    /// <summary>
-    /// Xóa toàn bộ giỏ hàng.
-    /// </summary>
-    public void ClearCart()
-    {
-        Session.Remove(CartSessionKey);
-    }
+        public void ClearCart() => Session?.Remove(CartKey);
 
-    /// <summary>
-    /// Xóa các sản phẩm đã được mua khỏi giỏ hàng.
-    /// </summary>
-    public void RemovePurchasedItems(IEnumerable<int> purchasedProductIds)
-    {
-        if (purchasedProductIds == null || !purchasedProductIds.Any()) return;
-        var cartItems = GetCartItems();
-        cartItems.RemoveAll(item => purchasedProductIds.Contains(item.ProductId));
-        SaveCartItems(cartItems);
+        public void RemovePurchasedItems(IEnumerable<int> purchasedProductIds)
+        {
+            if (Session == null) return;
+            var ids = purchasedProductIds?.ToArray() ?? Array.Empty<int>();
+            if (ids.Length == 0) return;
+
+            var items = GetCartItems();
+            items.RemoveAll(i => ids.Contains(i.ProductId));
+            SaveCartItems(items);
+        }
+
+        // ====== Helpers ======
+        public decimal GetSubtotal() => GetCartItems().Sum(it => it.Price * it.Quantity);
+
+        public int GetTotalQuantity() => GetCartItems().Sum(i => i.Quantity);
+
+        /// <summary>
+        /// Làm tươi giá/ảnh từ Product hiện tại (nếu cần), tránh dùng giá cũ trong session.
+        /// </summary>
+        public void RefreshPricesFrom(IEnumerable<Product> freshProducts)
+        {
+            if (Session == null) return;
+            var map = (freshProducts ?? Enumerable.Empty<Product>()).ToDictionary(p => p.Id, p => p);
+            var items = GetCartItems();
+            var changed = false;
+
+            foreach (var it in items)
+            {
+                if (!map.TryGetValue(it.ProductId, out var p)) continue;
+
+                var newPrice = Math.Max(0, p.Price);
+                if (it.Price != newPrice) { it.Price = newPrice; changed = true; }
+
+                var newImg = p.ImageUrl;
+                if (!string.IsNullOrWhiteSpace(newImg) &&
+                    !string.Equals(it.ImageUrl, newImg, StringComparison.OrdinalIgnoreCase))
+                {
+                    it.ImageUrl = newImg; changed = true;
+                }
+            }
+
+            if (changed) SaveCartItems(items);
+        }
     }
 }

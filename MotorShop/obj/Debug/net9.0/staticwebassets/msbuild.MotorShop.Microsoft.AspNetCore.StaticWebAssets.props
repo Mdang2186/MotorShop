@@ -12,8 +12,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>6mqiai452h</Fingerprint>
-      <Integrity>wlZJ3cG0l0j9INpvwmU75O3n+WLOGXjfGofNQJP0QJQ=</Integrity>
+      <Fingerprint>4vt0ti8tms</Fingerprint>
+      <Integrity>MByzrGy0hakr3CG/VKfa8Y/IPTdbKGRSFuKzyo2uswE=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\site.css'))</OriginalItemSpec>
@@ -234,6 +234,24 @@
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\content\product-banner.jpg'))</OriginalItemSpec>
     </StaticWebAsset>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\payments\bidv.svg'))">
+      <SourceType>Package</SourceType>
+      <SourceId>MotorShop</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/MotorShop</BasePath>
+      <RelativePath>images/payments/bidv.svg</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <Fingerprint>9x8bevjy18</Fingerprint>
+      <Integrity>7VucRpPr1LRY/vpFByXvVz1KjgoNVgEoqOhVKOzRo3M=</Integrity>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\payments\bidv.svg'))</OriginalItemSpec>
+    </StaticWebAsset>
     <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\payments\mastercard.svg'))">
       <SourceType>Package</SourceType>
       <SourceId>MotorShop</SourceId>
@@ -246,8 +264,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>554i2n3xwz</Fingerprint>
-      <Integrity>eVNEeCc+IJNlsUpH45N16VMp0ff8QbUMLq3YywmjLJ4=</Integrity>
+      <Fingerprint>djbw82j066</Fingerprint>
+      <Integrity>l32a2UURcTnMgp4Plmgs5SKLLSURiuQhhMf6DZJ1lBE=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\payments\mastercard.svg'))</OriginalItemSpec>
@@ -282,8 +300,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>gftb38y6fe</Fingerprint>
-      <Integrity>RPM4fDmfdwvte6cXxjxi+BghoYobZM8SfTrwZBzxH/E=</Integrity>
+      <Fingerprint>hfj53zfo11</Fingerprint>
+      <Integrity>Y8+NreKDgO78f/CagKStV3pb2/eDf+KysC+rRdKyHEc=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\payments\visa.svg'))</OriginalItemSpec>
@@ -876,8 +894,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>fr2ljuu08d</Fingerprint>
-      <Integrity>xfMKiYyosUS1OJ16LFhUNigVnmaIf9pde5f6AiBGPJ0=</Integrity>
+      <Fingerprint>bbufqacvym</Fingerprint>
+      <Integrity>yXbHQwGk+dLLiK06OgiXW6Cl5ZiXwpjQaZdUbylt2FY=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\js\site.js'))</OriginalItemSpec>
@@ -1961,24 +1979,6 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\lib\jquery\LICENSE.txt'))</OriginalItemSpec>
-    </StaticWebAsset>
-    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\MotorShop.a15b6620gz.bundle.scp.css'))">
-      <SourceType>Package</SourceType>
-      <SourceId>MotorShop</SourceId>
-      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
-      <BasePath>_content/MotorShop</BasePath>
-      <RelativePath>MotorShop.a15b6620gz.bundle.scp.css</RelativePath>
-      <AssetKind>All</AssetKind>
-      <AssetMode>Reference</AssetMode>
-      <AssetRole>Primary</AssetRole>
-      <RelatedAsset></RelatedAsset>
-      <AssetTraitName>ScopedCss</AssetTraitName>
-      <AssetTraitValue>ProjectBundle</AssetTraitValue>
-      <Fingerprint>a15b6620gz</Fingerprint>
-      <Integrity>wlN0UxbEnzeRg1TW7ZzDa/otxhTga1P9bBUiT9sD9rM=</Integrity>
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\MotorShop.a15b6620gz.bundle.scp.css'))</OriginalItemSpec>
     </StaticWebAsset>
   </ItemGroup>
 </Project>

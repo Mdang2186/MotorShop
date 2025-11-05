@@ -1,0 +1,25 @@
+﻿@{
+    Layout = "/Views/Shared/_Layout.cshtml"; // Kế thừa layout chính
+}
+
+<div class="bg-gray-50 py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-8 text-center">Quản lý Tài khoản</h1>
+        <div class="lg:grid lg:grid-cols-12 lg:gap-8">
+
+            <div class="lg:col-span-3 mb-8 lg:mb-0">
+                <partial name="_ManageNav" /> @* Tạo file này ở Views/Shared *@
+            </div>
+
+            <div class="lg:col-span-9">
+                <div class="bg-white p-6 rounded-xl border shadow-sm">
+                    @RenderBody()
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @RenderSection("Scripts", required: false)
+}
