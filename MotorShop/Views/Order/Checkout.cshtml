@@ -1,54 +1,193 @@
 ﻿@model MotorShop.ViewModels.CheckoutViewModel
+@using MotorShop.Models.Enums
 
 @{
     ViewData["Title"] = "Thanh toán";
-    var totalPrice = Model.CartItems.Sum(item => item.UnitPrice * item.Quantity);
 }
 
-<div class="py-8">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 class="text-2xl font-bold mb-6">@ViewData["Title"]</h1>
-        <form asp-action="Checkout" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-4"></div>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div>
-                    <h2 class="text-lg font-semibold mb-4">Thông tin giao hàng</h2>
-                    <div class="bg-white p-6 rounded-lg border space-y-4">
-                        <div class="form-group">
-                            <label asp-for="CustomerName" class="font-medium">Họ tên</label>
-                            <input asp-for="CustomerName" class="w-full mt-1 border rounded px-3 py-2" />
-                            <span asp-validation-for="CustomerName" class="text-danger text-sm"></span>
-                        </div>
-                        <div class="form-group">
-                            <label asp-for="ShippingPhone" class="font-medium">Số điện thoại</label>
-                            <input asp-for="ShippingPhone" class="w-full mt-1 border rounded px-3 py-2" />
-                            <span asp-validation-for="ShippingPhone" class="text-danger text-sm"></span>
-                        </div>
-                        <div class="form-group">
-                            <label asp-for="ShippingAddress" class="font-medium">Địa chỉ giao hàng</label>
-                            <textarea asp-for="ShippingAddress" class="w-full mt-1 border rounded px-3 py-2" rows="3"></textarea>
-                            <span asp-validation-for="ShippingAddress" class="text-danger text-sm"></span>
+<div class="max-w-6xl mx-auto px-4 py-10">
+    <h1 class="text-2xl font-bold mb-6">Thanh toán</h1>
+
+    @if (!Model.Items.Any())
+    {
+        <div class="p-6 bg-yellow-50 border rounded">Giỏ hàng trống.</div>
+    }
+    else
+    {
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Cột trái: Thông tin nhận hàng + thanh toán -->
+            <div class="lg:col-span-2 space-y-6">
+                <form asp-action="Index" asp-controller="Checkout" method="post" class="space-y-6">
+                    @Html.AntiForgeryToken()
+
+                    <!-- nếu bạn dùng subset, giữ lại trong hidden -->
+                    <input type="hidden" asp-for="SelectedProductIds" />
+
+                    <div class="bg-white border rounded-xl p-6 space-y-4">
+                        <h2 class="font-semibold text-lg">Thông tin người nhận</h2>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label asp-for="ReceiverName" class="block text-sm font-medium"></label>
+                                <input asp-for="ReceiverName" class="mt-1 w-full border rounded-lg px-3 py-2" />
+                                <span asp-validation-for="ReceiverName" class="text-sm text-red-600"></span>
+                            </div>
+                            <div>
+                                <label asp-for="ReceiverPhone" class="block text-sm font-medium"></label>
+                                <input asp-for="ReceiverPhone" class="mt-1 w-full border rounded-lg px-3 py-2" />
+                                <span asp-validation-for="ReceiverPhone" class="text-sm text-red-600"></span>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label asp-for="ReceiverEmail" class="block text-sm font-medium"></label>
+                                <input asp-for="ReceiverEmail" class="mt-1 w-full border rounded-lg px-3 py-2" />
+                                <span asp-validation-for="ReceiverEmail" class="text-sm text-red-600"></span>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div>
-                    <h2 class="text-lg font-semibold mb-4">Đơn hàng của bạn</h2>
-                    <div class="bg-white p-6 rounded-lg border">
-                        @foreach (var item in Model.CartItems)
-                        {
-                            <p>@item.Product.Name x @item.Quantity</p>
-                        }
-                        <hr class="my-4" />
-                        <div class="flex justify-between text-lg font-bold">
-                            <span>Tổng cộng:</span>
-                            <span class="text-red-600">@totalPrice.ToString("N0") đ</span>
+
+                    <div class="bg-white border rounded-xl p-6 space-y-4">
+                        <h2 class="font-semibold text-lg">Giao / Nhận</h2>
+
+                        <div class="space-y-3">
+                            <label class="flex items-center gap-3">
+                                <input type="radio" asp-for="DeliveryMethod" value="@DeliveryMethod.HomeDelivery" class="h-4 w-4">
+                                <span>Giao tận nơi</span>
+                            </label>
+                            <div class="pl-7">
+                                <label asp-for="ShippingAddress" class="block text-sm font-medium"></label>
+                                <input asp-for="ShippingAddress" class="mt-1 w-full border rounded-lg px-3 py-2" />
+                                <span asp-validation-for="ShippingAddress" class="text-sm text-red-600"></span>
+                            </div>
+
+                            <label class="flex items-center gap-3 mt-4">
+                                <input type="radio" asp-for="DeliveryMethod" value="@DeliveryMethod.PickupAtStore" class="h-4 w-4">
+                                <span>Nhận tại cửa hàng</span>
+                            </label>
+                            <div class="pl-7">
+                                <label asp-for="PickupBranchId" class="block text-sm font-medium"></label>
+                                <select asp-for="PickupBranchId" class="mt-1 w-full border rounded-lg px-3 py-2">
+                                    <option value="">-- Chọn chi nhánh --</option>
+                                    @foreach (var br in Model.Branches)
+                                    {
+                                        <option value="@br.Id">@br.Name - @br.Address</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="PickupBranchId" class="text-sm text-red-600"></span>
+                            </div>
                         </div>
-                        <button type="submit" class="w-full mt-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold">
-                            Xác nhận đặt hàng
+
+                        <div class="mt-4">
+                            <label asp-for="CustomerNote" class="block text-sm font-medium"></label>
+                            <textarea asp-for="CustomerNote" rows="3" class="mt-1 w-full border rounded-lg px-3 py-2"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border rounded-xl p-6 space-y-4">
+                        <h2 class="font-semibold text-lg">Thanh toán</h2>
+
+                        <div class="space-y-3">
+                            <label class="flex items-center gap-3">
+                                <input type="radio" asp-for="PaymentMethod" value="@PaymentMethod.Card" class="h-4 w-4">
+                                <span>Thẻ ngân hàng</span>
+                            </label>
+                            <label class="flex items-center gap-3">
+                                <input type="radio" asp-for="PaymentMethod" value="@PaymentMethod.BankTransfer" class="h-4 w-4">
+                                <span>Chuyển khoản</span>
+                            </label>
+                            <label class="flex items-center gap-3">
+                                <input type="radio" asp-for="PaymentMethod" value="@PaymentMethod.CashOnDelivery" class="h-4 w-4">
+                                <span>Thanh toán khi nhận</span>
+                            </label>
+                            <label class="flex items-center gap-3">
+                                <input type="radio" asp-for="PaymentMethod" value="@PaymentMethod.PayAtStore" class="h-4 w-4">
+                                <span>Thanh toán tại cửa hàng</span>
+
+                            </label>
+                        </div>
+
+                        <!-- Bank + Card fields (mô phỏng) -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                            <div>
+                                <label asp-for="SelectedBankCode" class="block text-sm font-medium"></label>
+                                <select asp-for="SelectedBankCode" class="mt-1 w-full border rounded-lg px-3 py-2">
+                                    @foreach (var b in Model.Banks)
+                                    {
+                                        <option value="@b.Code">@b.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <div>
+                                <label asp-for="CardHolder" class="block text-sm font-medium"></label>
+                                <input asp-for="CardHolder" class="mt-1 w-full border rounded-lg px-3 py-2" />
+                                <span asp-validation-for="CardHolder" class="text-sm text-red-600"></span>
+                            </div>
+                            <div>
+                                <label asp-for="CardNumber" class="block text-sm font-medium"></label>
+                                <input asp-for="CardNumber" class="mt-1 w-full border rounded-lg px-3 py-2" />
+                                <span asp-validation-for="CardNumber" class="text-sm text-red-600"></span>
+                            </div>
+                            <div>
+                                <label asp-for="CardExpiry" class="block text-sm font-medium"></label>
+                                <input asp-for="CardExpiry" class="mt-1 w-full border rounded-lg px-3 py-2" placeholder="MM/YY" />
+                                <span asp-validation-for="CardExpiry" class="text-sm text-red-600"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end">
+                        <button type="submit" class="px-6 py-3 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700">
+                            Đặt hàng
                         </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Cột phải: Tóm tắt đơn -->
+            <div class="lg:col-span-1">
+                <div class="bg-white border rounded-xl p-6">
+                    <h2 class="font-semibold text-lg mb-4">Đơn của bạn</h2>
+
+                    <ul class="divide-y">
+                        @foreach (var it in Model.Items)
+                        {
+                            <li class="py-3 flex items-center gap-3">
+                                @if (!string.IsNullOrWhiteSpace(it.ImageUrl))
+                                {
+                                    <img src="@it.ImageUrl" class="w-14 h-14 object-cover rounded" />
+                                }
+                                <div class="flex-1">
+                                    <div class="font-medium">@it.ProductName</div>
+                                    <div class="text-sm text-gray-500">x @it.Quantity</div>
+                                </div>
+                                <div class="font-semibold">@($"{it.Subtotal:#,0} ₫")</div>
+                            </li>
+                        }
+                    </ul>
+
+                    <div class="mt-4 space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span>Tạm tính</span>
+                            <span class="font-semibold">@($"{Model.Subtotal:#,0} ₫")</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Phí vận chuyển</span>
+                            <span class="font-semibold">@($"{Model.ShippingFee:#,0} ₫")</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Giảm giá</span>
+                            <span class="font-semibold">- @($"{Model.DiscountAmount:#,0} ₫")</span>
+                        </div>
+                        <div class="border-t pt-3 flex justify-between text-base">
+                            <span class="font-bold">Tổng</span>
+                            <span class="font-extrabold text-gray-900">@($"{Model.Total:#,0} ₫")</span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </form>
-    </div>
+        </div>
+    }
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,56 @@
+﻿@model MotorShop.ViewModels.ProductIndexViewModel
+@{
+    if (Model.TotalPages <= 1) { return; }
+    int page = Model.PageIndex;
+    int total = Model.TotalPages;
+    int start = Math.Max(1, page - 2);
+    int end = Math.Min(total, page + 2);
+}
+<nav class="flex justify-center">
+    <ul class="inline-flex items-center gap-2">
+        <li>
+            <a asp-action="Index"
+               asp-route-page="@(Math.Max(1, page - 1))"
+               asp-route-searchString="@Model.SearchString"
+               asp-route-brandFilter="@Model.BrandFilter"
+               asp-route-categoryFilter="@Model.CategoryFilter"
+               asp-route-minPrice="@Model.MinPrice"
+               asp-route-maxPrice="@Model.MaxPrice"
+               asp-route-sortBy="@Model.SortBy"
+               class="px-3 py-2 border rounded-xl text-sm hover:bg-gray-50 @(page == 1 ? "pointer-events-none opacity-50" : "")">
+                Trước
+            </a>
+        </li>
+
+        @for (int i = start; i <= end; i++)
+        {
+            <li>
+                <a asp-action="Index"
+                   asp-route-page="@i"
+                   asp-route-searchString="@Model.SearchString"
+                   asp-route-brandFilter="@Model.BrandFilter"
+                   asp-route-categoryFilter="@Model.CategoryFilter"
+                   asp-route-minPrice="@Model.MinPrice"
+                   asp-route-maxPrice="@Model.MaxPrice"
+                   asp-route-sortBy="@Model.SortBy"
+                   class="px-3 py-2 border rounded-xl text-sm hover:bg-gray-50 @(i==page?"!bg-blue-600 !text-white border-blue-600":"")">
+                    @i
+                </a>
+            </li>
+        }
+
+        <li>
+            <a asp-action="Index"
+               asp-route-page="@(Math.Min(total, page + 1))"
+               asp-route-searchString="@Model.SearchString"
+               asp-route-brandFilter="@Model.BrandFilter"
+               asp-route-categoryFilter="@Model.CategoryFilter"
+               asp-route-minPrice="@Model.MinPrice"
+               asp-route-maxPrice="@Model.MaxPrice"
+               asp-route-sortBy="@Model.SortBy"
+               class="px-3 py-2 border rounded-xl text-sm hover:bg-gray-50 @(page == total ? "pointer-events-none opacity-50" : "")">
+                Sau
+            </a>
+        </li>
+    </ul>
+</nav>

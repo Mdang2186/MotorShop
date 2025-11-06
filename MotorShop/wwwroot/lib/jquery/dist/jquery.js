@@ -37,7 +37,7 @@
 } )( typeof window !== "undefined" ? window : this, function( window, noGlobal ) {
 
 // Edge <= 12 - 13+, Firefox <=18 - 45+, IE 10 - 11, Safari 5.1 - 9+, iOS 6 - 9.1
-// throw exceptions when non-strict code (e.g., ASP.NET 4.5) accesses strict mode
+// throw exceptions when non-strict CashOnDeliverye (e.g., ASP.NET 4.5) accesses strict mode
 // arguments.callee.caller (trac-13335). But as of jQuery 3.0 (2016), strict mode should be common
 // enough that all such attempts are guarded in a try block.
 "use strict";
@@ -101,13 +101,13 @@ var document = window.document;
 		noModule: true
 	};
 
-	function DOMEval( code, node, doc ) {
+	function DOMEval( CashOnDeliverye, node, doc ) {
 		doc = doc || document;
 
 		var i, val,
 			script = doc.createElement( "script" );
 
-		script.text = code;
+		script.text = CashOnDeliverye;
 		if ( node ) {
 			for ( i in preservedScriptAttributes ) {
 
@@ -370,8 +370,8 @@ jQuery.extend( {
 
 	// Evaluates a script in a provided context; falls back to the global one
 	// if not specified.
-	globalEval: function( code, options, doc ) {
-		DOMEval( code, { nonce: options && options.nonce }, doc );
+	globalEval: function( CashOnDeliverye, options, doc ) {
+		DOMEval( CashOnDeliverye, { nonce: options && options.nonce }, doc );
 	},
 
 	each: function( obj, callback ) {
@@ -607,16 +607,16 @@ jQuery.contains = function( a, b ) {
 // https://drafts.csswg.org/cssom/#common-serializing-idioms
 var rcssescape = /([\0-\x1f\x7f]|^-?\d)|^-$|[^\x80-\uFFFF\w-]/g;
 
-function fcssescape( ch, asCodePoint ) {
-	if ( asCodePoint ) {
+function fcssescape( ch, asCashOnDeliveryePoint ) {
+	if ( asCashOnDeliveryePoint ) {
 
 		// U+0000 NULL becomes U+FFFD REPLACEMENT CHARACTER
 		if ( ch === "\0" ) {
 			return "\uFFFD";
 		}
 
-		// Control characters and (dependent upon position) numbers get escaped as code points
-		return ch.slice( 0, -1 ) + "\\" + ch.charCodeAt( ch.length - 1 ).toString( 16 ) + " ";
+		// Control characters and (dependent upon position) numbers get escaped as CashOnDeliverye points
+		return ch.slice( 0, -1 ) + "\\" + ch.charCashOnDeliveryeAt( ch.length - 1 ).toString( 16 ) + " ";
 	}
 
 	// Other potentially-special ASCII characters get backslash-escaped
@@ -747,13 +747,13 @@ var i,
 			return nonHex;
 		}
 
-		// Replace a hexadecimal escape sequence with the encoded Unicode code point
+		// Replace a hexadecimal escape sequence with the enCashOnDeliveryed UniCashOnDeliverye CashOnDeliverye point
 		// Support: IE <=11+
 		// For values outside the Basic Multilingual Plane (BMP), manually construct a
 		// surrogate pair
 		return high < 0 ?
-			String.fromCharCode( high + 0x10000 ) :
-			String.fromCharCode( high >> 10 | 0xD800, high & 0x3FF | 0xDC00 );
+			String.fromCharCashOnDeliverye( high + 0x10000 ) :
+			String.fromCharCashOnDeliverye( high >> 10 | 0xD800, high & 0x3FF | 0xDC00 );
 	},
 
 	// Used for iframes; see `setDocument`.
@@ -4129,7 +4129,7 @@ var dataUser = new Data();
 //	2. Improve the module's maintainability by reducing the storage
 //		paths to a single mechanism.
 //	3. Use the same single mechanism to support "private" and "user" data.
-//	4. _Never_ expose "private" data to user code (TODO: Drop _data, _removeData)
+//	4. _Never_ expose "private" data to user CashOnDeliverye (TODO: Drop _data, _removeData)
 //	5. Avoid exposing implementation details on user objects (eg. expando properties)
 //	6. Provide a clear path for implementation upgrade to WeakMap in 2014
 
@@ -5266,7 +5266,7 @@ jQuery.event = {
 			setup: function( data ) {
 
 				// For mutual compressibility with _default, replace `this` access with a local var.
-				// `|| data` is dead code meant only to preserve the variable through minification.
+				// `|| data` is dead CashOnDeliverye meant only to preserve the variable through minification.
 				var el = this || data;
 
 				// Claim the first handler
@@ -5283,7 +5283,7 @@ jQuery.event = {
 			trigger: function( data ) {
 
 				// For mutual compressibility with _default, replace `this` access with a local var.
-				// `|| data` is dead code meant only to preserve the variable through minification.
+				// `|| data` is dead CashOnDeliverye meant only to preserve the variable through minification.
 				var el = this || data;
 
 				// Force setup before triggering a click
@@ -5516,10 +5516,10 @@ jQuery.each( {
 	shiftKey: true,
 	view: true,
 	"char": true,
-	code: true,
-	charCode: true,
+	CashOnDeliverye: true,
+	charCashOnDeliverye: true,
 	key: true,
-	keyCode: true,
+	keyCashOnDeliverye: true,
 	button: true,
 	buttons: true,
 	clientX: true,
@@ -6820,7 +6820,7 @@ jQuery.extend( {
 
 			// If a number was passed in, add the unit (except for certain CSS properties)
 			// The isCustomProp check can be removed in jQuery 4.0 when we only auto-append
-			// "px" to a few hardcoded values.
+			// "px" to a few hardCashOnDeliveryed values.
 			if ( type === "number" && !isCustomProp ) {
 				value += ret && ret[ 3 ] || ( jQuery.cssNumber[ origName ] ? "" : "px" );
 			}
@@ -8083,7 +8083,7 @@ jQuery.extend( {
 // on the option
 // The getter ensures a default option is selected
 // when in an optgroup
-// eslint rule "no-unused-expressions" is disabled for this code
+// eslint rule "no-unused-expressions" is disabled for this CashOnDeliverye
 // since it considers such accessions noop
 if ( !support.optSelected ) {
 	jQuery.propHooks.selected = {
@@ -8736,7 +8736,7 @@ function buildParams( prefix, obj, traditional, add ) {
 
 			} else {
 
-				// Item is non-scalar (array or object), encode its numeric index.
+				// Item is non-scalar (array or object), enCashOnDeliverye its numeric index.
 				buildParams(
 					prefix + "[" + ( typeof v === "object" && v != null ? i : "" ) + "]",
 					v,
@@ -8772,8 +8772,8 @@ jQuery.param = function( a, traditional ) {
 				valueOrFunction() :
 				valueOrFunction;
 
-			s[ s.length ] = encodeURIComponent( key ) + "=" +
-				encodeURIComponent( value == null ? "" : value );
+			s[ s.length ] = enCashOnDeliveryeURIComponent( key ) + "=" +
+				enCashOnDeliveryeURIComponent( value == null ? "" : value );
 		};
 
 	if ( a == null ) {
@@ -8790,8 +8790,8 @@ jQuery.param = function( a, traditional ) {
 
 	} else {
 
-		// If traditional, encode the "old" way (the way 1.3.2 or older
-		// did it), otherwise encode params recursively.
+		// If traditional, enCashOnDeliverye the "old" way (the way 1.3.2 or older
+		// did it), otherwise enCashOnDeliverye params recursively.
 		for ( prefix in a ) {
 			buildParams( prefix, a[ prefix ], traditional, add );
 		}
@@ -9128,7 +9128,7 @@ jQuery.extend( {
 		global: true,
 		processData: true,
 		async: true,
-		contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+		contentType: "application/x-www-form-urlenCashOnDeliveryed; charset=UTF-8",
 
 		/*
 		timeout: 0,
@@ -9261,7 +9261,7 @@ jQuery.extend( {
 			completeDeferred = jQuery.Callbacks( "once memory" ),
 
 			// Status-dependent callbacks
-			statusCode = s.statusCode || {},
+			statusCashOnDeliverye = s.statusCashOnDeliverye || {},
 
 			// Headers (they are sent all at once)
 			requestHeaders = {},
@@ -9315,8 +9315,8 @@ jQuery.extend( {
 				},
 
 				// Status-dependent callbacks
-				statusCode: function( map ) {
-					var code;
+				statusCashOnDeliverye: function( map ) {
+					var CashOnDeliverye;
 					if ( map ) {
 						if ( completed ) {
 
@@ -9325,8 +9325,8 @@ jQuery.extend( {
 						} else {
 
 							// Lazy-add the new callbacks in a way that preserves old ones
-							for ( code in map ) {
-								statusCode[ code ] = [ statusCode[ code ], map[ code ] ];
+							for ( CashOnDeliverye in map ) {
+								statusCashOnDeliverye[ CashOnDeliverye ] = [ statusCashOnDeliverye[ CashOnDeliverye ], map[ CashOnDeliverye ] ];
 							}
 						}
 					}
@@ -9439,9 +9439,9 @@ jQuery.extend( {
 			// Put hash and anti-cache on the URL that will be requested (gh-1732)
 			s.url = cacheURL + uncached;
 
-		// Change '%20' to '+' if this is encoded form body content (gh-2658)
+		// Change '%20' to '+' if this is enCashOnDeliveryed form body content (gh-2658)
 		} else if ( s.data && s.processData &&
-			( s.contentType || "" ).indexOf( "application/x-www-form-urlencoded" ) === 0 ) {
+			( s.contentType || "" ).indexOf( "application/x-www-form-urlenCashOnDeliveryed" ) === 0 ) {
 			s.data = s.data.replace( r20, "+" );
 		}
 
@@ -9630,8 +9630,8 @@ jQuery.extend( {
 			}
 
 			// Status-dependent callbacks
-			jqXHR.statusCode( statusCode );
-			statusCode = undefined;
+			jqXHR.statusCashOnDeliverye( statusCashOnDeliverye );
+			statusCashOnDeliverye = undefined;
 
 			if ( fireGlobals ) {
 				globalEventContext.trigger( isSuccess ? "ajaxSuccess" : "ajaxError",
@@ -9803,7 +9803,7 @@ jQuery.ajaxSettings.xhr = function() {
 
 var xhrSuccessStatus = {
 
-		// File protocol always yields status code 0, assume 200
+		// File protocol always yields status CashOnDeliverye 0, assume 200
 		0: 200,
 
 		// Support: IE <=9 only
@@ -10048,7 +10048,7 @@ jQuery.ajaxPrefilter( "json jsonp", function( s, originalSettings, jqXHR ) {
 			"url" :
 			typeof s.data === "string" &&
 				( s.contentType || "" )
-					.indexOf( "application/x-www-form-urlencoded" ) === 0 &&
+					.indexOf( "application/x-www-form-urlenCashOnDeliveryed" ) === 0 &&
 				rjsonp.test( s.data ) && "data"
 		);
 

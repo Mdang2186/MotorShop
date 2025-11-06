@@ -1,0 +1,149 @@
+﻿@model MotorShop.ViewModels.Account.VerifyEmailCodeViewModel
+@using MotorShop.Utilities
+@{
+    ViewData["Title"] = "Xác minh email";
+    var email = Model?.Email ?? "";
+    var remain = (int?)ViewBag.RemainingSeconds ?? 0;
+}
+
+<section class="min-h-screen bg-gray-50 flex items-center py-12 sm:px-6 lg:px-8">
+    <div class="mx-auto w-full max-w-lg">
+        <div class="bg-white/90 backdrop-blur border border-gray-100 shadow-xl rounded-2xl p-6 sm:p-8">
+            <div class="text-center">
+                <div class="w-16 h-16 bg-blue-600 rounded-xl grid place-items-center mx-auto shadow-lg">
+                    <i class="fa-solid fa-envelope-circle-check text-white text-2xl"></i>
+                </div>
+                <h1 class="mt-4 text-3xl font-extrabold text-gray-900">@ViewData["Title"]</h1>
+                <p class="mt-2 text-sm text-gray-600">
+                    Chúng tôi đã gửi mã 6 số đến <span class="font-semibold text-gray-800">@email</span>.
+                </p>
+            </div>
+
+            <!-- Toast -->
+            @if (TempData[SD.Temp_Success] is string ok)
+            {
+                <div class="mt-4 rounded-md bg-green-50 p-4 text-green-700">@ok</div>
+            }
+            @if (TempData[SD.Temp_Info] is string inf)
+            {
+                <div class="mt-4 rounded-md bg-blue-50 p-4 text-blue-700">@inf</div>
+            }
+            @if (TempData[SD.Temp_Warning] is string w)
+            {
+                <div class="mt-4 rounded-md bg-yellow-50 p-4 text-yellow-800">@w</div>
+            }
+            @if (TempData[SD.Temp_Error] is string er)
+            {
+                <div class="mt-4 rounded-md bg-red-50 p-4 text-red-700">@er</div>
+            }
+
+            <!-- ONLY ONE FORM -->
+            <form id="verifyForm" asp-action="VerifyEmailCode" method="post" class="mt-6 space-y-6" novalidate>
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Email" />
+                <input type="hidden" asp-for="Code" id="code" />
+
+                <div asp-validation-summary="ModelOnly" class="hidden"></div>
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="rounded-md bg-red-50 p-4 mb-2 text-sm text-red-700">
+                        @foreach (var err in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <div>@err.ErrorMessage</div>
+                        }
+                    </div>
+                }
+
+                <!-- OTP boxes -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Mã xác nhận (6 số)</label>
+                    <div class="mt-2 grid grid-cols-6 gap-2" id="otpGrid">
+                        <input type="text" inputmode="numeric" maxlength="1" class="otpCell">
+                        <input type="text" inputmode="numeric" maxlength="1" class="otpCell">
+                        <input type="text" inputmode="numeric" maxlength="1" class="otpCell">
+                        <input type="text" inputmode="numeric" maxlength="1" class="otpCell">
+                        <input type="text" inputmode="numeric" maxlength="1" class="otpCell">
+                        <input type="text" inputmode="numeric" maxlength="1" class="otpCell">
+                    </div>
+                    <span asp-validation-for="Code" class="text-sm text-red-600"></span>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <div class="text-sm text-gray-600">
+                        Hết hạn sau: <span id="countdown" class="font-semibold text-gray-800">@remain</span>s
+                    </div>
+
+                    <!-- Same form, different action -->
+                    <div class="text-sm">
+                        <input type="hidden" name="email" value="@email" />
+                        <button id="btnResend" type="submit"
+                                formaction="@Url.Action("ResendEmailCode","Account")"
+                                formmethod="post"
+                                class="font-medium text-blue-600 hover:text-blue-500 disabled:text-gray-400"
+                                disabled="@(remain > 0)">
+                            Gửi lại mã
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <button type="submit"
+                            class="w-full inline-flex justify-center items-center gap-2 py-3 rounded-xl shadow-sm text-white bg-blue-600 hover:bg-blue-700 font-semibold">
+                        Xác nhận & kích hoạt
+                    </button>
+                </div>
+
+                <div class="text-center text-sm text-gray-500">
+                    Sai email? <a asp-action="Login" class="text-blue-600 hover:text-blue-500 font-medium">Đăng nhập lại</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <style>
+        .otpCell {
+            text-align: center;
+            font-size: 20px;
+            font-weight: 800;
+            border: 1px solid rgb(209 213 219);
+            border-radius: 12px;
+            padding: .65rem 0;
+            outline: none;
+            width: 100%;
+            transition: all .15s
+        }
+
+            .otpCell:focus {
+                border-color: rgb(59 130 246);
+                box-shadow: 0 0 0 2px rgba(59,130,246,.2)
+            }
+    </style>
+    <script>
+        // OTP -> hidden field
+        const cells = Array.from(document.querySelectorAll('#otpGrid .otpCell'));
+        const hidden = document.getElementById('code');
+        function syncHidden(){ hidden.value = cells.map(c => (c.value||'').replace(/\D/g,'').slice(0,1)).join(''); }
+        cells.forEach((c, i) => {
+          c.addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g,'').slice(0,1); if (e.target.value && i < cells.length-1) cells[i+1].focus(); syncHidden(); });
+          c.addEventListener('keydown', e => { if (e.key === 'Backspace' && !e.target.value && i>0) cells[i-1].focus(); });
+        });
+        document.getElementById('verifyForm')?.addEventListener('submit', syncHidden);
+
+        // Countdown & enable resend
+        (function(){
+          const cd = document.getElementById('countdown');
+          const btn = document.getElementById('btnResend');
+          let remain = parseInt(cd?.textContent || '0', 10) || 0;
+          if (remain > 0) {
+            const t = setInterval(() => {
+              remain = Math.max(0, remain - 1);
+              cd.textContent = remain;
+              if (remain <= 0) { btn?.removeAttribute('disabled'); clearInterval(t); }
+            }, 1000);
+          } else { btn?.removeAttribute('disabled'); }
+        })();
+    </script>
+}

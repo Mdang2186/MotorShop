@@ -1,0 +1,37 @@
+﻿@* Nội dung tương tự như file _ManageNav của Identity Scaffolding,
+   nhưng sử dụng asp-controller và asp-action thay vì asp-page *@
+
+@{
+    // Helper để xác định trang active (cần viết code C# nếu cần độ chính xác cao)
+    string IsActive(string action, string controller = "Manage")
+    {
+        return ViewContext.RouteData.Values["action"]?.ToString() == action &&
+               ViewContext.RouteData.Values["controller"]?.ToString() == controller
+               ? "active" : "";
+    }
+}
+
+<nav class="bg-white p-4 rounded-xl border shadow-sm space-y-1">
+    <a class="nav-link block px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100 @IsActive("Index")" asp-controller="Manage" asp-action="Index">
+        <i class="fas fa-user-edit w-4 mr-2 text-gray-500"></i>Hồ sơ
+    </a>
+    <a class="nav-link block px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100 @IsActive("Email")" asp-controller="Manage" asp-action="Email">
+        <i class="fas fa-envelope w-4 mr-2 text-gray-500"></i>Email
+    </a>
+    <a class="nav-link block px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100 @IsActive("ChangePassword")" asp-controller="Manage" asp-action="ChangePassword">
+        <i class="fas fa-key w-4 mr-2 text-gray-500"></i>Mật khẩu
+    </a>
+    @* Các mục khác như 2FA, External Login sẽ thêm sau *@
+</nav>
+
+<style>
+    .nav-link.active {
+        background-color: #eef2ff; /* bg-indigo-50 */
+        color: #4f46e5; /* text-indigo-700 */
+        font-weight: 600; /* font-semibold */
+    }
+
+        .nav-link.active i {
+            color: #4f46e5; /* text-indigo-600 */
+        }
+</style>

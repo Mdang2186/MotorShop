@@ -1,0 +1,31 @@
+﻿@model IEnumerable<MotorShop.Areas.Admin.Controllers.UserController.UserListItemVM>
+@{
+    ViewData["Title"] = "Người dùng";
+}
+<h1 class="text-2xl font-semibold mb-4">Người dùng</h1>
+
+<div class="bg-white border rounded-xl p-5 overflow-x-auto">
+    <table class="min-w-full text-sm">
+        <thead class="text-slate-500">
+            <tr class="text-left">
+                <th class="p-3">Tài khoản</th>
+                <th>Email</th>
+                <th>Vai trò</th>
+                <th>Ngày tạo</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var u in Model)
+            {
+                <tr class="border-t">
+                    <td class="p-3">@u.UserName</td>
+                    <td>@u.Email</td>
+                    <td>
+                        <span class="px-2 py-1 rounded-full bg-slate-100 text-slate-700 text-xs">@u.Roles</span>
+                    </td>
+                    <td>@u.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

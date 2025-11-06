@@ -1,0 +1,250 @@
+﻿@model MotorShop.Models.Order
+@using MotorShop.Models.Enums
+@{
+    ViewData["Title"] = $"Chi tiết đơn hàng #{Model.Id}";
+    
+    // Xác định nếu đơn hàng đã ở trạng thái cuối cùng
+    bool isFinalStatus = Model.Status == OrderStatus.Delivered || Model.Status == OrderStatus.Cancelled;
+}
+
+<div class="max-w-5xl mx-auto">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
+        <div>
+            <div class="flex items-center gap-3">
+                <h1 class="text-2xl font-bold text-slate-900">Đơn hàng #@Model.Id</h1>
+                 @switch (Model.Status)
+                {
+                    case OrderStatus.Pending:
+                        <span class="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-sm font-medium text-amber-800">
+                            <i class="fa-solid fa-clock mr-1.5"></i> Chờ xử lý
+                        </span>
+                        break;
+                    case OrderStatus.Confirmed:
+                        <span class="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800">
+                            <i class="fa-solid fa-check-circle mr-1.5"></i> Đã xác nhận
+                        </span>
+                        break;
+                    case OrderStatus.Shipping:
+                         <span class="inline-flex items-center rounded-full bg-indigo-100 px-3 py-1 text-sm font-medium text-indigo-800">
+                             <i class="fa-solid fa-truck-fast mr-1.5"></i> Đang giao
+                         </span>
+                        break;
+                    case OrderStatus.Delivered:
+                        <span class="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-sm font-medium text-emerald-800">
+                            <i class="fa-solid fa-clipboard-check mr-1.5"></i> Hoàn thành
+                        </span>
+                        break;
+                    case OrderStatus.Cancelled:
+                        <span class="inline-flex items-center rounded-full bg-rose-100 px-3 py-1 text-sm font-medium text-rose-800">
+                            <i class="fa-solid fa-ban mr-1.5"></i> Đã hủy
+                        </span>
+                        break;
+                }
+            </div>
+            <p class="mt-2 text-sm text-slate-500 flex items-center">
+                <i class="fa-regular fa-calendar mr-2"></i>
+                Đặt lúc: @Model.OrderDate.ToLocalTime().ToString("HH:mm - dd/MM/yyyy")
+            </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3">
+             <a asp-action="Index" class="inline-flex items-center px-4 py-2.5 bg-white border border-slate-300 rounded-lg font-medium text-slate-700 hover:bg-slate-50 transition-all shadow-sm">
+                <i class="fa-solid fa-arrow-left mr-2"></i> Quay lại
+            </a>
+            
+            @if (!isFinalStatus)
+            {
+                <form asp-action="UpdateStatus" method="post" class="inline-block">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    
+                    <div class="relative">
+                        <select name="status" onchange="if(confirm('Xác nhận chuyển trạng thái đơn hàng?')) this.form.submit(); else this.value='@Model.Status';" 
+                                class="appearance-none pl-4 pr-10 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-all shadow-sm cursor-pointer border-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                            
+                            <option value="@Model.Status" selected disabled>↳ Cập nhật trạng thái...</option>
+                            
+                            @switch (Model.Status)
+                            {
+                                case OrderStatus.Pending:
+                                    <option value="@OrderStatus.Confirmed">✓ Xác nhận đơn</option>
+                                    <option value="@OrderStatus.Cancelled" class="text-rose-200 font-semibold">✕ Hủy đơn hàng</option>
+                                    break;
+                                case OrderStatus.Confirmed:
+                                    <option value="@OrderStatus.Shipping">🚚 Bắt đầu giao hàng</option>
+                                    <option value="@OrderStatus.Cancelled" class="text-rose-200 font-semibold">✕ Hủy đơn hàng</option>
+                                    break;
+                                case OrderStatus.Shipping:
+                                    <option value="@OrderStatus.Delivered">🎉 Xác nhận đã giao (Hoàn thành)</option>
+                                    <option value="@OrderStatus.Cancelled" class="text-rose-200 font-semibold">✕ Giao thất bại (Hủy)</option>
+                                    break;
+                            }
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-white">
+                            <i class="fa-solid fa-chevron-down text-xs"></i>
+                        </div>
+                    </div>
+                </form>
+            }
+            else
+            {
+                if (Model.Status == OrderStatus.Delivered)
+                {
+                     <div class="inline-flex items-center px-4 py-2.5 bg-emerald-50 text-emerald-700 font-medium rounded-lg border border-emerald-100 cursor-not-allowed opacity-80">
+                        <i class="fa-solid fa-lock mr-2"></i> Đơn hàng đã hoàn tất
+                    </div>
+                }
+                else if (Model.Status == OrderStatus.Cancelled)
+                {
+                     <div class="inline-flex items-center px-4 py-2.5 bg-slate-50 text-slate-500 font-medium rounded-lg border border-slate-200 cursor-not-allowed opacity-80">
+                        <i class="fa-solid fa-lock mr-2"></i> Đơn hàng đã hủy
+                    </div>
+                }
+            }
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 space-y-6">
+            <div class="bg-white shadow-sm ring-1 ring-black/5 rounded-xl overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+                    <h2 class="text-lg font-semibold text-slate-900">Sản phẩm đã đặt</h2>
+                </div>
+                <ul role="list" class="divide-y divide-slate-100">
+                    @foreach (var item in Model.OrderItems)
+                    {
+                        <li class="p-4 sm:px-6 flex items-center gap-4">
+                            <div class="h-16 w-16 flex-shrink-0 rounded-lg border border-slate-200 p-0.5 bg-white overflow-hidden">
+                                <img src="@(item.Product?.PrimaryImageUrl ?? "https://placehold.co/100x100?text=No+Image")" alt="@item.Product?.Name" class="h-full w-full object-cover rounded-md">
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h4 class="text-sm font-medium text-slate-900 truncate">@(item.Product?.Name ?? $"Sản phẩm #{item.ProductId}")</h4>
+                                <p class="mt-1 text-sm text-slate-500">
+                                    <span class="font-medium">@item.UnitPrice.ToString("N0") ₫</span> x @item.Quantity
+                                </p>
+                            </div>
+                            <div class="text-right font-semibold text-slate-900">
+                                @((item.UnitPrice * item.Quantity).ToString("N0")) ₫
+                            </div>
+                        </li>
+                    }
+                </ul>
+            </div>
+
+            <div class="bg-white shadow-sm ring-1 ring-black/5 rounded-xl overflow-hidden p-6">
+                <h2 class="text-lg font-semibold text-slate-900 mb-4">Tổng quan thanh toán</h2>
+                <div class="space-y-3 text-sm">
+                    <div class="flex justify-between text-slate-600">
+                        <span>Tạm tính</span>
+                        <span>@((Model.TotalAmount - Model.ShippingFee + Model.DiscountAmount).ToString("N0")) ₫</span>
+                    </div>
+                    <div class="flex justify-between text-slate-600">
+                        <span>Phí vận chuyển</span>
+                        <span>@(Model.ShippingFee > 0 ? Model.ShippingFee.ToString("N0") + " ₫" : "Miễn phí")</span>
+                    </div>
+                     @if (Model.DiscountAmount > 0)
+                    {
+                        <div class="flex justify-between text-green-600">
+                            <span>Giảm giá</span>
+                            <span>-@Model.DiscountAmount.ToString("N0") ₫</span>
+                        </div>
+                    }
+                    <div class="pt-3 border-t border-slate-100 flex justify-between items-center">
+                        <span class="text-base font-semibold text-slate-900">Tổng cộng</span>
+                        <span class="text-xl font-bold text-blue-600">@Model.TotalAmount.ToString("N0") ₫</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-6">
+            <div class="bg-white shadow-sm ring-1 ring-black/5 rounded-xl overflow-hidden p-6">
+                <h2 class="text-lg font-semibold text-slate-900 mb-4">Thông tin khách hàng</h2>
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                    <div>
+                        <div class="font-medium text-slate-900">@(Model.User?.FullName ?? Model.ReceiverName ?? "Khách lẻ")</div>
+                        <div class="text-sm text-slate-500">@(Model.User?.Email ?? Model.ReceiverEmail ?? "Không có email")</div>
+                    </div>
+                </div>
+                <div class="space-y-3 text-sm border-t border-slate-100 pt-4">
+                    <div>
+                        <span class="text-slate-500 block mb-1">Người nhận hàng:</span>
+                        <span class="font-medium text-slate-900">@Model.ReceiverName</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-500 block mb-1">Số điện thoại:</span>
+                        <span class="font-medium text-slate-900"><a href="tel:@Model.ReceiverPhone" class="hover:text-blue-600">@Model.ReceiverPhone</a></span>
+                    </div>
+                     @if (!string.IsNullOrEmpty(Model.CustomerNote))
+                    {
+                        <div>
+                            <span class="text-slate-500 block mb-1">Ghi chú của khách:</span>
+                            <p class="text-slate-700 bg-slate-50 p-3 rounded-lg italic">"@Model.CustomerNote"</p>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="bg-white shadow-sm ring-1 ring-black/5 rounded-xl overflow-hidden p-6">
+                <h2 class="text-lg font-semibold text-slate-900 mb-4">Vận chuyển & Thanh toán</h2>
+                <div class="space-y-4 text-sm">
+                    <div>
+                        <span class="text-slate-500 block mb-1">Phương thức giao hàng:</span>
+                        <span class="font-medium text-slate-900 flex items-center gap-2">
+                            @if (Model.DeliveryMethod == MotorShop.Models.Enums.DeliveryMethod.HomeDelivery)
+                            {
+                                <i class="fa-solid fa-truck text-slate-400"></i> <span>Giao tận nơi</span>
+                            }
+                            else
+                            {
+                                <i class="fa-solid fa-store text-slate-400"></i> <span>Nhận tại cửa hàng</span>
+                            }
+                        </span>
+                    </div>
+                    @if (Model.DeliveryMethod == MotorShop.Models.Enums.DeliveryMethod.HomeDelivery)
+                    {
+                        <div>
+                            <span class="text-slate-500 block mb-1">Địa chỉ giao hàng:</span>
+                            <span class="font-medium text-slate-900">@Model.ShippingAddress</span>
+                        </div>
+                    }
+                    else if (Model.PickupBranch != null)
+                    {
+                         <div>
+                            <span class="text-slate-500 block mb-1">Chi nhánh nhận:</span>
+                            <span class="font-medium text-slate-900">@Model.PickupBranch.Name</span>
+                            <p class="text-slate-500 text-xs mt-0.5">@Model.PickupBranch.Address</p>
+                        </div>
+                    }
+
+                    <div class="border-t border-slate-100 pt-4">
+                        <span class="text-slate-500 block mb-1">Phương thức thanh toán:</span>
+                        <span class="font-medium text-slate-900">@Model.PaymentMethod</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-500 block mb-1">Trạng thái thanh toán:</span>
+                         @if (Model.PaymentStatus == MotorShop.Models.Enums.PaymentStatus.Paid)
+                        {
+                             <span class="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
+                                 <i class="fa-solid fa-check-circle mr-1"></i> Đã thanh toán
+                             </span>
+                        }
+                        else if (Model.PaymentStatus == MotorShop.Models.Enums.PaymentStatus.Pending)
+                        {
+                             <span class="inline-flex items-center rounded-full bg-amber-50 px-2 py-1 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20">
+                                 <i class="fa-solid fa-clock mr-1"></i> Chờ thanh toán
+                             </span>
+                        }
+                        else
+                        {
+                            <span class="font-medium text-slate-900">@Model.PaymentStatus</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

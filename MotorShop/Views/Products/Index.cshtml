@@ -1,69 +1,368 @@
 ﻿@model MotorShop.ViewModels.ProductIndexViewModel
-
+@using Microsoft.AspNetCore.Mvc.Rendering
 @{
-    ViewData["Title"] = "Sản phẩm";
+    ViewData["Title"] = "Tất cả sản phẩm";
 }
 
-<div class="py-8">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 class="text-2xl font-bold mb-6">Sản phẩm</h1>
+<!-- HERO / SEARCH =================================================== -->
+<section class="relative overflow-hidden bg-slate-950">
+    <!-- gradient hoved -->
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(59,130,246,.45)_0%,rgba(15,23,42,0)_42%),linear-gradient(120deg,#0f172a_0%,#1d4ed8_46%,#38bdf8_100%)] opacity-95"></div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            <div class="lg:col-span-1">
-                <form id="filterForm" asp-controller="Products" asp-action="Index" method="get" class="bg-white p-4 rounded-lg border sticky top-20">
-                    <h3 class="font-semibold mb-4">Bộ lọc</h3>
+    <!-- pattern -->
+    <div class="pointer-events-none absolute inset-0 opacity-[0.12]"
+         style="background-image: radial-gradient(circle, rgba(255,255,255,.25) 1px, transparent 1px); background-size: 46px 46px;">
+    </div>
 
-                    <div class="relative mb-4">
-                        <input type="text" name="searchString" value="@Model.SearchString" placeholder="Tìm kiếm..."
-                               class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                    </div>
+    <!-- hero content -->
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-16 flex flex-col md:flex-row gap-10 items-center justify-between">
+        <!-- left -->
+        <div class="max-w-xl text-white">
+            <p class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-[11px] tracking-[.25em] uppercase mb-4">
+                <i class="fa-solid fa-motorcycle text-xs"></i> MotorShop / Sản phẩm
+            </p>
+            <h1 class="text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight drop-shadow-sm">
+                Tìm chiếc xe chuẩn gu của bạn
+            </h1>
+            <p class="mt-3 text-white/80 text-sm md:text-base">
+                Lọc theo hãng, dòng, khoảng giá. Giao diện mới mượt, không lạc màu.
+            </p>
 
-                    <div class="mb-6">
-                        <h4 class="font-medium mb-3">Thương hiệu</h4>
-                        <select name="brandFilter" asp-items="Model.Brands" class="w-full border border-gray-300 rounded px-3 py-2">
-                            <option value="">Tất cả thương hiệu</option>
-                        </select>
-                    </div>
+            <!-- Search hero -->
+            <form asp-controller="Products" asp-action="Index" method="get" class="mt-6" novalidate>
+                <div class="relative max-w-lg">
+                    <input name="searchString" value="@Model.SearchString"
+                           type="search" autocomplete="off"
+                           placeholder="Nhập: Vision, Exciter, SH 160, Ducati…"
+                           class="w-full rounded-2xl bg-white text-slate-900 pl-11 pr-4 py-3 shadow-lg/70
+                                  focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400" />
+                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                </div>
+            </form>
 
-                    <div class="mb-6">
-                        <h4 class="font-medium mb-3">Loại xe</h4>
-                        <select name="categoryFilter" asp-items="Model.Categories" class="w-full border border-gray-300 rounded px-3 py-2">
-                            <option value="">Tất cả loại xe</option>
-                        </select>
-                    </div>
+            <!-- quick tags -->
+            <div class="mt-4 flex flex-wrap gap-2 text-xs text-white/70">
+                <button class="px-3 py-1 rounded-full bg-white/10 border border-white/10 hover:bg-white/20">Xe tay ga</button>
+                <button class="px-3 py-1 rounded-full bg-white/10 border border-white/10 hover:bg-white/20">Xe côn tay</button>
+                <button class="px-3 py-1 rounded-full bg-white/10 border border-white/10 hover:bg-white/20">PKL / Adventure</button>
+            </div>
+        </div>
 
-                    <a asp-controller="Products" asp-action="Index" class="w-full text-center py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
-                        Xóa bộ lọc
-                    </a>
-                </form>
+        <!-- right / hero stat + image -->
+        <div class="w-full md:w-auto flex gap-4 items-stretch">
+            <!-- stats -->
+            <div class="grid grid-cols-2 gap-4 min-w-[200px]">
+                <div class="rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 px-4 py-5 text-white">
+                    <div class="text-3xl font-extrabold">@Model.TotalProductCount</div>
+                    <div class="text-[11px] uppercase tracking-wide mt-2 text-white/70">Sản phẩm</div>
+                </div>
+                <div class="rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 px-4 py-5 text-white">
+                    <div class="text-3xl font-extrabold">@((Model.Brands?.Count() ?? 0))</div>
+                    <div class="text-[11px] uppercase tracking-wide mt-2 text-white/70">Thương hiệu</div>
+                </div>
+                <div class="col-span-2 rounded-2xl bg-slate-950/20 border border-white/10 px-4 py-3 text-white/80 text-xs flex items-center gap-2">
+                    <i class="fa-regular fa-lightbulb text-amber-300"></i>
+                    Gợi ý: lọc theo “Honda”, sau đó set giá 30–60 triệu.
+                </div>
             </div>
 
-            <div class="lg:col-span-3">
-                <div class="bg-white p-4 rounded-lg border mb-6 flex justify-between items-center">
-                    <span class="text-gray-600">Hiển thị @Model.Products.Count sản phẩm</span>
-                    <form asp-controller="Products" asp-action="Index" method="get" id="sortForm" class="flex items-center">
-                        <input type="hidden" name="searchString" value="@Model.SearchString" />
-                        <input type="hidden" name="brandFilter" value="@Model.BrandFilter" />
-                        <input type="hidden" name="categoryFilter" value="@Model.CategoryFilter" />
-                        <select name="sortBy" onchange="this.form.submit()" class="border border-gray-300 rounded px-3 py-1">
-                            <option value="newest">Mới nhất</option>
-                            <option value="price-low">Giá thấp đến cao</option>
-                            <option value="price-high">Giá cao đến thấp</option>
-                        </select>
-                    </form>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-                    @foreach (var product in Model.Products)
-                    {
-                        <partial name="_ProductCardPartial" model="product" />
-                    }
-                </div>
-
-                <div class="flex justify-center">
+            <!-- image block -->
+            <div class="hidden lg:block relative w-[210px] h-[180px] rounded-2xl overflow-hidden border border-cyan-200/20 bg-gradient-to-b from-slate-950/0 via-slate-950/20 to-slate-950/90">
+                <img src="~/images/content/A cinematicmotorcycle.jpg" alt="Motor" class="w-full h-full object-cover opacity-80">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/0"></div>
+                <div class="absolute bottom-3 left-3 text-white text-xs leading-tight">
+                    <p class="text-[10px] uppercase tracking-[.35em] text-white/40">new</p>
+                    <p class="text-sm font-semibold">Showroom 2025</p>
+                    <p class="text-[11px] text-white/60">Hà Nội • HCM</p>
                 </div>
             </div>
         </div>
     </div>
-</div>
+</section>
+
+<!-- BRAND BELT ====================================================== -->
+<section class="bg-white py-6 border-b border-slate-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-semibold tracking-wide text-slate-500 uppercase">Thương hiệu tiêu biểu</h3>
+            <a asp-controller="Products" asp-action="Index" class="text-sm text-blue-600 hover:text-blue-700 inline-flex items-center gap-1">
+                Xem tất cả <i class="fa-solid fa-arrow-right-long text-xs"></i>
+            </a>
+        </div>
+
+        <div class="flex gap-4 overflow-x-auto pb-2 scroll-smooth" style="scroll-snap-type:x mandatory">
+            @foreach (var item in Model.Brands.Cast<SelectListItem>())
+            {
+                var slug = (item.Text ?? "").ToLower().Replace(" ", "-");
+                <a asp-controller="Products" asp-action="Index"
+                   asp-route-brandFilter="@item.Value"
+                   asp-route-searchString="@Model.SearchString"
+                   asp-route-categoryFilter="@Model.CategoryFilter"
+                   asp-route-minPrice="@Model.MinPrice"
+                   asp-route-maxPrice="@Model.MaxPrice"
+                   asp-route-sortBy="@Model.SortBy"
+                   class="flex-shrink-0 scroll-snap-align-start">
+                    <div class="h-[60px] w-[118px] bg-slate-50 border border-slate-100 rounded-2xl grid place-items-center
+                                        hover:bg-white hover:shadow-sm transition group">
+                        <img src="~/images/brands/@(slug).png"
+                             alt="@item.Text"
+                             class="max-h-8 object-contain grayscale opacity-70 group-hover:opacity-100 group-hover:grayscale-0 transition"
+                             onerror="this.style.display='none'; this.parentElement.innerHTML='<span class=&quot;text-[11px] text-slate-700 font-medium text-center block px-2&quot;>@item.Text</span>'" />
+                    </div>
+                </a>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- FILTER + LIST ==================================================== -->
+<section class="bg-slate-50 py-10 md:py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-4 gap-8">
+
+        <!-- FILTER ================================================= -->
+        <aside class="lg:col-span-1">
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm">
+                <!-- mobile toggle -->
+                <button type="button"
+                        class="w-full flex items-center justify-between px-6 py-4 lg:hidden"
+                        onclick="document.getElementById('filterBody').classList.toggle('hidden')">
+                    <span class="text-base font-semibold text-slate-900">Bộ lọc</span>
+                    <i class="fa-solid fa-sliders text-slate-500"></i>
+                </button>
+
+                <form id="filterForm" asp-controller="Products" asp-action="Index" method="get"
+                      class="px-6 pb-6 lg:pt-6 space-y-6 hidden lg:block" data-ajax="true" novalidate>
+                    <!-- giữ trạng thái -->
+                    <input type="hidden" name="sortBy" value="@Model.SortBy" />
+                    <input type="hidden" name="page" value="@Model.PageIndex" />
+
+                    <div id="filterBody" class="space-y-6 lg:block">
+                        <!-- search -->
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Tìm theo tên</label>
+                            <div class="relative">
+                                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-300"></i>
+                                <input name="searchString" value="@Model.SearchString"
+                                       class="w-full border-slate-200 rounded-xl shadow-sm pl-10 focus:ring-blue-500 focus:border-blue-500"
+                                       placeholder="VD: Vision, Exciter…" />
+                            </div>
+                        </div>
+
+                        <!-- brand -->
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Thương hiệu</label>
+                            <select name="brandFilter" asp-items="Model.Brands"
+                                    class="w-full border-slate-200 rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm">
+                                <option value="">Tất cả thương hiệu</option>
+                            </select>
+                        </div>
+
+                        <!-- category -->
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Loại xe</label>
+                            <select name="categoryFilter" asp-items="Model.Categories"
+                                    class="w-full border-slate-200 rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm">
+                                <option value="">Tất cả loại xe</option>
+                            </select>
+                        </div>
+
+                        <!-- price -->
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Khoảng giá (VNĐ)</label>
+                            <div class="flex items-center gap-2">
+                                <input name="minPrice" value="@(Model.MinPrice?.ToString() ?? "")"
+                                       type="number" min="0" inputmode="numeric"
+                                       class="w-full border-slate-200 rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                       placeholder="Từ" />
+                                <span class="text-slate-400">—</span>
+                                <input name="maxPrice" value="@(Model.MaxPrice?.ToString() ?? "")"
+                                       type="number" min="0" inputmode="numeric"
+                                       class="w-full border-slate-200 rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                       placeholder="Đến" />
+                            </div>
+                        </div>
+
+                        <!-- actions -->
+                        <div class="flex gap-2 pt-1">
+                            <button type="submit"
+                                    class="flex-1 inline-flex justify-center items-center gap-2 py-2.5 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 shadow-sm">
+                                <i class="fa-solid fa-filter"></i> Áp dụng
+                            </button>
+                            <a asp-action="Index" class="px-3 py-2.5 text-sm font-medium border rounded-xl hover:bg-slate-50 text-slate-600">Xoá</a>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- support box -->
+                <div class="px-6 pb-6">
+                    <div class="mt-5 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-700 text-white rounded-2xl p-4 flex gap-3 items-start">
+                        <div class="w-10 h-10 rounded-xl bg-white/10 grid place-items-center">
+                            <i class="fa-solid fa-headset"></i>
+                        </div>
+                        <div class="text-sm leading-relaxed">
+                            <p class="font-semibold">Cần tư vấn mua xe?</p>
+                            <p class="text-white/70 text-xs mt-1">Gọi ngay: <span class="font-semibold text-white">1900 1234</span></p>
+                            <p class="text-white/70 text-xs">08:30 – 20:30 (T2–CN)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- RESULTS =================================================== -->
+        <div class="lg:col-span-3 space-y-6">
+            <!-- header / meta -->
+            <div id="resultsMeta" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="text-sm text-slate-600" aria-live="polite">
+                        Hiển thị <strong>@Model.Products.Count()</strong>
+                        @if (Model.TotalProductCount > 0)
+                        {
+                            <text>/ <strong>@Model.TotalProductCount</strong></text>
+                        }
+                        <text> sản phẩm</text>
+                        @if (!string.IsNullOrWhiteSpace(Model.SearchString))
+                        {
+                            <span> cho từ khoá <span class="font-medium text-slate-900">"@Model.SearchString"</span>.</span>
+                        }
+                    </div>
+
+                    <!-- sort -->
+                    <form asp-controller="Products" asp-action="Index" method="get" class="w-full sm:w-auto" novalidate>
+                        <!-- giữ filter -->
+                        <input type="hidden" name="searchString" value="@Model.SearchString" />
+                        <input type="hidden" name="brandFilter" value="@Model.BrandFilter" />
+                        <input type="hidden" name="categoryFilter" value="@Model.CategoryFilter" />
+                        <input type="hidden" name="minPrice" value="@Model.MinPrice" />
+                        <input type="hidden" name="maxPrice" value="@Model.MaxPrice" />
+                        <input type="hidden" name="page" value="@Model.PageIndex" />
+
+                        <div class="flex items-center gap-2">
+                            <label for="sortBy" class="text-sm font-medium text-slate-700 whitespace-nowrap">Sắp xếp:</label>
+                            <select asp-for="SortBy" id="sortBy" name="sortBy"
+                                    onchange="this.form.submit()"
+                                    class="border-slate-200 rounded-xl shadow-sm text-sm focus:ring-blue-500 focus:border-blue-500 bg-white">
+                                <option value="newest">Mới nhất</option>
+                                <option value="price-low">Giá thấp → cao</option>
+                                <option value="price-high">Giá cao → thấp</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- chips -->
+                @if (!string.IsNullOrWhiteSpace(Model.SearchString) || Model.BrandFilter.HasValue || Model.CategoryFilter.HasValue || Model.MinPrice.HasValue || Model.MaxPrice.HasValue)
+                {
+                    <div class="mt-3 flex flex-wrap gap-2">
+                        @if (!string.IsNullOrWhiteSpace(Model.SearchString))
+                        {
+                            <span class="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full text-xs">Từ khoá: @Model.SearchString</span>
+                        }
+                        @if (Model.BrandFilter.HasValue)
+                        {
+                            <span class="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-full text-xs">
+                                Thương hiệu: @Model.Brands.FirstOrDefault(i => i.Value == Model.BrandFilter.ToString())?.Text
+                            </span>
+                        }
+                        @if (Model.CategoryFilter.HasValue)
+                        {
+                            <span class="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-full text-xs">
+                                Loại: @Model.Categories.FirstOrDefault(i => i.Value == Model.CategoryFilter.ToString())?.Text
+                            </span>
+                        }
+                        @if (Model.MinPrice.HasValue)
+                        {
+                            <span class="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-full text-xs">Từ: @Model.MinPrice.Value.ToString("N0")</span>
+                        }
+                        @if (Model.MaxPrice.HasValue)
+                        {
+                            <span class="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-full text-xs">Đến: @Model.MaxPrice.Value.ToString("N0")</span>
+                        }
+                        <a asp-action="Index" class="px-3 py-1.5 border rounded-full text-xs hover:bg-slate-50">Xoá tất cả</a>
+                    </div>
+                }
+            </div>
+
+            <!-- LIST -->
+            <div id="productsContainer">
+                @if (Model.Products.Any())
+                {
+                    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
+                        @foreach (var product in Model.Products)
+                        {
+                            <partial name="_ProductCardPartial" model="product" />
+                        }
+                    </div>
+                    <partial name="_PaginationPartial" model="Model" />
+                }
+                else
+                {
+                    <div class="text-center py-20 bg-white border border-slate-100 rounded-2xl shadow-sm">
+                        <div class="flex items-center justify-center h-16 w-16 mx-auto bg-blue-100 rounded-full mb-4">
+                            <i class="fas fa-search-minus text-3xl text-blue-600"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-slate-900 mb-2">Không tìm thấy sản phẩm</h3>
+                        <p class="text-slate-500 mb-6">Thử bộ lọc khác hoặc xoá bộ lọc hiện tại.</p>
+                        <a asp-action="Index"
+                           class="inline-block bg-blue-600 text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-blue-700">
+                            Xoá tất cả bộ lọc
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        // AJAX lọc: vẫn giữ cách bạn đang làm
+        (function () {
+            const form = document.getElementById('filterForm');
+            if (!form) return;
+
+            const qs = (f) => new URLSearchParams(new FormData(f)).toString();
+            const swap = async (url) => {
+                const res = await fetch(url, { headers: { "X-Requested-With": "fetch" } });
+                const html = await res.text();
+                const dom = new DOMParser().parseFromString(html, "text/html");
+                const nMeta = dom.getElementById("resultsMeta");
+                const nBox  = dom.getElementById("productsContainer");
+                if (nMeta && nBox) {
+                    document.getElementById("resultsMeta").innerHTML = nMeta.innerHTML;
+                    document.getElementById("productsContainer").innerHTML = nBox.innerHTML;
+                    const top = document.querySelector("section.bg-slate-50");
+                    if (top) window.scrollTo({ top: top.offsetTop - 70, behavior: "smooth" });
+                } else {
+                    window.location.href = url;
+                }
+            };
+
+            form.addEventListener("submit", function (e) {
+                e.preventDefault();
+                const url = form.action + "?" + qs(form);
+                history.pushState(null, "", url);
+                swap(url);
+            });
+
+            const autos = form.querySelectorAll("select, input[name=minPrice], input[name=maxPrice]");
+            let t;
+            autos.forEach(el => el.addEventListener("input", () => {
+                clearTimeout(t);
+                t = setTimeout(() => form.requestSubmit(), 350);
+            }));
+
+            const search = form.querySelector("input[name=searchString]");
+            let ts;
+            search?.addEventListener("input", () => {
+                clearTimeout(ts);
+                ts = setTimeout(() => form.requestSubmit(), 500);
+            });
+            search?.addEventListener("keydown", e => {
+                if (e.key === "Enter") { e.preventDefault(); form.requestSubmit(); }
+            });
+
+            window.addEventListener("popstate", () => swap(location.href));
+        })();
+    </script>
+}

@@ -1,0 +1,139 @@
+﻿@model MotorShop.Models.Order
+@using MotorShop.Models.Enums
+@{
+    ViewData["Title"] = $"Đơn hàng #{Model.Id}";
+    string statusText = Model.Status switch
+    {
+        OrderStatus.Pending => "Chờ xử lý",
+        OrderStatus.Processing => "Đang xử lý",
+        OrderStatus.Confirmed => "Đã xác nhận",
+        OrderStatus.Shipping => "Đang giao",
+        OrderStatus.Delivered => "Đã giao",
+        OrderStatus.Completed => "Hoàn tất",
+        OrderStatus.Cancelled => "Đã hủy",
+        _ => "Không xác định"
+    };
+}
+
+<div class="bg-white border-b">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="py-8 text-center">
+            <h1 class="text-3xl font-extrabold text-gray-900">@ViewData["Title"]</h1>
+            <p class="mt-2 text-md text-gray-500">Ngày đặt: @Model.OrderDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
+        </div>
+    </div>
+</div>
+
+<div class="py-10 bg-gray-50">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <div class="lg:col-span-2 space-y-6">
+            <div class="bg-white border rounded-2xl shadow-sm overflow-hidden">
+                <div class="px-6 py-4 border-b flex items-center justify-between">
+                    <h2 class="font-bold text-lg">Sản phẩm</h2>
+                    <span class="text-sm text-gray-500">Tổng: @Model.OrderItems.Sum(i => i.Quantity) chiếc</span>
+                </div>
+                <div class="divide-y">
+                    @foreach (var it in Model.OrderItems)
+                    {
+                        var img = it.Product?.ImageUrl ?? "/images/content/placeholder-600x400.png";
+                        var name = it.Product?.Name ?? ("#" + it.ProductId);
+                        var line = (it.Quantity * it.UnitPrice).ToString("N0");
+                        <div class="px-6 py-4 flex items-center gap-4">
+                            <img src="@img" alt="@name" class="w-16 h-16 rounded-lg object-cover border" />
+                            <div class="flex-1 min-w-0">
+                                <div class="font-medium text-gray-900 truncate">@name</div>
+                                <div class="text-sm text-gray-500">SL: @it.Quantity</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-sm text-gray-700">@it.UnitPrice.ToString("N0") đ</div>
+                                <div class="font-semibold">@line đ</div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="bg-white border rounded-2xl shadow-sm">
+                <div class="px-6 py-4 border-b"><h2 class="font-bold text-lg">Giao nhận & thanh toán</h2></div>
+                <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-1">
+                        <div class="text-sm text-gray-500">Trạng thái đơn</div>
+                        <div class="font-semibold">@statusText</div>
+                        <div class="text-sm text-gray-500 mt-3">Hình thức</div>
+                        <div>@(Model.DeliveryMethod == DeliveryMethod.HomeDelivery ? "Giao tận nơi" : "Nhận tại cửa hàng")</div>
+                        @if (Model.DeliveryMethod == DeliveryMethod.HomeDelivery)
+                        {
+                            <div class="text-sm text-gray-500 mt-3">Địa chỉ giao</div>
+                            <div>@(Model.ShippingAddress ?? "—")</div>
+                        }
+                        else
+                        {
+                            <div class="text-sm text-gray-500 mt-3">Chi nhánh</div>
+                            <div>@(Model.PickupBranch?.Name ?? ("#" + (Model.PickupBranchId?.ToString() ?? "—")))<br /><span class="text-sm text-gray-500">@(Model.PickupBranch?.Address)</span></div>
+                        }
+                    </div>
+                    <div class="space-y-1">
+                        <div class="text-sm text-gray-500">Người nhận</div>
+                        <div class="font-medium">@Model.ReceiverName — @Model.ReceiverPhone</div>
+                        <div class="text-sm text-gray-500 mt-3">Thanh toán</div>
+                        <div>@Model.PaymentMethod — @(Model.PaymentStatus == PaymentStatus.Paid ? "Đã thanh toán" : "Chờ thanh toán")</div>
+                        @if (!string.IsNullOrWhiteSpace(Model.PaymentRef))
+                        {
+                            <div class="text-sm text-gray-500 mt-3">Mã giao dịch</div>
+                            <div class="font-mono">@Model.PaymentRef</div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-1">
+            <div class="bg-white border rounded-2xl shadow-sm p-6 sticky top-20 space-y-4">
+                <div class="divide-y">
+                    <div class="flex justify-between py-2 text-sm">
+                        <span>Tạm tính</span><span>@Model.OrderItems.Sum(i => i.UnitPrice * i.Quantity).ToString("N0") đ</span>
+                    </div>
+                    <div class="flex justify-between py-2 text-sm">
+                        <span>Phí vận chuyển</span><span>@Model.ShippingFee.ToString("N0") đ</span>
+                    </div>
+                    <div class="flex justify-between py-2 text-sm">
+                        <span>Giảm giá</span><span>-@Model.DiscountAmount.ToString("N0") đ</span>
+                    </div>
+                    <div class="flex justify-between py-3 font-bold text-lg">
+                        <span>Tổng cộng</span><span class="text-red-600">@Model.TotalAmount.ToString("N0") đ</span>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    @if (Model.Status != OrderStatus.Cancelled && Model.Status != OrderStatus.Completed)
+                    {
+                        <form asp-action="Cancel" asp-route-id="@Model.Id" method="post" class="inline">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="w-full px-4 py-2 border rounded-xl hover:bg-gray-50">Hủy đơn</button>
+                        </form>
+                    }
+                    @if (Model.Status == OrderStatus.Delivered)
+                    {
+                        <form asp-action="ConfirmReceived" asp-route-id="@Model.Id" method="post" class="inline">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="w-full px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700">Xác nhận đã nhận</button>
+                        </form>
+                    }
+                    <form asp-action="Reorder" asp-route-id="@Model.Id" method="post" class="inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="w-full px-4 py-2 bg-gray-900 text-white rounded-xl hover:bg-gray-800">Mua lại</button>
+                    </form>
+                    <form asp-action="ResendEmail" asp-route-id="@Model.Id" method="post" class="inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="w-full px-4 py-2 border rounded-xl hover:bg-gray-50">Gửi lại email</button>
+                    </form>
+                    <a asp-action="Invoice" asp-route-id="@Model.Id" target="_blank" class="block text-center text-sm text-blue-600 hover:text-blue-700">Xem hóa đơn</a>
+                </div>
+
+                <a asp-action="History" class="block text-center text-sm text-gray-600 hover:text-gray-800">Về lịch sử mua hàng</a>
+            </div>
+        </div>
+
+    </div>
+</div>

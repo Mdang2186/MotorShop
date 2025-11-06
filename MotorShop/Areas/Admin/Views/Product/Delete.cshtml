@@ -1,40 +1,81 @@
 ﻿@model MotorShop.Models.Product
-
 @{
-    ViewData["Title"] = "Xóa sản phẩm";
-    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Xoá sản phẩm";
 }
 
-<h1 class="h2 pt-3 pb-2 mb-3 border-bottom text-danger">@ViewData["Title"]</h1>
+<div class="max-w-2xl mx-auto mt-10">
+    <div class="bg-white shadow-lg rounded-lg border border-red-100 overflow-hidden">
+        <div class="p-6 sm:flex sm:items-start bg-red-50 border-b border-red-100">
+            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                <i class="fa-solid fa-triangle-exclamation text-red-600 text-lg"></i>
+            </div>
+            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                <h3 class="text-lg leading-6 font-medium text-red-800" id="modal-title">Xác nhận xoá sản phẩm</h3>
+                <div class="mt-2">
+                    <p class="text-sm text-red-700">
+                        Bạn có chắc chắn muốn xoá sản phẩm này không? Hành động này không thể hoàn tác.
+                    </p>
+                </div>
+            </div>
+        </div>
 
-<h3>Bạn có chắc chắn muốn xóa sản phẩm này?</h3>
-<div>
-    <h4>@Model.Name</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-2">
-            Thương hiệu
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Brand.Name)
-        </dd>
-        <dt class="col-sm-2">
-            Loại xe
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Category.Name)
-        </dd>
-        <dt class="col-sm-2">
-            Giá
-        </dt>
-        <dd class="col-sm-10">
-            @Model.Price.ToString("N0") đ
-        </dd>
-    </dl>
+        <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="md:col-span-1">
+                @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
+                {
+                    <img src="@Model.ImageUrl" alt="@Model.Name" class="w-full h-auto rounded-lg border border-gray-200 shadow-sm object-cover aspect-square" />
+                }
+                else
+                {
+                    <div class="w-full aspect-square bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200 text-gray-400">
+                        <i class="fa-solid fa-image text-4xl"></i>
+                    </div>
+                }
+            </div>
 
-    <form asp-action="Delete">
-        <input type="hidden" asp-for="Id" />
-        <input type="submit" value="Xóa" class="btn btn-danger" /> |
-        <a asp-action="Index">Quay lại danh sách</a>
-    </form>
+            <div class="md:col-span-2 space-y-3">
+                <h4 class="text-xl font-bold text-gray-900">@Model.Name</h4>
+                <div class="border-t border-gray-100 pt-3 space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Hãng sản xuất:</span>
+                        <span class="font-medium text-gray-900">@Model.Brand?.Name</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Danh mục:</span>
+                        <span class="font-medium text-gray-900">@Model.Category?.Name</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Năm sản xuất:</span>
+                        <span class="font-medium text-gray-900">@Model.Year</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Giá bán:</span>
+                        <span class="font-bold text-blue-600">@Model.Price.ToString("N0") ₫</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Tồn kho:</span>
+                        <span class="font-medium @(Model.StockQuantity > 0 ? "text-green-600" : "text-red-600")">@Model.StockQuantity</span>
+                    </div>
+                </div>
+                @if (!string.IsNullOrEmpty(Model.Description))
+                {
+                    <div class="mt-4 p-3 bg-gray-50 rounded-md text-sm text-gray-600 italic border border-gray-100">
+                        "@Model.Description"
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end space-x-3">
+            <form asp-action="Delete" method="post">
+                <input type="hidden" asp-for="Id" />
+                <a asp-action="Index" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                    Hủy bỏ
+                </a>
+                <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors ml-3">
+                    <i class="fa-solid fa-trash-can mr-2"></i> Xác nhận xoá
+                </button>
+            </form>
+        </div>
+    </div>
 </div>

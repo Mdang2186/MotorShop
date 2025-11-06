@@ -1,0 +1,146 @@
+﻿@model MotorShop.Models.Order
+@using MotorShop.Models.Enums
+@{
+    ViewData["Title"] = $"Xác nhận đơn hàng #{Model.Id}";
+    string Money(decimal v) => v.ToString("#,0") + " ₫";
+}
+
+<section class="bg-gray-50 py-10">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
+            <div class="p-6 md:p-8 flex items-start gap-4">
+                <div class="w-11 h-11 rounded-xl bg-emerald-500 text-white grid place-items-center text-2xl">✓</div>
+                <div>
+                    <h1 class="text-2xl font-bold">Đặt hàng thành công!</h1>
+                    <p class="text-gray-600 mt-1">
+                        Cảm ơn bạn. Chúng tôi đã nhận đơn <b>#@Model.Id</b> vào
+                        <b>@Model.OrderDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</b>.
+                    </p>
+                </div>
+                <div class="ml-auto text-right hidden md:block">
+                    <div class="text-sm text-gray-500">Tổng thanh toán</div>
+                    <div class="text-xl font-extrabold text-gray-900">@Money(Model.TotalAmount)</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6 md:p-8 pt-0">
+                <!-- Cột trái: danh sách sản phẩm -->
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-xl border">
+                        <div class="px-5 py-4 border-b flex items-center justify-between">
+                            <h3 class="font-semibold">Sản phẩm</h3>
+                            <div class="text-sm text-gray-500">
+                                Trạng thái: <span class="font-medium text-blue-600">@Model.Status</span>
+                            </div>
+                        </div>
+                        <div class="divide-y">
+                            @foreach (var it in Model.OrderItems)
+                            {
+                                var img = it.Product?.ImageUrl ?? "/images/content/placeholder-600x400.png";
+                                <div class="p-4 flex items-center gap-4">
+                                    <img src="@img" alt="@it.Product?.Name" class="w-16 h-16 object-cover rounded-lg border">
+                                    <div class="flex-1">
+                                        <div class="font-medium">@it.Product?.Name</div>
+                                        <div class="text-sm text-gray-500">SL: @it.Quantity</div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-sm text-gray-500">@it.UnitPrice.ToString("#,0") ₫</div>
+                                        <div class="font-semibold">@((it.UnitPrice * it.Quantity).ToString("#,0")) ₫</div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <div class="px-5 py-4 border-t">
+                            <div class="flex justify-end gap-6 text-sm">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-gray-500">Tạm tính</span>
+                                    <span class="font-semibold">@Money(Model.OrderItems.Sum(i => i.UnitPrice * i.Quantity))</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-gray-500">Phí vận chuyển</span>
+                                    <span class="font-semibold">@Money(Model.ShippingFee)</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-gray-500">Giảm giá</span>
+                                    <span class="font-semibold">-@Money(Model.DiscountAmount)</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-base">
+                                    <span class="font-bold">Tổng</span>
+                                    <span class="font-extrabold text-gray-900">@Money(Model.TotalAmount)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cột phải: giao nhận & thanh toán -->
+                <div class="space-y-6">
+                    <div class="bg-white rounded-xl border">
+                        <div class="px-5 py-4 border-b">
+                            <h3 class="font-semibold">Giao / Nhận</h3>
+                        </div>
+                        <div class="p-5 text-sm text-gray-700 space-y-2">
+                            <div><b>Hình thức:</b> @(Model.DeliveryMethod == DeliveryMethod.HomeDelivery ? "Giao tận nơi" : "Nhận tại cửa hàng")</div>
+
+                            @if (Model.DeliveryMethod == DeliveryMethod.HomeDelivery)
+                            {
+                                <div><b>Địa chỉ giao:</b> @Model.ShippingAddress</div>
+                            }
+                            else
+                            {
+                                <div><b>Chi nhánh nhận:</b> @Model.PickupBranch?.Name</div>
+                                <div class="text-gray-500">@Model.PickupBranch?.Address</div>
+                                @if (!string.IsNullOrWhiteSpace(Model.PickupBranch?.Phone))
+                                {
+                                    <div class="text-gray-500">Hotline: @Model.PickupBranch?.Phone</div>
+                                }
+                            }
+
+                            <div class="pt-2">
+                                <div><b>Người nhận:</b> @Model.ReceiverName</div>
+                                <div><b>Điện thoại:</b> @Model.ReceiverPhone</div>
+                                <div><b>Email:</b> @Model.ReceiverEmail</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border">
+                        <div class="px-5 py-4 border-b">
+                            <h3 class="font-semibold">Thanh toán</h3>
+                        </div>
+                        <div class="p-5 text-sm text-gray-700 space-y-2">
+                            <div><b>Phương thức:</b> @Model.PaymentMethod</div>
+                            <div>
+                                <b>Trạng thái:</b>
+                                <span class="font-medium @(Model.PaymentStatus == PaymentStatus.Paid ? "text-emerald-600" : "text-amber-600")">
+                                    @Model.PaymentStatus
+                                </span>
+                            </div>
+                            @if (!string.IsNullOrWhiteSpace(Model.PaymentRef))
+                            {
+                                <div><b>Mã giao dịch:</b> @Model.PaymentRef</div>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(Model.CardLast4))
+                            {
+                                <div><b>Thẻ:</b> **** **** **** <b>@Model.CardLast4</b></div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border p-5">
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <a asp-action="Details" asp-route-id="@Model.Id"
+                               class="inline-flex items-center justify-center px-4 py-2.5 rounded-lg border border-gray-300 hover:bg-gray-50 font-medium">
+                                Xem chi tiết đơn
+                            </a>
+                            <a asp-action="History"
+                               class="inline-flex items-center justify-center px-4 py-2.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-semibold">
+                                Về lịch sử đơn hàng
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

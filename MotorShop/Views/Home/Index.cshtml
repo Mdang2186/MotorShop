@@ -1,32 +1,516 @@
-﻿@model IEnumerable<MotorShop.Models.Product>
-
+﻿@model MotorShop.ViewModels.Home.HomeViewModel
 @{
     ViewData["Title"] = "Trang chủ";
 }
 
-<section class="hero-gradient text-white py-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h1 class="text-4xl md:text-5xl font-bold mb-4">Showroom xe máy chính hãng #1</h1>
-        <p class="text-xl mb-8 text-blue-100 max-w-2xl mx-auto">Hơn 10.000+ xe máy chính hãng • Giá tốt nhất • Bảo hành toàn quốc</p>
-        <a asp-controller="Products" asp-action="Index" class="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100">
-            <i class="fas fa-motorcycle mr-2"></i>Xem sản phẩm
-        </a>
+<style>
+    :root {
+        --ms-bg: #020617;
+        --ms-slate: #0f172a;
+        --ms-blue: #1d4ed8;
+        --ms-cyan: #38bdf8;
+    }
+
+    .ms-card {
+        transition: all .25s ease;
+    }
+
+        .ms-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 18px 45px rgba(15,23,42,.11);
+            border-color: rgba(59,130,246,.24);
+        }
+
+    .ms-line {
+        height: 3px;
+        width: 46px;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #38bdf8 0%, #1d4ed8 95%);
+    }
+
+    .ms-hero-img {
+        transition: transform .8s ease, filter .8s ease;
+    }
+
+        .ms-hero-img:hover {
+            transform: scale(1.025);
+            filter: brightness(1.02);
+        }
+
+    .ms-badge {
+        background: rgba(255,255,255,.02);
+        border: 1px solid rgba(255,255,255,.07);
+        backdrop-filter: blur(8px);
+    }
+</style>
+
+<!-- HERO ===================================================== -->
+<section class="relative overflow-hidden bg-slate-950 text-white">
+    <!-- layer bg -->
+    <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(59,130,246,.28)_0,rgba(15,23,42,0)_48%),linear-gradient(140deg,#020617_0%,#0f172a_28%,#1d4ed8_60%,#38bdf8_100%)] opacity-95"></div>
+    <div class="pointer-events-none absolute inset-0 opacity-[0.05]"
+         style="background-image: radial-gradient(circle, rgba(255,255,255,.25) 1px, transparent 1px); background-size: 38px 38px;">
+    </div>
+
+    <!-- right image -->
+    <div class="hidden xl:block absolute right-0 top-0 h-full w-[37%]">
+        <div class="absolute inset-y-16 right-6 rounded-[2rem] overflow-hidden border border-white/5 shadow-[0_18px_70px_rgba(0,0,0,.35)]">
+            <img src="~/images/content/A cinematicmotorcycle.jpg"
+                 alt="Motorcycle"
+                 class="w-full h-full object-cover opacity-85 mix-blend-screen ms-hero-img" loading="eager" />
+        </div>
+        <div class="absolute bottom-10 right-10 w-36 h-36 bg-cyan-400/40 blur-3xl rounded-full"></div>
+    </div>
+
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-20 lg:pb-28">
+        <div class="grid lg:grid-cols-[1.02fr_.62fr] gap-10 items-center">
+            <!-- LEFT -->
+            <div>
+                <p class="inline-flex items-center gap-2 ms-badge rounded-full px-4 py-1 text-[11px] uppercase tracking-[.35em] mb-6">
+                    <span class="w-2 h-2 rounded-full bg-emerald-300 animate-pulse"></span>
+                    MOTORSHOP 2025
+                    <span class="text-slate-200/70">•</span>
+                    Giao xe 24h
+                </p>
+                <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight mb-4">
+                    Sành điệu xứng tầm,
+                    <span class="text-cyan-300 block">Khẳng định đẳng cấp.</span>
+                </h1>
+                <p class="text-sm sm:text-base text-slate-100/70 max-w-xl mb-7">
+                    Lọc thông minh, xem ảnh thực tế, báo giá ngay. Phù hợp đi phố, đi tour, chạy đơn. Tất cả đều chính hãng, bảo hành rõ ràng.
+                </p>
+
+                <!-- Search -->
+                <form asp-controller="Products" asp-action="Index" method="get" class="max-w-xl" role="search">
+                    <label for="home-search" class="sr-only">Tìm kiếm</label>
+                    <div class="flex gap-2 bg-slate-950/40 backdrop-blur border border-white/10 rounded-2xl px-2 py-1 items-center shadow-[0_14px_50px_rgba(0,0,0,.10)]">
+                        <i class="fa-solid fa-magnifying-glass text-cyan-300 pl-1.5"></i>
+                        <input id="home-search"
+                               name="q"
+                               type="search"
+                               placeholder="Nhập: SH 160, Exciter, Ducati…"
+                               class="flex-1 bg-transparent py-2.5 text-slate-50 text-sm focus:outline-none placeholder:text-slate-300/50"
+                               autocomplete="off"
+                               aria-autocomplete="list"
+                               aria-controls="suggest-list"
+                               aria-expanded="false" />
+                        <button type="submit"
+                                class="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-white text-sm font-semibold transition shadow-sm">
+                            Tìm
+                        </button>
+                    </div>
+                    <div id="suggest-box"
+                         class="hidden mt-1 bg-slate-900/95 rounded-xl shadow-xl border border-slate-700/70 overflow-hidden">
+                        <ul id="suggest-list" role="listbox" class="divide-y divide-slate-800/70"></ul>
+                    </div>
+                </form>
+
+                <!-- action row -->
+                <div class="mt-6 flex flex-wrap items-center gap-4">
+                    <a asp-controller="Products" asp-action="Index"
+                       class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white text-slate-900 font-semibold shadow hover:-translate-y-0.5 transition">
+                        <i class="fas fa-motorcycle text-blue-600"></i> Khám phá ngay
+                    </a>
+                    <div class="flex items-center gap-2 text-sm text-slate-100/70">
+                        <i class="fa-solid fa-shield-halved text-emerald-300"></i> Bảo hành chính hãng
+                    </div>
+                    <div class="flex items-center gap-2 text-sm text-slate-100/70">
+                        <i class="fa-solid fa-bolt text-amber-200"></i> Duyệt hồ sơ 30'
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT floating cards -->
+            <div class="hidden md:flex flex-col gap-4">
+                <div class="bg-slate-950/35 backdrop-blur border border-slate-700/30 rounded-2xl p-4 flex items-center gap-4 shadow-[0_16px_40px_rgba(15,23,42,.35)]">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-500 grid place-items-center text-white text-lg">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-xs uppercase tracking-wide text-slate-200/70 mb-0.5">Gợi ý AI</p>
+                        <p class="text-sm text-white">Xe cho người cao 1m6, đi phố, 40–55tr</p>
+                    </div>
+                    <button class="text-cyan-200 hover:text-white text-xs font-semibold">Xem »</button>
+                </div>
+
+                <div class="bg-slate-950/30 backdrop-blur border border-slate-600/20 rounded-2xl p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <p class="text-xs uppercase tracking-wide text-slate-200/70">Deal nóng hôm nay</p>
+                        <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-200 text-[10px] font-semibold">-2.5tr</span>
+                    </div>
+                    <p class="text-base text-white font-semibold mb-1">Yamaha R15 V4 / 2025</p>
+                    <p class="text-[13px] text-slate-200/60 mb-4">Sẵn xe • bảo hành điện tử • tặng mũ</p>
+                    <div class="flex items-center gap-4">
+                        <p class="text-2xl font-bold text-white">74.9tr</p>
+                        <p class="text-xs text-slate-300 line-through">79.5tr</p>
+                        <a asp-controller="Products" asp-action="Index"
+                           class="ml-auto text-xs text-cyan-200 hover:text-white font-medium">Mua ngay</a>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-slate-900/80 to-slate-800/40 border border-slate-700/30 rounded-2xl p-4 flex items-center gap-4">
+                    <div class="w-16 h-16 rounded-2xl bg-slate-950/70 border border-slate-600/40 grid place-items-center text-cyan-200 text-2xl">
+                        <i class="fa-solid fa-headset"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm text-white font-medium">Gọi 1900 1234</p>
+                        <p class="text-xs text-slate-200/60">Tư vấn chọn xe miễn phí</p>
+                    </div>
+                    <span class="text-[10px] px-2 py-1 rounded-full border border-slate-500/50 text-slate-100/80">08:30–20:30</span>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 
-<section class="py-12 bg-gray-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-2xl font-bold text-center mb-8">Sản phẩm nổi bật</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            @foreach (var product in Model)
-            {
-                <partial name="_ProductCardPartial" model="product" />
-            }
+<!-- KPI STRIP ===================================================== -->
+<section class="bg-slate-950/95 border-b border-slate-800/70">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-wrap gap-5 items-center justify-between">
+        <div class="flex items-center gap-3 text-white/85">
+            <div class="w-9 h-9 rounded-xl bg-slate-900/50 grid place-items-center text-cyan-300">
+                <i class="fa-solid fa-store"></i>
+            </div>
+            <div>
+                <p class="text-[11px] uppercase tracking-[.35em] text-slate-300/70">Showroom</p>
+                <p class="text-sm font-semibold">Hà Nội • HCM • Đà Nẵng</p>
+            </div>
         </div>
-        <div class="text-center mt-8">
-            <a asp-controller="Products" asp-action="Index" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700">
-                Xem tất cả sản phẩm
-            </a>
+        <div class="flex items-center gap-3 text-white/85">
+            <div class="w-9 h-9 rounded-xl bg-slate-900/50 grid place-items-center text-cyan-300">
+                <i class="fa-solid fa-boxes-stacked"></i>
+            </div>
+            <div>
+                <p class="text-[11px] uppercase tracking-[.35em] text-slate-300/70">Kho xe</p>
+                <p class="text-sm font-semibold">@((Model.FeaturedProducts?.Count() ?? 0) + (Model.Categories?.Count() ?? 0) + 18) model sẵn</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3 text-white/85">
+            <div class="w-9 h-9 rounded-xl bg-slate-900/50 grid place-items-center text-amber-300">
+                <i class="fa-solid fa-bolt"></i>
+            </div>
+            <div>
+                <p class="text-[11px] uppercase tracking-[.35em] text-slate-300/70">Xử lý nhanh</p>
+                <p class="text-sm font-semibold">Giao trong 24h</p>
+            </div>
         </div>
     </div>
 </section>
+
+<!-- CATEGORIES ===================================================== -->
+<section class="py-14 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between mb-8 gap-4">
+            <div>
+                <div class="ms-line mb-3"></div>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900">Mua theo dòng xe</h2>
+                <p class="text-slate-500 mt-1 text-sm">Chọn đúng phong cách → lọc đúng sản phẩm.</p>
+            </div>
+            <a asp-controller="Products" asp-action="Index" class="hidden sm:inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm font-medium">
+                Xem tất cả
+                <i class="fa-solid fa-arrow-right-long"></i>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            @foreach (var category in (Model.Categories ?? Enumerable.Empty<MotorShop.Models.Category>()).Take(6))
+            {
+                <a asp-controller="Products" asp-action="Index" asp-route-categoryFilter="@category.Id"
+                   class="group ms-card rounded-2xl bg-slate-50 hover:bg-white border border-slate-100 p-4 text-center flex flex-col items-center gap-3">
+                    <div class="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 grid place-items-center text-2xl group-hover:scale-105 transition">
+                        @{
+                            var name = category?.Name ?? "";
+                            if (name.Contains("tay ga", StringComparison.OrdinalIgnoreCase))
+                            {
+                                <i class="fa-solid fa-motorcycle"></i>
+                            }
+                            else if (name.Contains("sport", StringComparison.OrdinalIgnoreCase))
+                            {
+                                <i class="fa-solid fa-gauge-high"></i>
+                            }
+                            else if (name.Contains("naked", StringComparison.OrdinalIgnoreCase))
+                            {
+                                <i class="fa-solid fa-person-biking"></i>
+                            }
+                            else if (name.Contains("cruiser", StringComparison.OrdinalIgnoreCase))
+                            {
+                                <i class="fa-solid fa-road"></i>
+                            }
+                            else if (name.Contains("adventure", StringComparison.OrdinalIgnoreCase))
+                            {
+                                <i class="fa-regular fa-compass"></i>
+                            }
+                            else
+                            {
+                                <i class="fa-regular fa-circle-dot"></i>
+                            }
+                        }
+                    </div>
+                    <h3 class="font-semibold text-slate-900 text-sm line-clamp-1">@category?.Name</h3>
+                    <p class="text-xs text-slate-400 group-hover:text-slate-500">Xem xe</p>
+                </a>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- FEATURED / XE MỚI ===================================================== -->
+<section class="py-16 bg-slate-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-end justify-between mb-8">
+            <div>
+                <div class="ms-line mb-3"></div>
+                <h2 class="text-2xl md:text-3xl font-bold text-slate-900">Xe mới về</h2>
+                <p class="text-slate-500 mt-1 text-sm md:text-base">Những mẫu vừa cập bến, số lượng ít.</p>
+            </div>
+            <a asp-controller="Products" asp-action="Index"
+               class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm font-medium">
+                Xem tất cả
+                <i class="fa-solid fa-arrow-right-long"></i>
+            </a>
+        </div>
+
+        @if (Model.FeaturedProducts != null && Model.FeaturedProducts.Any())
+        {
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                @foreach (var product in Model.FeaturedProducts)
+                {
+                    <partial name="_ProductCardPartial" model="product" />
+                }
+            </div>
+        }
+        else
+        {
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                @for (int i = 0; i < 4; i++)
+                {
+                    <div class="animate-pulse rounded-2xl bg-white border border-slate-100 p-4 h-72"></div>
+                }
+            </div>
+        }
+    </div>
+</section>
+
+<!-- SHOWROOM / GALLERY =============================================== -->
+<section class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between gap-4 mb-6">
+            <div>
+                <div class="ms-line mb-3"></div>
+                <h2 class="text-2xl font-bold text-slate-900">Không gian showroom</h2>
+                <p class="text-slate-500 text-sm">Ảnh chụp thật, sàn sáng, trưng bày 5–7 mẫu hot.</p>
+            </div>
+            <p class="text-xs text-slate-400">Cập nhật hằng tuần</p>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-5">
+            <div class="rounded-2xl overflow-hidden border border-slate-100 bg-slate-100/30">
+                <img src="~/images/content/motor-adventure.jpg" alt="Showroom 1" class="w-full h-52 object-cover hover:scale-[1.02] transition">
+                <div class="p-4">
+                    <p class="text-sm font-semibold text-slate-900">Khu adventure – touring</p>
+                    <p class="text-xs text-slate-500 mt-1">Rộng 46m² • trưng bày 6 xe • demo phụ kiện</p>
+                </div>
+            </div>
+            <div class="rounded-2xl overflow-hidden border border-slate-100 bg-slate-100/30">
+                <img src="~/images/content/motor-sport.jpg" alt="Showroom 2" class="w-full h-52 object-cover hover:scale-[1.02] transition">
+                <div class="p-4">
+                    <p class="text-sm font-semibold text-slate-900">Khu sport – pkl</p>
+                    <p class="text-xs text-slate-500 mt-1">Gắn sẵn biển giá, gói trả góp</p>
+                </div>
+            </div>
+            <div class="rounded-2xl overflow-hidden border border-slate-100 bg-slate-100/30 flex flex-col">
+                <div class="p-4 flex-1">
+                    <p class="text-sm font-semibold text-slate-900">Đặt lịch xem trực tiếp</p>
+                    <p class="text-xs text-slate-500 mt-1">Chọn showroom gần bạn nhất</p>
+                    <ul class="mt-3 text-xs text-slate-600 space-y-1">
+                        <li>• Hà Nội: 123 ABC, Hoàn Kiếm</li>
+                        <li>• HCM: 89B Nguyễn Huệ, Q.1</li>
+                        <li>• Đà Nẵng: 45 Lê Duẩn</li>
+                    </ul>
+                </div>
+                <div class="p-4 pt-0">
+                    <a asp-controller="Home" asp-action="Contact"
+                       class="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 font-medium">
+                        Đặt lịch ngay <i class="fa-solid fa-arrow-right-long text-xs"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- BLOG / REVIEW NHANH =============================================== -->
+<section class="py-14 bg-slate-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <div class="ms-line mb-3"></div>
+                <h2 class="text-2xl font-bold text-slate-900">Tin & đánh giá nhanh</h2>
+                <p class="text-slate-500 text-sm">Chọn xe dựa trên trải nghiệm thực tế.</p>
+            </div>
+            <a asp-controller="Home" asp-action="Blog" class="hidden sm:inline-flex items-center gap-2 text-slate-500 hover:text-slate-700 text-sm">
+                Xem thêm
+                <i class="fa-solid fa-arrow-right-long"></i>
+            </a>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-6">
+            <article class="ms-card bg-white border border-slate-100 rounded-2xl p-5 flex gap-4">
+                <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 grid place-items-center text-lg shrink-0">
+                    <i class="fa-solid fa-newspaper"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-900 line-clamp-2">So sánh AirBlade 160 vs Vario 160 — nên chọn mẫu nào để đi làm?</h3>
+                    <p class="text-xs text-slate-500 mt-1">Tiêu hao, cốp, phanh CBS/ABS, cảm giác lái...</p>
+                    <p class="mt-2 text-[10px] uppercase tracking-wide text-slate-400">6 phút đọc</p>
+                </div>
+            </article>
+            <article class="ms-card bg-white border border-slate-100 rounded-2xl p-5 flex gap-4">
+                <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 grid place-items-center text-lg shrink-0">
+                    <i class="fa-solid fa-gauge-high"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-900 line-clamp-2">Top 5 xe dưới 50tr cho người mới đi — dễ chống chân, ít rung</h3>
+                    <p class="text-xs text-slate-500 mt-1">Wave, Future, Jupiter, Sirius Fi...</p>
+                    <p class="mt-2 text-[10px] uppercase tracking-wide text-slate-400">4 phút đọc</p>
+                </div>
+            </article>
+            <article class="ms-card bg-white border border-slate-100 rounded-2xl p-5 flex gap-4">
+                <div class="w-12 h-12 rounded-xl bg-orange-50 text-orange-500 grid place-items-center text-lg shrink-0">
+                    <i class="fa-solid fa-circle-info"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-900 line-clamp-2">Hướng dẫn làm trả góp 0% chỉ cần CCCD + BLX</h3>
+                    <p class="text-xs text-slate-500 mt-1">Thủ tục 15 phút, nhận xe trong ngày.</p>
+                    <p class="mt-2 text-[10px] uppercase tracking-wide text-slate-400">3 phút đọc</p>
+                </div>
+            </article>
+        </div>
+    </div>
+</section>
+
+<!-- CONTACT / LIÊN HỆ ===================================================== -->
+<section class="py-16 bg-slate-900 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid lg:grid-cols-2 gap-10 items-center">
+            <div>
+                <div class="ms-line mb-3"></div>
+                <h2 class="text-3xl font-bold mb-4">Đặt lịch xem xe hoặc nhận báo giá</h2>
+                <p class="text-slate-100/80 mb-6">
+                    Điền thông tin, đội ngũ MotorShop sẽ gọi lại trong 15–30 phút (giờ hành chính).
+                </p>
+                <ul class="space-y-3 text-sm">
+                    <li class="flex gap-3 items-start">
+                        <span class="w-9 h-9 rounded-xl bg-white/5 border border-white/10 grid place-items-center text-cyan-200">
+                            <i class="fa-solid fa-location-dot"></i>
+                        </span>
+                        <div>
+                            <p class="font-medium text-white">Showroom Hà Nội</p>
+                            <p class="text-slate-200/70 text-sm">123 ABC, Hoàn Kiếm</p>
+                        </div>
+                    </li>
+                    <li class="flex gap-3 items-start">
+                        <span class="w-9 h-9 rounded-xl bg-white/5 border border-white/10 grid place-items-center text-cyan-200">
+                            <i class="fa-solid fa-phone"></i>
+                        </span>
+                        <div>
+                            <p class="font-medium text-white">Hotline</p>
+                            <p class="text-slate-200/70 text-sm">1900 1234 (08:30 – 20:30)</p>
+                        </div>
+                    </li>
+                    <li class="flex gap-3 items-start">
+                        <span class="w-9 h-9 rounded-xl bg-white/5 border border-white/10 grid place-items-center text-cyan-200">
+                            <i class="fa-solid fa-envelope"></i>
+                        </span>
+                        <div>
+                            <p class="font-medium text-white">Email</p>
+                            <p class="text-slate-200/70 text-sm">contact@motorshop.vn</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div>
+                <form class="bg-slate-950/40 border border-white/10 rounded-2xl p-6 shadow-2xl space-y-4">
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm mb-1">Họ và tên</label>
+                            <input type="text" class="w-full bg-slate-900/60 border border-slate-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-400" placeholder="Nguyễn Văn A" />
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">Số điện thoại</label>
+                            <input type="tel" class="w-full bg-slate-900/60 border border-slate-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-400" placeholder="0912 xxx xxx" />
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-1">Dòng xe quan tâm</label>
+                        <select class="w-full bg-slate-900/60 border border-slate-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-400">
+                            <option>Tay ga</option>
+                            <option>Xe số</option>
+                            <option>Sport / Underbone</option>
+                            <option>Adventure / Touring</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-1">Ghi chú</label>
+                        <textarea rows="3" class="w-full bg-slate-900/60 border border-slate-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-400" placeholder="Thời gian bạn rảnh, màu xe, phương án trả góp…"></textarea>
+                    </div>
+                    <button type="submit" class="w-full inline-flex justify-center items-center gap-2 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-white font-semibold rounded-xl transition">
+                        <i class="fa-solid fa-paper-plane"></i> Gửi yêu cầu
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        const debounce = (fn, wait = 200) => {
+            let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), wait); };
+        };
+        const input = document.getElementById('home-search');
+        const box   = document.getElementById('suggest-box');
+        const list  = document.getElementById('suggest-list');
+
+        function hideSuggest() {
+            if (!box || !list) return;
+            box.classList.add('hidden');
+            list.innerHTML = '';
+            input?.setAttribute('aria-expanded', 'false');
+        }
+
+        async function fetchSuggest(term) {
+            try {
+                const res = await fetch(`/Products/Suggest?term=${enCashOnDeliveryeURIComponent(term)}`, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                if (!res.ok) { hideSuggest(); return; }
+                const data = await res.json();
+                if (!Array.isArray(data) || data.length === 0) { hideSuggest(); return; }
+
+                list.innerHTML = data.map(x => `
+                    <li role="option">
+                        <a href="/products/${x.id}"
+                           class="block px-4 py-2 hover:bg-slate-800/50 text-sm text-slate-50">
+                           ${x.name}
+                        </a>
+                    </li>`).join('');
+                box.classList.remove('hidden');
+                input?.setAttribute('aria-expanded', 'true');
+            } catch {
+                hideSuggest();
+            }
+        }
+
+        const onType = debounce((e) => {
+            const v = e.target.value.trim();
+            if (v.length < 2) { hideSuggest(); return; }
+            fetchSuggest(v);
+        }, 200);
+
+        input?.addEventListener('input', onType);
+        input?.addEventListener('blur', () => setTimeout(hideSuggest, 180));
+        input?.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') hideSuggest();
+        });
+    </script>
+}

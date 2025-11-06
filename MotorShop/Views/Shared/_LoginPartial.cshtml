@@ -1,34 +1,173 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @using MotorShop.Models
-
+@using MotorShop.Utilities
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 
-<div class="flex items-center space-x-4">
-    <a asp-controller="Cart" asp-action="Index" class="relative p-2 text-gray-600 hover:text-blue-600">
-        <i class="fas fa-shopping-cart text-xl"></i>
-    </a>
+@{
+    var isAuth = SignInManager.IsSignedIn(User);
+    ApplicationUser? me = null;
+    if (isAuth)
+    {
+        me = await UserManager.GetUserAsync(User);
+    }
 
-    @if (SignInManager.IsSignedIn(User))
-    {
-        <div class="relative">
-            <a class="flex items-center space-x-2 text-gray-600 hover:text-blue-600" asp-area="Identity" asp-page="/Account/Manage" title="Manage">
-                <i class="fas fa-user-circle text-xl"></i>
-                <span class="hidden md:block">@UserManager.GetUserAsync(User).Result?.FullName</span>
-            </a>
+    string Initial(string? fullNameOrEmail)
+        => string.IsNullOrWhiteSpace(fullNameOrEmail) ? "U"
+           : char.ToUpper(fullNameOrEmail.Trim()[0]).ToString();
+
+    var displayName = me?.FullName?.Trim();
+    if (string.IsNullOrWhiteSpace(displayName)) displayName = me?.Email;
+    var email = me?.Email ?? "";
+    var isAdmin = User.IsInRole(SD.Role_Admin);
+}
+
+@if (!isAuth)
+{
+    <!-- Khi chưa đăng nhập -->
+    <div class="flex items-center gap-2">
+        <a asp-controller="Account" asp-action="Login"
+           class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-white hover:bg-blue-600 rounded-lg border border-gray-300">
+            Đăng nhập
+        </a>
+        <a asp-controller="Account" asp-action="Register"
+           class="hidden sm:inline-block px-3 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow">
+            Đăng ký
+        </a>
+    </div>
+}
+else
+{
+    <!-- Khi đã đăng nhập -->
+    <div class="relative" id="userMenuRoot">
+        <button id="userMenuBtn"
+                class="flex items-center gap-2 px-2.5 py-1.5 rounded-full hover:bg-gray-50 border border-transparent hover:border-gray-200 focus:outline-none"
+                aria-haspopup="true" aria-expanded="false">
+            <div class="w-8 h-8 rounded-full bg-blue-600 text-white grid place-items-center font-semibold">
+                @(Initial(displayName ?? email))
+            </div>
+            <span class="hidden sm:flex items-center gap-1 text-sm font-semibold text-gray-800">
+                @displayName
+                <i class="fa-solid fa-chevron-down text-gray-400 text-xs"></i>
+            </span>
+        </button>
+
+        <div id="userMenu"
+             class="invisible opacity-0 translate-y-1 pointer-events-none
+                        absolute right-0 mt-2 w-72 bg-white border border-gray-100 rounded-2xl shadow-xl
+                        transition-all duration-150 origin-top-right z-50">
+            <!-- Header -->
+            <div class="px-4 py-4 border-b border-gray-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-blue-600 text-white grid place-items-center text-lg font-bold">
+                        @(Initial(displayName ?? email))
+                    </div>
+                    <div>
+                        <div class="font-semibold text-gray-900 leading-5">@displayName</div>
+                        <div class="text-sm text-gray-500">@email</div>
+
+                        @if (me?.EmailConfirmed == true)
+                        {
+                            <div class="mt-1 inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                <i class="fa-solid fa-shield-check"></i> Email đã xác minh
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="mt-1 flex items-center gap-2">
+                                <a asp-controller="Account" asp-action="VerifyEmailCode" asp-route-email="@email"
+                                   class="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                                    <i class="fa-solid fa-triangle-exclamation"></i> Nhập mã xác minh
+                                </a>
+                                <form asp-controller="Account" asp-action="ResendMyEmailCode" method="post" class="m-0 inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit"
+                                            class="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100">
+                                        <i class="fa-solid fa-paper-plane"></i> Gửi lại mã
+                                    </button>
+                                </form>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Body -->
+            <div class="py-2 text-[15px]">
+                <div class="px-4 pb-1 pt-2 text-[11px] font-semibold tracking-wider text-gray-400 uppercase">Tài khoản</div>
+                <a asp-controller="Manage" asp-action="Index" class="flex items-center gap-3 px-4 py-2 hover:bg-gray-50">
+                    <i class="fa-solid fa-id-card-clip w-5 text-gray-500"></i> Hồ sơ cá nhân
+                </a>
+                <a asp-controller="Manage" asp-action="ChangePassword" class="flex items-center gap-3 px-4 py-2 hover:bg-gray-50">
+                    <i class="fa-solid fa-key w-5 text-gray-500"></i> Đổi mật khẩu
+                </a>
+                <a asp-controller="Manage" asp-action="Email" class="flex items-center gap-3 px-4 py-2 hover:bg-gray-50">
+                    <i class="fa-solid fa-envelope w-5 text-gray-500"></i> Quản lý Email
+                </a>
+
+                <div class="px-4 pb-1 pt-3 text-[11px] font-semibold tracking-wider text-gray-400 uppercase">Đơn hàng</div>
+                <a asp-controller="Order" asp-action="History" class="flex items-center gap-3 px-4 py-2 hover:bg-gray-50">
+                    <i class="fa-solid fa-clock-rotate-left w-5 text-gray-500"></i> Lịch sử đơn hàng
+                </a>
+                <a asp-controller="Cart" asp-action="Index" class="flex items-center gap-3 px-4 py-2 hover:bg-gray-50">
+                    <i class="fa-solid fa-cart-shopping w-5 text-gray-500"></i> Giỏ hàng của tôi
+                </a>
+
+                @if (isAdmin)
+                {
+                    <div class="px-4 pb-1 pt-3 text-[11px] font-semibold tracking-wider text-gray-400 uppercase">Quản trị</div>
+                    <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="flex items-center gap-3 px-4 py-2 hover:bg-gray-50">
+                        <i class="fa-solid fa-gauge-high w-5 text-gray-500"></i> Admin Dashboard
+                    </a>
+                    <a asp-area="Admin" asp-controller="Product" asp-action="Index" class="flex items-center gap-3 px-4 py-2 hover:bg-gray-50">
+                        <i class="fa-solid fa-box-open w-5 text-gray-500"></i> Quản lý sản phẩm
+                    </a>
+                }
+
+                <div class="my-2 border-t border-gray-100"></div>
+
+                <form class="px-4 py-2" asp-controller="Account" asp-action="Logout" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium">
+                        <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
+                    </button>
+                </form>
+            </div>
         </div>
-        <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-            <button type="submit" class="text-gray-600 hover:text-red-600" title="Đăng xuất">
-                <i class="fas fa-sign-out-alt text-xl"></i>
-            </button>
-        </form>
-    }
-    else
-    {
-        <div class="flex items-center space-x-2">
-            <a class="text-gray-600 hover:text-blue-600" title="Đăng nhập / Đăng ký" asp-area="Identity" asp-page="/Account/Login">
-                <i class="fas fa-user text-xl"></i>
-            </a>
-        </div>
-    }
-</div>
+    </div>
+
+    <script>
+        (function () {
+            const root = document.getElementById('userMenuRoot');
+            if (!root) return;
+            const btn = root.querySelector('#userMenuBtn');
+            const menu = root.querySelector('#userMenu');
+
+            const show = (v) => {
+                btn.setAttribute('aria-expanded', v ? 'true' : 'false');
+                menu.classList.toggle('invisible', !v);
+                menu.classList.toggle('opacity-0', !v);
+                menu.classList.toggle('translate-y-1', !v);
+                menu.classList.toggle('pointer-events-none', !v);
+            };
+
+            let opened = false;
+            const open = () => { opened = true; show(true); };
+            const close = () => { opened = false; show(false); };
+
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                opened ? close() : open();
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!opened) return;
+                if (!root.contains(e.target)) close();
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && opened) close();
+            });
+        })();
+    </script>
+}

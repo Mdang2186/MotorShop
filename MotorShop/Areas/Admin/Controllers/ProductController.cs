@@ -4,149 +4,133 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MotorShop.Data;
 using MotorShop.Models;
+using MotorShop.Utilities;
 
 namespace MotorShop.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Manager")]
     public class ProductController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ApplicationDbContext _db;
+        public ProductController(ApplicationDbContext db) => _db = db;
 
-        public ProductController(ApplicationDbContext context)
+        public async Task<IActionResult> Index(string? q, int? categoryId, string? status, int page = 1)
         {
-            _context = context;
+            int pageSize = 10;
+            var query = _db.Products
+                .AsNoTracking()
+                .Include(p => p.Category)
+                .Include(p => p.Brand)
+                .Include(p => p.Images)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                q = q.Trim().ToLower();
+                query = query.Where(p => p.Name.ToLower().Contains(q) || (p.SKU != null && p.SKU.ToLower().Contains(q)));
+            }
+            if (categoryId.HasValue)
+            {
+                query = query.Where(p => p.CategoryId == categoryId);
+            }
+            if (!string.IsNullOrEmpty(status))
+            {
+                if (status == "active") query = query.Where(p => p.IsActive && p.StockQuantity > 0);
+                else if (status == "outofstock") query = query.Where(p => p.StockQuantity <= 0);
+                else if (status == "inactive") query = query.Where(p => !p.IsActive);
+            }
+
+            var total = await query.CountAsync();
+            var items = await query
+                .OrderByDescending(p => p.Id)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            ViewBag.Q = q;
+            ViewBag.CategoryId = new SelectList(await _db.Categories.AsNoTracking().ToListAsync(), "Id", "Name", categoryId);
+            ViewBag.Status = status;
+            ViewBag.Page = page;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)total / pageSize);
+
+            return View(items);
         }
 
-        // GET: /Admin/Product
-        public async Task<IActionResult> Index()
-        {
-            var products = await _context.Products
-                                         .Include(p => p.Brand)
-                                         .Include(p => p.Category)
-                                         .ToListAsync();
-            return View(products);
-        }
-
-        // GET: /Admin/Product/Create
         public IActionResult Create()
         {
-            ViewData["BrandId"] = new SelectList(_context.Brands, "Id", "Name");
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name");
+            PopulateDropdowns();
             return View();
         }
 
-        // POST: /Admin/Product/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,Description,Price,OriginalPrice,StockQuantity,ImageUrl,Year,BrandId,CategoryId")] Product product)
+        public async Task<IActionResult> Create(Product product)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(product);
-                await _context.SaveChangesAsync();
+                _db.Add(product);
+                await _db.SaveChangesAsync();
+                TempData["Success"] = "Thêm sản phẩm thành công";
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["BrandId"] = new SelectList(_context.Brands, "Id", "Name", product.BrandId);
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name", product.CategoryId);
+            PopulateDropdowns(product);
             return View(product);
         }
 
-        // ✨ ACTION MỚI: HIỂN THỊ FORM SỬA SẢN PHẨM ✨
-        // GET: /Admin/Product/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var product = await _context.Products.FindAsync(id);
-            if (product == null)
-            {
-                return NotFound();
-            }
-            ViewData["BrandId"] = new SelectList(_context.Brands, "Id", "Name", product.BrandId);
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name", product.CategoryId);
+            var product = await _db.Products.FindAsync(id);
+            if (product == null) return NotFound();
+            PopulateDropdowns(product);
             return View(product);
         }
 
-        // ✨ ACTION MỚI: XỬ LÝ CẬP NHẬT SẢN PHẨM ✨
-        // POST: /Admin/Product/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,Price,OriginalPrice,StockQuantity,ImageUrl,Year,BrandId,CategoryId")] Product product)
+        public async Task<IActionResult> Edit(int id, Product product)
         {
-            if (id != product.Id)
-            {
-                return NotFound();
-            }
-
+            if (id != product.Id) return NotFound();
             if (ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(product);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ProductExists(product.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                _db.Update(product);
+                await _db.SaveChangesAsync();
+                TempData["Success"] = "Cập nhật sản phẩm thành công";
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["BrandId"] = new SelectList(_context.Brands, "Id", "Name", product.BrandId);
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name", product.CategoryId);
+            PopulateDropdowns(product);
             return View(product);
         }
 
-        // ✨ ACTION MỚI: HIỂN THỊ TRANG XÁC NHẬN XÓA ✨
-        // GET: /Admin/Product/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var product = await _context.Products
-                .Include(p => p.Brand)
+            var product = await _db.Products
+                .AsNoTracking()
                 .Include(p => p.Category)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (product == null)
-            {
-                return NotFound();
-            }
-
+                .Include(p => p.Brand)
+                .FirstOrDefaultAsync(p => p.Id == id);
+            if (product == null) return NotFound();
             return View(product);
         }
 
-        // ✨ ACTION MỚI: XỬ LÝ XÓA SẢN PHẨM ✨
-        // POST: /Admin/Product/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var product = await _context.Products.FindAsync(id);
+            var product = await _db.Products.FindAsync(id);
             if (product != null)
             {
-                _context.Products.Remove(product);
+                _db.Products.Remove(product);
+                await _db.SaveChangesAsync();
+                TempData["Success"] = "Đã xóa sản phẩm.";
             }
-
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool ProductExists(int id)
+        private void PopulateDropdowns(Product? product = null)
         {
-            return _context.Products.Any(e => e.Id == id);
+            ViewBag.BrandId = new SelectList(_db.Brands.AsNoTracking(), "Id", "Name", product?.BrandId);
+            ViewBag.CategoryId = new SelectList(_db.Categories.AsNoTracking(), "Id", "Name", product?.CategoryId);
         }
     }
 }

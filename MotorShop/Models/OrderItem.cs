@@ -1,21 +1,24 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
+﻿using MotorShop.Models;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+// OrderItem.cs
 namespace MotorShop.Models
 {
-    // Chi tiết một sản phẩm trong đơn hàng
     public class OrderItem
     {
         public int Id { get; set; }
+
+        [Range(1, 100000)]
         public int Quantity { get; set; }
 
         [Column(TypeName = "decimal(18, 2)")]
+        [Range(0, 100000000)]
         public decimal UnitPrice { get; set; }
 
-        // Khóa ngoại
+        // FK
         public int OrderId { get; set; }
         public int ProductId { get; set; }
 
-        // Thuộc tính điều hướng
         public Order Order { get; set; } = null!;
         public Product Product { get; set; } = null!;
     }

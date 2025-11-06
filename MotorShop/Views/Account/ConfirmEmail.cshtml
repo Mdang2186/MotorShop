@@ -1,0 +1,48 @@
+﻿@{
+    ViewData["Title"] = "Xác nhận Email";
+    var isSuccess = (ViewData["IsSuccess"] as bool?) ?? false;
+    var message = (ViewData["StatusMessage"] as string) ?? "";
+}
+
+<div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-md text-center">
+        <div class="flex items-center justify-center h-16 w-16 mx-auto rounded-full mb-4 @(isSuccess ? "bg-green-100" : "bg-red-100")">
+            @if (isSuccess)
+            {
+                <!-- check circle -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 20 20" fill="currentColor" style="color:#16a34a">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 10-1.414 1.414L9 13.414l4.707-4.707z" clip-rule="evenodd" />
+                </svg>
+            }
+            else
+            {
+                <!-- x circle -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 20 20" fill="currentColor" style="color:#dc2626">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm2.828-10.828a1 1 0 00-1.414-1.414L10 8.172 8.586 6.758A1 1 0 107.172 8.172L8.586 9.586 7.172 11A1 1 0 108.586 12.414L10 11l1.414 1.414A1 1 0 0012.828 11l-1.414-1.414 1.414-1.414z" clip-rule="evenodd" />
+                </svg>
+            }
+        </div>
+
+        <h2 class="mt-6 text-3xl font-extrabold text-gray-900">
+            @(isSuccess ? "Xác nhận Thành công" : "Xác nhận Thất bại")
+        </h2>
+
+        <p class="mt-4 text-md text-gray-600">
+            @message
+        </p>
+
+        <div class="mt-8">
+            <a asp-controller="Home" asp-action="Index" class="font-medium text-blue-600 hover:text-blue-500">
+                Quay lại Trang chủ
+            </a>
+
+            @if (isSuccess)
+            {
+                <span class="mx-2 text-gray-300">|</span>
+                <a asp-controller="Account" asp-action="Login" class="font-medium text-blue-600 hover:text-blue-500">
+                    Đi đến Đăng nhập
+                </a>
+            }
+        </div>
+    </div>
+</div>

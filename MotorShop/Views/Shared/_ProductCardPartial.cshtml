@@ -1,40 +1,44 @@
 ﻿@model MotorShop.Models.Product
+@{
+    string Vnd(decimal v) => v.ToString("#,0") + " ₫";
+    var slug = (Model.Name ?? "").Trim().ToLower().Replace(" ", "-");
 
-<div class="bg-white rounded-lg border overflow-hidden card-hover">
-    <div class="relative">
-        <img src="@(Model.ImageUrl ?? "https://placehold.co/400x300/e2e8f0/adb5bd?text=MotorShop")" alt="@Model.Name" class="w-full h-40 object-cover">
-        @if (Model.OriginalPrice.HasValue && Model.OriginalPrice > Model.Price)
-        {
-            var discount = Math.Round((1 - Model.Price / Model.OriginalPrice.Value) * 100);
-            <div class="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">-@discount%</div>
-        }
-        <div class="absolute top-2 left-2 bg-white bg-opacity-90 text-blue-600 text-xs px-2 py-1 rounded-full">@Model.Brand.Name</div>
-    </div>
-    <div class="p-4">
-        <h3 class="font-semibold mb-2 h-12 line-clamp-2">@Model.Name</h3>
-        <div class="mb-4">
-            @if (Model.OriginalPrice.HasValue && Model.OriginalPrice > Model.Price)
-            {
-                <div class="flex items-center space-x-2">
-                    <span class="font-bold text-lg text-red-600">@Model.Price.ToString("N0") đ</span>
-                    <span class="text-sm text-gray-500 line-through">@Model.OriginalPrice?.ToString("N0") đ</span>
+    // Lấy ảnh đầu theo Id; nếu không có thì dùng placeholder
+    var imageUrl = (Model.Images != null && Model.Images.Any())
+        ? (Model.Images.OrderBy(i => i.Id).First().ImageUrl ?? "/images/products/placeholder.png")
+        : "/images/products/placeholder.png";
+}
+
+<div class="bg-white rounded-2xl border shadow-sm hover:shadow-lg transition overflow-hidden group">
+    <!-- Link chỉ bao ảnh + thông tin, KHÔNG bao nút -->
+    <a asp-controller="Products" asp-action="Details" asp-route-id="@Model.Id" asp-route-slug="@slug" class="block focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <div class="aspect-[4/3] bg-gray-50 relative">
+            <img src="@imageUrl" alt="@Model.Name" class="absolute inset-0 w-full h-full object-cover"
+                 onerror="this.src='/images/products/placeholder.png'" />
+        </div>
+
+        <div class="p-4">
+            <div class="text-xs text-gray-500">@Model.Brand?.Name</div>
+            <div class="mt-0.5 font-semibold text-gray-900 line-clamp-2 group-hover:text-blue-600">
+                @Model.Name
+            </div>
+
+            <div class="mt-2 flex items-center justify-between">
+                <div>
+                    <div class="text-blue-600 font-extrabold">@Vnd(Model.Price)</div>
+                    <div class="text-xs text-gray-400">Còn @Model.StockQuantity</div>
                 </div>
-            }
-            else
-            {
-                <span class="font-bold text-lg text-red-600">@Model.Price.ToString("N0") đ</span>
-            }
+            </div>
         </div>
-        <div class="flex space-x-2">
-            <button class="add-to-cart-btn flex-1 bg-blue-600 text-white py-2 px-3 rounded-lg text-sm font-medium hover:bg-blue-700"
-                    data-product-id="@Model.Id"
-                    data-url="@Url.Action("AddToCartApi", "Cart")">
-                <i class="fas fa-shopping-cart mr-1"></i>Thêm
-            </button>
-            <button class="view-product-btn px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
-                    data-url="@Url.Action("Details", "Products", new { id = Model.Id })">
-                <i class="fas fa-eye"></i>
-            </button>
-        </div>
+    </a>
+
+    <!-- Nút Add to cart (đứng ngoài <a>) -->
+    <div class="px-4 pb-4">
+        <button type="button"
+                class="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700"
+                data-add-to-cart data-id="@Model.Id" data-qty="1" aria-label="Thêm @Model.Name vào giỏ">
+            <i class="fa-solid fa-cart-plus"></i>
+            <span>Thêm vào giỏ</span>
+        </button>
     </div>
 </div>

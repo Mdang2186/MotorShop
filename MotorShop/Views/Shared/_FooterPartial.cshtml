@@ -1,0 +1,171 @@
+﻿@* Views/Shared/_FooterPartial.cshtml *@
+<footer class="bg-gray-900 text-gray-300 pt-16 pb-8 mt-16 relative">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+
+        <!-- Top: CTA / Newsletter -->
+        <div class="bg-gradient-to-r from-blue-600/10 via-blue-500/5 to-transparent border border-blue-500/20 rounded-2xl px-6 py-5 mb-12 flex flex-col md:flex-row items-center gap-5">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-xl bg-blue-600 grid place-items-center text-white">
+                    <i class="fa-solid fa-envelope"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-200 font-semibold">Nhận ưu đãi & xe mới về</p>
+                    <p class="text-xs text-gray-400">Tin giảm giá, khuyến mãi, mẫu mới sẽ gửi vào mail.</p>
+                </div>
+            </div>
+            <form asp-controller="Newsletter" asp-action="Subscribe" method="post" class="flex-1 w-full">
+                <div class="flex gap-3">
+                    <input name="email" type="email" required
+                           class="flex-1 bg-gray-950/40 border border-gray-700 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
+                           placeholder="Nhập email của bạn..." />
+                    <button type="submit"
+                            class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold">
+                        Đăng ký
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Middle: 4 columns -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+
+            <!-- Brand -->
+            <div class="space-y-4">
+                <a asp-controller="Home" asp-action="Index" class="flex items-center gap-2">
+                    <div class="w-9 h-9 bg-blue-600 rounded-xl grid place-items-center shadow-lg">
+                        <i class="fas fa-motorcycle text-white text-base"></i>
+                    </div>
+                    <span class="font-bold text-lg text-white tracking-tight">MotorShop</span>
+                </a>
+                <p class="text-sm text-gray-400 leading-relaxed">
+                    Showroom xe máy chính hãng. Giá tốt – dịch vụ tận tâm – trải nghiệm mượt.
+                </p>
+                <div class="flex items-center gap-4">
+                    <a href="#" class="text-gray-400 hover:text-white" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-white" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-white" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+                </div>
+                <div class="text-xs text-gray-500 pt-2">
+                    MST: 0101234567 – Sở KH&ĐT Hà Nội cấp
+                </div>
+            </div>
+
+            <!-- Support -->
+            <div>
+                <h3 class="text-sm font-semibold text-gray-200 tracking-wider uppercase mb-4">Hỗ trợ</h3>
+                <ul class="space-y-3 text-sm">
+                    <li><a href="#" class="hover:text-white flex items-center gap-2"><i class="fa-regular fa-circle-question w-4"></i> Câu hỏi thường gặp</a></li>
+                    <li><a href="#" class="hover:text-white flex items-center gap-2"><i class="fa-solid fa-shield-halved w-4"></i> Chính sách bảo hành</a></li>
+                    <li><a href="#" class="hover:text-white flex items-center gap-2"><i class="fa-solid fa-credit-card w-4"></i> Hướng dẫn trả góp</a></li>
+                    <li><a href="#" class="hover:text-white flex items-center gap-2"><i class="fa-solid fa-truck-fast w-4"></i> Vận chuyển & giao xe</a></li>
+                </ul>
+            </div>
+
+            <!-- Links -->
+            <div>
+                <h3 class="text-sm font-semibold text-gray-200 tracking-wider uppercase mb-4">Liên kết nhanh</h3>
+                <ul class="space-y-3 text-sm">
+                    <li><a asp-controller="Products" asp-action="Index" class="hover:text-white flex items-center gap-2"><i class="fa-solid fa-list w-4"></i> Tất cả sản phẩm</a></li>
+                    <li><a href="#" class="hover:text-white flex items-center gap-2"><i class="fa-solid fa-fire w-4"></i> Xe mới về</a></li>
+                    <li><a href="#" class="hover:text-white flex items-center gap-2"><i class="fa-solid fa-newspaper w-4"></i> Tin tức</a></li>
+                    <li><a href="#" class="hover:text-white flex items-center gap-2"><i class="fa-solid fa-users w-4"></i> Về chúng tôi</a></li>
+                </ul>
+            </div>
+
+            <!-- Contact + Bank -->
+            <div class="space-y-4">
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-200 tracking-wider uppercase mb-4">Liên hệ</h3>
+                    <ul class="space-y-3 text-sm">
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-map-marker-alt w-4 mt-1 text-blue-400"></i>
+                            <span>123 ABC, Hoàn Kiếm, Hà Nội</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-phone-alt w-4 mt-1 text-blue-400"></i>
+                            <span>Hotline: <a href="tel:19001234" class="hover:text-white">1900 1234</a></span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-envelope w-4 mt-1 text-blue-400"></i>
+                            <span>contact@motorshop.vn</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-clock w-4 mt-1 text-blue-400"></i>
+                            <span>Thứ 2 – CN: 8h30 – 20h30</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-200 tracking-wider uppercase mb-3">Thanh toán chuyển khoản</h3>
+                    <div class="bg-gray-800/40 border border-gray-700/60 rounded-xl p-3 text-xs space-y-2">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-gray-400">Ngân hàng</span>
+                            <span class="text-gray-100 font-semibold">Vietcombank</span>
+                        </div>
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-gray-400">Chủ TK</span>
+                            <span class="text-gray-100 font-semibold">CÔNG TY MOTOSHOP</span>
+                        </div>
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-gray-400">Số TK</span>
+                            <span class="text-gray-100 font-mono text-sm">0123 456 789</span>
+                        </div>
+                        <p class="text-[11px] text-gray-500 leading-relaxed">
+                            Nội dung: <span class="text-gray-200 font-medium">Thanh toan don #MOTO-xxxx</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment / Bank logos -->
+        <div class="border-t border-gray-800 mt-10 pt-6">
+            <div class="flex flex-col lg:flex-row gap-4 items-center justify-between">
+                <div class="flex items-center gap-3 text-sm text-gray-400">
+                    <i class="fa-solid fa-shield-halved text-blue-400"></i>
+                    <span>Thanh toán an toàn • Mã hóa SSL • Xuất hóa đơn VAT</span>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-3">
+                    <!-- bạn có thể giữ lại partial cũ -->
+                    @* <partial name="_PaymentMethods" /> *@
+
+                    <div class="flex gap-3 items-center">
+                        <span class="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-1 text-xs">
+                            <img src="~/images/payments/visa.svg" alt="Visa" class="h-4" loading="lazy" />
+                            VISA
+                        </span>
+                        <span class="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-1 text-xs">
+                            <img src="~/images/payments/mastercard.svg" alt="Mastercard" class="h-4" loading="lazy" />
+                            Mastercard
+                        </span>
+                        <span class="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-1 text-xs">
+                            <img src="~/images/payments/momo.svg" alt="MoMo" class="h-4" loading="lazy" />
+                            MoMo
+                        </span>
+                        <span class="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-1 text-xs">
+                            <img src="~/images/payments/vnpay.svg" alt="VNPay" class="h-4" loading="lazy" />
+                            VNPay
+                        </span>
+                        <span class="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-1 text-xs">
+                            <img src="~/images/payments/bidv.svg" alt="bidv" class="h-4" loading="lazy" />
+                            iBanking
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom -->
+        <div class="border-t border-gray-800 pt-6 mt-6 text-sm text-gray-500 flex flex-col md:flex-row items-center justify-between gap-4">
+            <p>&copy; @DateTime.Now.Year MotorShop. All Rights Reserved.</p>
+            <div class="flex gap-5 text-xs">
+                <a href="#" class="hover:text-gray-300">Điều khoản</a>
+                <a href="#" class="hover:text-gray-300">Chính sách bảo mật</a>
+                <a href="#" class="hover:text-gray-300">Sitemap</a>
+            </div>
+        </div>
+
+    </div>
+</footer>

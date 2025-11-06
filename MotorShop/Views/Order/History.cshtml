@@ -1,21 +1,149 @@
 ﻿@model IEnumerable<MotorShop.Models.Order>
+@using MotorShop.Models.Enums
 
 @{
     ViewData["Title"] = "Lịch sử mua hàng";
+
+    // Tránh đụng @page directive
+    var currentStatus = ViewBag.Status as OrderStatus?;
+    int pageIndex = ViewBag.Page ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+    int pageSize = ViewBag.PageSize ?? 10;
+
+    string Link(int p) => Url.Action("History", "Order", new { status = currentStatus, page = p, pageSize })!;
+
+    (string CssClass, string Icon, string DisplayText) GetStatusDetails(OrderStatus status) => status switch
+    {
+        OrderStatus.Pending => ("bg-yellow-100 text-yellow-800", "fas fa-hourglass-half", "Chờ xử lý"),
+        OrderStatus.Processing => ("bg-blue-100 text-blue-800", "fas fa-rotate", "Đang xử lý"),
+        OrderStatus.Confirmed => ("bg-indigo-100 text-indigo-800", "fas fa-check-circle", "Đã xác nhận"),
+        OrderStatus.Shipping => ("bg-sky-100 text-sky-800", "fas fa-truck", "Đang giao"),
+        OrderStatus.Delivered => ("bg-emerald-100 text-emerald-800", "fas fa-clipboard-check", "Đã giao"),
+        OrderStatus.Completed => ("bg-green-100 text-green-800", "fas fa-badge-check", "Hoàn tất"),
+        OrderStatus.Cancelled => ("bg-rose-100 text-rose-800", "fas fa-times-circle", "Đã hủy"),
+        _ => ("bg-gray-100 text-gray-800", "fas fa-question-circle", "Không xác định")
+    };
 }
 
-<div class="py-8">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 class="text-2xl font-bold mb-6">@ViewData["Title"]</h1>
-        <div class="space-y-4">
-            @foreach(var order in Model)
-            {
-                <div class="bg-white p-4 rounded-lg border">
-                    <p>Mã đơn hàng: <strong>#@order.Id</strong></p>
-                    <p>Ngày đặt: @order.OrderDate.ToShortDateString()</p>
-                    <p>Tổng tiền: <span class="font-bold text-red-600">@order.TotalAmount.ToString("N0") đ</span></p>
-                </div>
-            }
+<div class="bg-white border-b">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="py-8 text-center">
+            <h1 class="text-3xl font-extrabold text-gray-900">@ViewData["Title"]</h1>
+            <p class="mt-2 text-md text-gray-500">Theo dõi tất cả các đơn hàng đã đặt của bạn tại MotorShop.</p>
         </div>
+    </div>
+</div>
+
+<div class="py-12 bg-gray-50">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Filter trạng thái -->
+        <div class="bg-white border rounded-xl p-3 mb-6">
+            <div class="flex flex-wrap gap-2">
+                <a class="px-3 py-1.5 rounded-xl border text-sm @(currentStatus == null ? "bg-gray-900 text-white border-gray-900" : "hover:bg-gray-50")"
+                   asp-action="History" asp-route-page="1" asp-route-pageSize="@pageSize">Tất cả</a>
+                @foreach (OrderStatus st in Enum.GetValues(typeof(OrderStatus)))
+                {
+                    var active = currentStatus == st;
+                    <a class="px-3 py-1.5 rounded-xl border text-sm @(active ? "bg-gray-900 text-white border-gray-900" : "hover:bg-gray-50")"
+                       asp-action="History" asp-route-status="@st" asp-route-page="1" asp-route-pageSize="@pageSize">@st</a>
+                }
+            </div>
+        </div>
+
+        @if (Model != null && Model.Any())
+        {
+            <div class="flex items-center justify-between mb-4">
+                <div class="text-sm text-gray-500">Trang @pageIndex / @totalPages</div>
+            </div>
+
+            <div class="space-y-6">
+                @foreach (var order in Model)
+                {
+                    var statusInfo = GetStatusDetails(order.Status);
+
+                    <div class="bg-white border rounded-lg shadow-sm overflow-hidden">
+                        <div class="bg-gray-50 px-6 py-4 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                            <div>
+                                <h3 class="font-bold text-lg text-gray-800">Mã đơn hàng: #@order.Id</h3>
+                                <p class="text-sm text-gray-500">Ngày đặt: @order.OrderDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
+                            </div>
+                            <div class="mt-2 sm:mt-0">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold @statusInfo.CssClass">
+                                    <i class="@statusInfo.Icon mr-2"></i>@statusInfo.DisplayText
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="p-6">
+                            <div class="space-y-4">
+                                @foreach (var item in (order.OrderItems ?? new List<MotorShop.Models.OrderItem>()).Take(2))
+                                {
+                                    var img = item.Product?.ImageUrl ?? "https://placehold.co/100x100/e2e8f0/adb5bd?text=N/A";
+                                    var name = item.Product?.Name ?? ("#" + item.ProductId);
+                                    <div class="flex items-center">
+                                        <img src="@img" alt="@name" class="w-16 h-16 rounded-md object-cover mr-4 border">
+                                        <div class="flex-grow">
+                                            <p class="font-semibold text-gray-800">@name</p>
+                                            <p class="text-sm text-gray-500">Số lượng: @item.Quantity</p>
+                                        </div>
+                                        <p class="text-sm text-gray-700">@item.UnitPrice.ToString("N0") đ</p>
+                                    </div>
+                                }
+                                @if ((order.OrderItems?.Count ?? 0) > 2)
+                                {
+                                    <p class="text-sm text-gray-500 text-center pt-2">… và @(order.OrderItems!.Count - 2) sản phẩm khác.</p>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-50 px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+                            <p class="text-lg font-bold text-gray-900">
+                                Tổng tiền:
+                                <span class="text-red-600">@order.TotalAmount.ToString("N0") đ</span>
+                            </p>
+                            <div class="flex items-center gap-2">
+                                <a asp-action="Details" asp-route-id="@order.Id"
+                                   class="w-full sm:w-auto text-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-semibold transition-colors">
+                                    Xem chi tiết
+                                </a>
+                                <a asp-action="Invoice" asp-route-id="@order.Id" target="_blank"
+                                   class="w-full sm:w-auto text-center px-4 py-2 border rounded-lg hover:bg-gray-50 text-sm">
+                                    Hóa đơn
+                                </a>
+                                <form asp-action="Reorder" asp-route-id="@order.Id" method="post" class="inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="w-full sm:w-auto text-center px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 text-sm">
+                                        Mua lại
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Pagination -->
+            <div class="mt-6 flex items-center justify-center gap-2">
+                <a class="px-3 py-2 rounded-lg border text-sm hover:bg-gray-50 @(pageIndex <= 1 ? "pointer-events-none opacity-40" : "")"
+                   href="@(pageIndex > 1 ? Link(pageIndex - 1) : "#")">Trước</a>
+                <span class="text-sm text-gray-600">Trang @pageIndex / @totalPages</span>
+                <a class="px-3 py-2 rounded-lg border text-sm hover:bg-gray-50 @(pageIndex >= totalPages ? "pointer-events-none opacity-40" : "")"
+                   href="@(pageIndex<totalPages?Link(pageIndex+1):"#")">Sau</a>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-20 bg-white border rounded-lg">
+                <div class="flex items-center justify-center h-16 w-16 mx-auto bg-blue-100 rounded-full mb-4">
+                    <i class="fas fa-receipt text-3xl text-blue-600"></i>
+                </div>
+                <h2 class="text-xl font-semibold text-gray-900 mb-2">Bạn chưa có đơn hàng nào</h2>
+                <p class="text-gray-500 mb-6">Hãy bắt đầu khám phá và tìm cho mình chiếc xe ưng ý nhé!</p>
+                <a asp-controller="Products" asp-action="Index"
+                   class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-300">
+                    Bắt đầu mua sắm
+                </a>
+            </div>
+        }
     </div>
 </div>

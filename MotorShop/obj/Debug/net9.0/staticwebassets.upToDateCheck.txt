@@ -1,5 +1,53 @@
 wwwroot\css\site.css
 wwwroot\favicon.ico
+wwwroot\images\avatars\f6927751add44ff281843ddd0b1dd845.png
+wwwroot\images\brands\bmw-motorrad.png
+wwwroot\images\brands\ducati.png
+wwwroot\images\brands\honda.png
+wwwroot\images\brands\kymco.png
+wwwroot\images\brands\piaggio.png
+wwwroot\images\brands\suzuki.png
+wwwroot\images\brands\sym.jpg
+wwwroot\images\brands\SYM.png
+wwwroot\images\brands\yamaha.png
+wwwroot\images\content\A cinematicmotorcycle.jpg
+wwwroot\images\content\product-banner.jpg
+wwwroot\images\payments\bidv.svg
+wwwroot\images\payments\mastercard.svg
+wwwroot\images\payments\momo.svg
+wwwroot\images\payments\visa.svg
+wwwroot\images\payments\vnpay.svg
+wwwroot\images\products\honda\adv-160.png
+wwwroot\images\products\honda\africa-twin.png
+wwwroot\images\products\honda\air-blade-160-dac-biet.png
+wwwroot\images\products\honda\blade-110-the-thao.png
+wwwroot\images\products\honda\cb150r-the-streetster.jpg
+wwwroot\images\products\honda\cb300r.png
+wwwroot\images\products\honda\cb500x.png
+wwwroot\images\products\honda\cbr150r-the-thao.png
+wwwroot\images\products\honda\cbr250rr.png
+wwwroot\images\products\honda\crf300l.png
+wwwroot\images\products\honda\future-125-fi-dac-biet.png
+wwwroot\images\products\honda\gold-wing.png
+wwwroot\images\products\honda\lead-125-dac-biet
+wwwroot\images\products\honda\monkey.png
+wwwroot\images\products\honda\msx-125.png
+wwwroot\images\products\honda\pcx-160.png
+wwwroot\images\products\honda\rebel-300.png
+wwwroot\images\products\honda\rebel-500.png
+wwwroot\images\products\honda\sh-125i-the-thao.png
+wwwroot\images\products\honda\sh-160i-dac-biet.png
+wwwroot\images\products\honda\sh-mode-the-thao.png
+wwwroot\images\products\honda\shadow-phantom-750.png
+wwwroot\images\products\honda\super-cub-c125.png
+wwwroot\images\products\honda\transalp.png
+wwwroot\images\products\honda\vario-160-the-thao.png
+wwwroot\images\products\honda\vision-2024-cao-cap.png
+wwwroot\images\products\honda\wave-alpha-110-dac-biet.png
+wwwroot\images\products\honda\wave-rsx-fi-110.png
+wwwroot\images\products\honda\winner-x-150-dac-biet.png
+wwwroot\images\products\yamaha\grande-gioi-han.png
+wwwroot\images\products\yamaha\janus-gioi-han.png
 wwwroot\js\site.js
 wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css
 wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css.map
@@ -61,65 +109,70 @@ wwwroot\lib\jquery\dist\jquery.slim.js
 wwwroot\lib\jquery\dist\jquery.slim.min.js
 wwwroot\lib\jquery\dist\jquery.slim.min.map
 wwwroot\lib\jquery\LICENSE.txt
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\css\site.css
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\favicon.ico
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\js\site.js
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.css
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.css.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.min.css
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.min.css.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.css
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.css.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.min.css
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.min.css.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.css
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.css.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.min.css
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.min.css.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.css
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.css.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.min.css
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.min.css.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.css
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.css.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.min.css
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.min.css.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap.css
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap.css.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap.min.css
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap.min.css.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.css
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.css.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.min.css
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.min.css.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.js
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.js.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.min.js
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.min.js.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.esm.js
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.esm.js.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.esm.min.js
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.esm.min.js.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.js
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.js.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.min.js
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.min.js.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\jquery-validation-unobtrusive\dist\jquery.validate.unobtrusive.js
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\jquery-validation-unobtrusive\dist\jquery.validate.unobtrusive.min.js
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\jquery-validation-unobtrusive\LICENSE.txt
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\jquery-validation\dist\additional-methods.js
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\jquery-validation\dist\additional-methods.min.js
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\jquery-validation\dist\jquery.validate.js
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\jquery-validation\dist\jquery.validate.min.js
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\jquery-validation\LICENSE.md
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\jquery\dist\jquery.js
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\jquery\dist\jquery.min.js
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\jquery\dist\jquery.min.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\jquery\dist\jquery.slim.js
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\jquery\dist\jquery.slim.min.js
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\jquery\dist\jquery.slim.min.map
-D:\2. THỰC TẬP LẬP TRÌNH .NET\MotorShop\MotorShop\wwwroot\lib\jquery\LICENSE.txt
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\jquery\LICENSE.txt
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\jquery\dist\jquery.slim.min.js
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\images\payments\mastercard.svg
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\images\payments\momo.svg
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\images\payments\visa.svg
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\jquery\dist\jquery.js
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\jquery-validation\LICENSE.md
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\images\payments\vnpay.svg
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\js\site.js
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css.map
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.css.map
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\jquery-validation-unobtrusive\LICENSE.txt
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\jquery-validation-unobtrusive\dist\jquery.validate.unobtrusive.min.js
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\jquery-validation-unobtrusive\dist\jquery.validate.unobtrusive.js
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.css
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.css.map
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.min.css
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.min.css.map
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.css
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.css.map
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.min.css
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.min.css.map
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.css
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.css.map
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.js.map
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.min.css
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.min.css.map
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.min.css.map
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.css.map
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.css
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap.min.css.map
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.css.map
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap.css.map
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.min.css
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.min.css.map
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap.css
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap.min.css
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.css
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.min.css
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.js
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.min.js
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.min.js.map
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.esm.js
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.esm.js.map
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.esm.min.js
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.esm.min.js.map
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.js
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.js.map
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.min.js
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\js\bootstrap.min.js.map
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.min.css.map
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.min.css
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\jquery-validation\dist\additional-methods.js
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.css
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css.map
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\jquery-validation\dist\additional-methods.min.js
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\jquery-validation\dist\jquery.validate.js
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\jquery-validation\dist\jquery.validate.min.js
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\jquery\dist\jquery.slim.min.map
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\favicon.ico
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\css\site.css
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\jquery\dist\jquery.slim.js
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\jquery\dist\jquery.min.map
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\lib\jquery\dist\jquery.min.js
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\wwwroot\images\payments\bidv.svg

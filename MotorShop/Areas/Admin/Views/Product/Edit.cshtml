@@ -1,77 +1,27 @@
 ﻿@model MotorShop.Models.Product
-
 @{
-    ViewData["Title"] = "Chỉnh sửa sản phẩm";
-    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Cập nhật sản phẩm";
 }
 
-<h1 class="h2 pt-3 pb-2 mb-3 border-bottom">@ViewData["Title"]</h1>
+<div class="max-w-3xl mx-auto">
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-2xl font-bold text-slate-900">Cập nhật sản phẩm</h1>
+        <a asp-action="Index" class="text-slate-500 hover:text-blue-600 flex items-center gap-1 text-sm font-medium transition-colors">
+            <i class="fa-solid fa-arrow-left"></i> Quay lại
+        </a>
+    </div>
 
-<div class="row">
-    <div class="col-md-6">
+    <div class="bg-white shadow-sm ring-1 ring-black/5 rounded-xl p-6 sm:p-8">
         <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
-
-            <div class="form-group mb-3">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
-            </div>
-
-            <div class="form-group mb-3">
-                <label asp-for="Description" class="control-label"></label>
-                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
-                <span asp-validation-for="Description" class="text-danger"></span>
-            </div>
-
-            <div class="row">
-                <div class="form-group mb-3 col-md-6">
-                    <label asp-for="Price" class="control-label"></label>
-                    <input asp-for="Price" class="form-control" />
-                    <span asp-validation-for="Price" class="text-danger"></span>
-                </div>
-                <div class="form-group mb-3 col-md-6">
-                    <label asp-for="OriginalPrice" class="control-label"></label>
-                    <input asp-for="OriginalPrice" class="form-control" />
-                    <span asp-validation-for="OriginalPrice" class="text-danger"></span>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="form-group mb-3 col-md-6">
-                    <label asp-for="StockQuantity" class="control-label"></label>
-                    <input asp-for="StockQuantity" class="form-control" />
-                    <span asp-validation-for="StockQuantity" class="text-danger"></span>
-                </div>
-                <div class="form-group mb-3 col-md-6">
-                    <label asp-for="Year" class="control-label"></label>
-                    <input asp-for="Year" class="form-control" />
-                    <span asp-validation-for="Year" class="text-danger"></span>
-                </div>
-            </div>
-
-
-            <div class="form-group mb-3">
-                <label asp-for="BrandId" class="control-label"></label>
-                <select asp-for="BrandId" class="form-control" asp-items="ViewBag.BrandId"></select>
-            </div>
-
-            <div class="form-group mb-3">
-                <label asp-for="CategoryId" class="control-label"></label>
-                <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.CategoryId"></select>
-            </div>
-
-            <div class="form-group mb-3">
-                <label asp-for="ImageUrl" class="control-label"></label>
-                <input asp-for="ImageUrl" class="form-control" />
-                <span asp-validation-for="ImageUrl" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <input type="submit" value="Lưu thay đổi" class="btn btn-primary" />
-                <a asp-action="Index" class="btn btn-outline-secondary">Quay lại danh sách</a>
+            <partial name="_ProductForm" model="Model" />
+            <div class="mt-8 flex justify-end gap-3 border-t border-slate-100 pt-6">
+                <a asp-action="Index" class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors">Hủy</a>
+                <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm">Lưu thay đổi</button>
             </div>
         </form>
     </div>
 </div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

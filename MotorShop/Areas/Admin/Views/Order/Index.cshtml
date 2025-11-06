@@ -1,0 +1,181 @@
+﻿@model IEnumerable<MotorShop.Models.Order>
+@using MotorShop.Models.Enums
+@using MotorShop.Utilities
+
+@{
+    ViewData["Title"] = "Quản lý đơn hàng";
+    var currentStatus = ViewBag.Status as OrderStatus?;
+    var pageIndex = (int)(ViewBag.Page ?? 1);
+    var totalPages = (int)(ViewBag.TotalPages ?? 1);
+    var q = Context.Request.Query["q"].ToString();
+    var from = Context.Request.Query["from"].ToString();
+    var to = Context.Request.Query["to"].ToString();
+
+    var counts = ViewBag.StatusCounts as Dictionary<OrderStatus, int> ?? new Dictionary<OrderStatus, int>();
+
+    string ActiveClass(OrderStatus? s) => currentStatus == s
+        ? "ring-2 ring-offset-2 ring-blue-500 shadow-md"
+        : "hover:shadow-md hover:border-slate-300";
+}
+
+<div class="space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-900">Quản lý đơn hàng</h1>
+            <p class="mt-1 text-sm text-slate-500">Theo dõi và xử lý các đơn đặt hàng theo quy trình.</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <a href="@Url.Action("Index", new { status = OrderStatus.Pending })" class="bg-white p-3 rounded-xl border border-amber-200 transition-all @ActiveClass(OrderStatus.Pending)">
+            <div class="text-xs font-medium text-amber-800 mb-1">1. Chờ xử lý</div>
+            <div class="text-2xl font-bold text-slate-900">@counts.GetValueOrDefault(OrderStatus.Pending)</div>
+        </a>
+        <a href="@Url.Action("Index", new { status = OrderStatus.Processing })" class="bg-white p-3 rounded-xl border border-sky-200 transition-all @ActiveClass(OrderStatus.Processing)">
+            <div class="text-xs font-medium text-sky-800 mb-1">2. Đang xử lý</div>
+            <div class="text-2xl font-bold text-slate-900">@counts.GetValueOrDefault(OrderStatus.Processing)</div>
+        </a>
+        <a href="@Url.Action("Index", new { status = OrderStatus.Confirmed })" class="bg-white p-3 rounded-xl border border-blue-200 transition-all @ActiveClass(OrderStatus.Confirmed)">
+            <div class="text-xs font-medium text-blue-800 mb-1">3. Đã xác nhận</div>
+            <div class="text-2xl font-bold text-slate-900">@counts.GetValueOrDefault(OrderStatus.Confirmed)</div>
+        </a>
+        <a href="@Url.Action("Index", new { status = OrderStatus.Shipping })" class="bg-white p-3 rounded-xl border border-indigo-200 transition-all @ActiveClass(OrderStatus.Shipping)">
+            <div class="text-xs font-medium text-indigo-800 mb-1">4. Đang giao</div>
+            <div class="text-2xl font-bold text-slate-900">@counts.GetValueOrDefault(OrderStatus.Shipping)</div>
+        </a>
+        <a href="@Url.Action("Index", new { status = OrderStatus.Delivered })" class="bg-white p-3 rounded-xl border border-teal-200 transition-all @ActiveClass(OrderStatus.Delivered)">
+            <div class="text-xs font-medium text-teal-800 mb-1">5. Đã giao hàng</div>
+            <div class="text-2xl font-bold text-slate-900">@counts.GetValueOrDefault(OrderStatus.Delivered)</div>
+        </a>
+        <a href="@Url.Action("Index", new { status = OrderStatus.Completed })" class="bg-white p-3 rounded-xl border border-emerald-200 transition-all @ActiveClass(OrderStatus.Completed)">
+            <div class="text-xs font-medium text-emerald-800 mb-1">6. Hoàn tất</div>
+            <div class="text-2xl font-bold text-slate-900">@counts.GetValueOrDefault(OrderStatus.Completed)</div>
+        </a>
+    </div>
+
+    <div class="bg-white shadow-sm ring-1 ring-black/5 rounded-xl overflow-hidden">
+        <div class="p-4 border-b border-slate-200 bg-slate-50/50">
+            <form method="get" class="grid grid-cols-1 sm:grid-cols-12 gap-4">
+                @if (currentStatus.HasValue)
+                {
+                    <input type="hidden" name="status" value="@currentStatus" />
+                }
+                <div class="sm:col-span-4 relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 z-10"></i>
+                    <input type="text" name="q" value="@q" placeholder="Tìm kiếm đơn hàng..." class="block w-full rounded-md border-0 py-2 pl-10 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-blue-600 sm:text-sm" />
+                </div>
+                <div class="sm:col-span-3">
+                    <input type="date" name="from" value="@from" class="block w-full rounded-md border-0 py-2 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-blue-600 sm:text-sm" />
+                </div>
+                <div class="sm:col-span-3">
+                    <input type="date" name="to" value="@to" class="block w-full rounded-md border-0 py-2 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-blue-600 sm:text-sm" />
+                </div>
+                <div class="sm:col-span-2">
+                    <button type="submit" class="w-full rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition-all">Lọc</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-200">
+                <thead class="bg-slate-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase text-slate-500">Mã đơn</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase text-slate-500">Thời gian</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase text-slate-500">Khách hàng</th>
+                        <th class="px-6 py-3 text-right text-xs font-semibold uppercase text-slate-500">Tổng tiền</th>
+                        <th class="px-6 py-3 text-center text-xs font-semibold uppercase text-slate-500">Trạng thái</th>
+                        <th class="px-6 py-3 text-right text-xs font-semibold uppercase text-slate-500">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 bg-white">
+                    @foreach (var item in Model)
+                    {
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap font-mono text-sm font-medium text-blue-600">
+                                <a asp-action="Details" asp-route-id="@item.Id" class="hover:underline">#@item.Id</a>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                                @item.OrderDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-slate-900">@(item.User?.FullName ?? item.ReceiverName ?? "Khách lẻ")</div>
+                                <div class="text-xs text-slate-500">@(item.User?.Email ?? item.ReceiverPhone)</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-semibold text-slate-900">
+                                @item.TotalAmount.ToString("N0") ₫
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                @switch (item.Status)
+                                {
+                                    case OrderStatus.Pending:
+                                        <span class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20">Chờ xử lý</span>
+                                        break;
+                                    case OrderStatus.Processing:
+                                        <span class="inline-flex items-center rounded-full bg-sky-50 px-2.5 py-1 text-xs font-medium text-sky-700 ring-1 ring-inset ring-sky-600/20">Đang xử lý</span>
+                                        break;
+                                    case OrderStatus.Confirmed:
+                                        <span class="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">Đã xác nhận</span>
+                                        break;
+                                    case OrderStatus.Shipping:
+                                        <span class="inline-flex items-center rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/10">Đang giao</span>
+                                        break;
+                                    case OrderStatus.Delivered:
+                                        <span class="inline-flex items-center rounded-full bg-teal-50 px-2.5 py-1 text-xs font-medium text-teal-700 ring-1 ring-inset ring-teal-600/20">Đã giao hàng</span>
+                                        break;
+                                    case OrderStatus.Completed:
+                                        <span class="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20">Hoàn tất</span>
+                                        break;
+                                    case OrderStatus.Cancelled:
+                                        <span class="inline-flex items-center rounded-full bg-rose-50 px-2.5 py-1 text-xs font-medium text-rose-700 ring-1 ring-inset ring-rose-600/10">Đã hủy</span>
+                                        break;
+                                    default:
+                                        <span class="text-slate-500 text-xs">@item.Status</span>
+                                        break;
+                                }
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <div class="flex justify-end items-center gap-2">
+                                    @if (item.Status != OrderStatus.Completed && item.Status != OrderStatus.Cancelled)
+                                    {
+                                        <form asp-action="UpdateStatus" method="post" class="inline-block">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@item.Id" />
+                                            <input type="hidden" name="returnUrl" value="@Context.Request.PathAndQuery()" />
+                                            <select name="status" onchange="if(confirm('Cập nhật trạng thái?')) this.form.submit(); else this.value='';" class="text-xs rounded-md border-slate-300 py-1 pl-2 pr-6 focus:ring-blue-500 cursor-pointer w-28">
+                                                <option value="" selected disabled>Cập nhật...</option>
+                                                @if (item.Status == OrderStatus.Pending)
+                                                {
+                                                    <option value="@OrderStatus.Processing">→ Đang xử lý</option>
+                                                    <option value="@OrderStatus.Cancelled">✕ Hủy đơn</option>
+         }
+                                                else if (item.Status == OrderStatus.Processing)
+                                                {
+                                                    <option value="@OrderStatus.Confirmed">→ Xác nhận</option>
+                                                    <option value="@OrderStatus.Cancelled">✕ Hủy đơn</option>
+         }
+                                                else if (item.Status == OrderStatus.Confirmed)
+                                                {
+                                                    <option value="@OrderStatus.Shipping">→ Giao hàng</option>
+                                                }
+                                                else if (item.Status == OrderStatus.Shipping)
+                                                {
+                                                    <option value="@OrderStatus.Delivered">→ Đã giao</option>
+                                                }
+                                                else if (item.Status == OrderStatus.Delivered)
+                                                {
+                                                    <option value="@OrderStatus.Completed">→ Hoàn tất</option>
+                                                }
+                                            </select>
+                                        </form>
+                                    }
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="text-slate-400 hover:text-blue-600 p-1.5 hover:bg-blue-50 rounded"><i class="fa-solid fa-eye"></i></a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,34 @@
+﻿@* Views/Shared/_PaymentMethods.cshtml *@
+@{
+    ViewData["Title"] = null; // partial
+}
+<div class="w-full bg-white/0">
+    <div class="flex items-center justify-between flex-wrap gap-3">
+        <div class="text-sm text-gray-400 uppercase tracking-wider">
+            Chấp nhận thanh toán
+        </div>
+
+        <div class="flex items-center gap-3 sm:gap-4">
+            <img src="~/images/payments/visa.svg"
+                 asp-append-version="true"
+                 alt="Visa" title="Visa"
+                 class="h-6 sm:h-7 opacity-90 hover:opacity-100 transition"
+                 loading="lazy" decoding="async" />
+            <img src="~/images/payments/mastercard.svg"
+                 asp-append-version="true"
+                 alt="Mastercard" title="Mastercard"
+                 class="h-6 sm:h-7 opacity-90 hover:opacity-100 transition"
+                 loading="lazy" decoding="async" />
+            <img src="~/images/payments/momo.svg"
+                 asp-append-version="true"
+                 alt="MoMo" title="Ví MoMo"
+                 class="h-6 sm:h-7 opacity-90 hover:opacity-100 transition"
+                 loading="lazy" decoding="async" />
+            <img src="~/images/payments/vnpay.svg"
+                 asp-append-version="true"
+                 alt="VNPay" title="VNPay"
+                 class="h-6 sm:h-7 opacity-90 hover:opacity-100 transition"
+                 loading="lazy" decoding="async" />
+        </div>
+    </div>
+</div>

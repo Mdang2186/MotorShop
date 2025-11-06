@@ -1,47 +1,104 @@
-﻿@model IEnumerable<MotorShop.Models.Product>
-
+﻿@model List<MotorShop.Models.Product>
 @{
-    ViewData["Title"] = "Quản lý sản phẩm";
-    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Sản phẩm";
+
+    // Lấy lại các filter hiện tại để giữ nguyên khi chuyển trang
+    var q = (string?)ViewBag.Q ?? string.Empty;
+    var sort = (string?)ViewBag.Sort ?? "new";
+    var brandId = Context.Request.Query["brandId"].ToString();
+    var categoryId = Context.Request.Query["categoryId"].ToString();
+
+    int page = (int)(ViewBag.Page ?? 1);
+    int totalPages = (int)(ViewBag.TotalPages ?? 1);
 }
 
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">@ViewData["Title"]</h1>
-    <div class="btn-toolbar mb-2 mb-md-0">
-        <a asp-action="Create" class="btn btn-sm btn-outline-primary">
-            Tạo sản phẩm mới
-        </a>
-    </div>
+<h1 class="text-2xl font-semibold mb-4">Sản phẩm</h1>
+
+<form method="get" class="grid grid-cols-1 md:grid-cols-5 gap-3 mb-4">
+    <input name="q" value="@q" class="border rounded-md px-3 py-2" placeholder="Tìm theo tên..." />
+
+    <select name="brandId" asp-items="ViewBag.Brands" class="border rounded-md px-3 py-2">
+        <option value="">-- Brand --</option>
+    </select>
+
+    <select name="categoryId" asp-items="ViewBag.Categories" class="border rounded-md px-3 py-2">
+        <option value="">-- Category --</option>
+    </select>
+
+    <select name="sort" class="border rounded-md px-3 py-2">
+        <option value="new" selected="@(sort == "new")">Mới nhất</option>
+        <option value="price_asc" selected="@(sort == "price_asc")">Giá tăng dần</option>
+        <option value="price_desc" selected="@(sort == "price_desc")">Giá giảm dần</option>
+        <option value="stock" selected="@(sort == "stock")">Tồn kho</option>
+    </select>
+
+    <button class="px-3 py-2 rounded-md bg-slate-900 text-white">Lọc</button>
+</form>
+
+<div class="mb-3">
+    <a asp-action="Create" class="px-3 py-2 rounded-md bg-blue-600 text-white">
+        <i class="fa fa-plus mr-1"></i>Thêm sản phẩm
+    </a>
 </div>
 
-<div class="table-responsive">
-    <table class="table table-striped table-sm">
+<div class="overflow-x-auto bg-white rounded-xl shadow">
+    <table class="min-w-full text-sm">
         <thead>
-            <tr>
-                <th>Tên sản phẩm</th>
-                <th>Thương hiệu</th>
-                <th>Loại xe</th>
+            <tr class="text-left text-slate-500">
+                <th class="p-3">#</th>
+                <th>Tên</th>
+                <th>Brand</th>
+                <th>Category</th>
                 <th>Giá</th>
-                <th>Số lượng</th>
+                <th>Tồn</th>
                 <th></th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var item in Model)
+            @foreach (var p in Model)
             {
-                <tr>
-                    <td>@item.Name</td>
-                    <td>@item.Brand.Name</td>
-                    <td>@item.Category.Name</td>
-                    <td>@item.Price.ToString("N0") đ</td>
-                    <td>@item.StockQuantity</td>
+                <tr class="border-t">
+                    <td class="p-3">@p.Id</td>
                     <td>
-                        <a asp-action="Edit" asp-route-id="@item.Id">Sửa</a> |
-                        <a asp-action="Details" asp-route-id="@item.Id">Chi tiết</a> |
-                        <a asp-action="Delete" asp-route-id="@item.Id">Xóa</a>
+                        <div class="flex items-center gap-3">
+                            @if (!string.IsNullOrWhiteSpace(p.ImageUrl))
+                            {
+                                <img src="@p.ImageUrl" class="w-12 h-12 object-cover rounded" />
+                            }
+                            <div>
+                                <div class="font-medium">@p.Name</div>
+                                <div class="text-slate-500 text-xs">Năm: @p.Year</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>@p.Brand?.Name</td>
+                    <td>@p.Category?.Name</td>
+                    <td>@p.Price.ToString("N0") đ</td>
+                    <td>@p.StockQuantity</td>
+                    <td class="text-right pr-3">
+                        <a asp-action="Edit" asp-route-id="@p.Id" class="text-blue-600 hover:underline">Sửa</a>
+                        <span class="mx-1">·</span>
+                        <a asp-action="Delete" asp-route-id="@p.Id" class="text-red-600 hover:underline">Xoá</a>
                     </td>
                 </tr>
             }
         </tbody>
     </table>
 </div>
+
+@if (totalPages > 1)
+{
+    <div class="flex justify-end gap-1 mt-3">
+        @for (var i = 1; i <= totalPages; i++)
+        {
+            <a class="px-3 py-1 rounded border @(i == page ? "bg-slate-900 text-white" : "bg-white")"
+               asp-route-page="@i"
+               asp-route-q="@q"
+               asp-route-brandId="@(brandId)"
+               asp-route-categoryId="@(categoryId)"
+               asp-route-sort="@(sort)">
+                @i
+            </a>
+        }
+    </div>
+}

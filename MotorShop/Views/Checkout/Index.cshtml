@@ -1,0 +1,403 @@
+﻿@model MotorShop.ViewModels.CheckoutViewModel
+@using MotorShop.Models.Enums
+
+@{
+    ViewData["Title"] = "Thanh toán";
+    // Hỗ trợ Coupon linh hoạt (nếu VM có thuộc tính CouponCode)
+    var supportsCoupon = Model?.GetType().GetProperty("CouponCode") != null;
+    var couponValue = supportsCoupon
+        ? (Model?.GetType().GetProperty("CouponCode")!.GetValue(Model) as string)
+        : null;
+}
+
+@section Head{
+    <style>
+        /* Nhẹ nhàng hiệu ứng 3D/glass */
+        .card-glass{background:rgba(255,255,255,.92);backdrop-filter:blur(10px) saturate(160%);border:1px solid rgba(15,23,42,.06)}
+        .ring-3d{box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 10px 30px rgba(2,6,23,.06)}
+        .btn-3d{transform:translateZ(0);box-shadow:0 8px 20px rgba(37,99,235,.18)}
+        .btn-3d:hover{transform:translateY(-1px);box-shadow:0 12px 28px rgba(37,99,235,.22)}
+    </style>
+}
+
+<section class="relative py-10">
+    <!-- Decorative blobs -->
+    <div aria-hidden="true" class="pointer-events-none absolute -top-10 -right-10 w-72 h-72 rounded-full blur-3xl bg-blue-200/40"></div>
+    <div aria-hidden="true" class="pointer-events-none absolute -bottom-10 -left-10 w-80 h-80 rounded-full blur-3xl bg-cyan-200/40"></div>
+
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Steps -->
+        <div class="mb-6">
+            <ol class="flex items-center gap-2 text-sm">
+                <li class="flex items-center gap-2 text-blue-600 font-semibold">
+                    <span class="w-6 h-6 grid place-items-center rounded-full bg-blue-600 text-white text-xs ring-3d">1</span> Giỏ hàng
+                </li>
+                <span class="text-gray-400">—</span>
+                <li class="flex items-center gap-2 text-blue-600 font-semibold">
+                    <span class="w-6 h-6 grid place-items-center rounded-full bg-blue-600 text-white text-xs ring-3d">2</span> Thông tin
+                </li>
+                <span class="text-gray-400">—</span>
+                <li class="flex items-center gap-2 text-blue-600 font-semibold">
+                    <span class="w-6 h-6 grid place-items-center rounded-full bg-blue-600 text-white text-xs ring-3d">3</span> Thanh toán
+                </li>
+                <span class="text-gray-400">—</span>
+                <li class="flex items-center gap-2 text-gray-500">
+                    <span class="w-6 h-6 grid place-items-center rounded-full bg-gray-200 text-gray-700 text-xs">4</span> Hoàn tất
+                </li>
+            </ol>
+        </div>
+
+        <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-gray-900 mb-6">
+            @ViewData["Title"]
+        </h1>
+
+        <form asp-action="Index" asp-controller="Checkout" method="post" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            @Html.AntiForgeryToken()
+
+            @* Giữ danh sách sản phẩm được chọn (nếu có) *@
+            @if (Model.SelectedProductIds != null)
+            {
+                foreach (var id in Model.SelectedProductIds)
+                {
+                    <input type="hidden" name="SelectedProductIds" value="@id" />
+                }
+            }
+
+            <!-- LEFT: form -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Receiver -->
+                <div class="card-glass rounded-2xl p-6 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold">Thông tin người nhận</h2>
+                        <div class="text-xs text-gray-500 flex items-center gap-1">
+                            <i class="fa-solid fa-shield-halved text-blue-600"></i> Bảo mật & Mã hoá
+                        </div>
+                    </div>
+
+                    <div class="grid sm:grid-cols-2 gap-4">
+                        <div>
+                            <label asp-for="ReceiverName" class="block text-sm font-medium text-gray-700"></label>
+                            <input asp-for="ReceiverName" placeholder="Nguyễn Văn A"
+                                   class="mt-1 w-full border-gray-300 rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                            <span asp-validation-for="ReceiverName" class="text-sm text-red-600"></span>
+                        </div>
+                        <div>
+                            <label asp-for="ReceiverPhone" class="block text-sm font-medium text-gray-700"></label>
+                            <input asp-for="ReceiverPhone" inputmode="tel" placeholder="09xx xxx xxx"
+                                   class="mt-1 w-full border-gray-300 rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                            <span asp-validation-for="ReceiverPhone" class="text-sm text-red-600"></span>
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label asp-for="ReceiverEmail" class="block text-sm font-medium text-gray-700"></label>
+                            <input asp-for="ReceiverEmail" type="email" placeholder="you@example.com"
+                                   class="mt-1 w-full border-gray-300 rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                            <span asp-validation-for="ReceiverEmail" class="text-sm text-red-600"></span>
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label asp-for="CustomerNote" class="block text-sm font-medium text-gray-700"></label>
+                            <textarea asp-for="CustomerNote" rows="2" placeholder="Lưu ý cho shipper/nhân viên..."
+                                      class="mt-1 w-full border-gray-300 rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500"></textarea>
+                            <span asp-validation-for="CustomerNote" class="text-sm text-red-600"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Delivery -->
+                <div class="card-glass rounded-2xl p-6 shadow-sm">
+                    <h2 class="text-lg font-semibold mb-4">Hình thức nhận hàng</h2>
+
+                    <div class="grid sm:grid-cols-2 gap-3">
+                        <label class="border rounded-xl p-4 flex items-start gap-3 cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="DeliveryMethod" value="@((int)DeliveryMethod.HomeDelivery)"
+                                   @(Model.DeliveryMethod == DeliveryMethod.HomeDelivery ? "checked" : null)
+                                   onchange="toggleDelivery(this.value)" class="mt-1 text-blue-600" />
+                            <div>
+                                <div class="font-medium">Giao tận nơi</div>
+                                <div class="text-sm text-gray-500">Phí hiển thị ở phần tóm tắt bên phải.</div>
+                            </div>
+                        </label>
+
+                        <label class="border rounded-xl p-4 flex items-start gap-3 cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="DeliveryMethod" value="@((int)DeliveryMethod.PickupAtStore)"
+                                   @(Model.DeliveryMethod == DeliveryMethod.PickupAtStore ? "checked" : null)
+                                   onchange="toggleDelivery(this.value)" class="mt-1 text-blue-600" />
+                            <div>
+                                <div class="font-medium">Nhận tại cửa hàng</div>
+                                <div class="text-sm text-gray-500">Miễn phí vận chuyển.</div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- Address -->
+                    <div id="shipBox" class="mt-4 @(Model.DeliveryMethod == DeliveryMethod.HomeDelivery ? "" : "hidden")">
+                        <label asp-for="ShippingAddress" class="block text-sm font-medium text-gray-700"></label>
+                        <input asp-for="ShippingAddress" placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành"
+                               class="mt-1 w-full border-gray-300 rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                        <span asp-validation-for="ShippingAddress" class="text-sm text-red-600"></span>
+                    </div>
+
+                    <!-- Branch -->
+                    <div id="pickupBox" class="mt-4 space-y-3 @(Model.DeliveryMethod == DeliveryMethod.PickupAtStore ? "" : "hidden")">
+                        <label class="block text-sm font-medium text-gray-700">Chi nhánh nhận</label>
+                        <select id="PickupBranchId" name="PickupBranchId"
+                                class="w-full border-gray-300 rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                onchange="updateBranchInfo()">
+                            <option value="">-- Chọn chi nhánh --</option>
+                            @foreach (var br in Model.Branches)
+                            {
+                                <option value="@br.Id" data-name="@br.Name" data-address="@br.Address">@br.Name</option>
+                            }
+                        </select>
+                        <span asp-validation-for="PickupBranchId" class="text-sm text-red-600"></span>
+
+                        <div id="branchCard" class="hidden rounded-xl border bg-blue-50/40 p-3 text-sm">
+                            <div class="font-semibold text-gray-800" data-name>—</div>
+                            <div class="text-gray-600 mt-0.5" data-address>—</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment -->
+                <div class="card-glass rounded-2xl p-6 shadow-sm">
+                    <h2 class="text-lg font-semibold mb-4">Phương thức thanh toán</h2>
+
+                    <div class="grid sm:grid-cols-2 gap-3">
+                        <label class="border rounded-xl p-4 flex items-start gap-3 cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="PaymentMethod" value="@((int)PaymentMethod.Card)"
+                                   @(Model.PaymentMethod == PaymentMethod.Card ? "checked" : null)
+                                   onchange="togglePayment(this.value)" class="mt-1 text-blue-600" />
+                            <div>
+                                <div class="font-medium">Thẻ ngân hàng</div>
+                                <div class="text-sm text-gray-500">Nhập số thẻ ảo để mô phỏng.</div>
+                            </div>
+                        </label>
+
+                        <label class="border rounded-xl p-4 flex items-start gap-3 cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="PaymentMethod" value="@((int)PaymentMethod.BankTransfer)"
+                                   @(Model.PaymentMethod == PaymentMethod.BankTransfer ? "checked" : null)
+                                   onchange="togglePayment(this.value)" class="mt-1 text-blue-600" />
+                            <div>
+                                <div class="font-medium">Chuyển khoản</div>
+                                <div class="text-sm text-gray-500">Chọn ngân hàng để xem thông tin.</div>
+                            </div>
+                        </label>
+
+                        <label class="border rounded-xl p-4 flex items-start gap-3 cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="PaymentMethod" value="@((int)PaymentMethod.CashOnDelivery)"
+                                   @(Model.PaymentMethod == PaymentMethod.CashOnDelivery ? "checked" : null)
+                                   onchange="togglePayment(this.value)" class="mt-1 text-blue-600" />
+                            <div>
+                                <div class="font-medium">Thanh toán khi nhận</div>
+                                <div class="text-sm text-gray-500">Thu tiền khi giao hàng.</div>
+                            </div>
+                        </label>
+
+                        <label class="border rounded-xl p-4 flex items-start gap-3 cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="PaymentMethod" value="@((int)PaymentMethod.PayAtStore)"
+                                   @(Model.PaymentMethod == PaymentMethod.PayAtStore ? "checked" : null)
+                                   onchange="togglePayment(this.value)" class="mt-1 text-blue-600" />
+                            <div>
+                                <div class="font-medium">Thanh toán tại cửa hàng</div>
+                                <div class="text-sm text-gray-500">Dùng khi nhận tại chi nhánh.</div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- Banks -->
+                    <div id="bankBox" class="mt-5 @(Model.PaymentMethod is PaymentMethod.Card or PaymentMethod.BankTransfer ? "" : "hidden")">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Ngân hàng</label>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                            @foreach (var bank in Model.Banks)
+                            {
+                                var t = bank.GetType();
+                                var code = (t.GetProperty("Code")?.GetValue(bank) as string) ?? "";
+                                var logo = (t.GetProperty("Logo")?.GetValue(bank) as string)
+                                           ?? (t.GetProperty("LogoUrl")?.GetValue(bank) as string)
+                                           ?? (!string.IsNullOrWhiteSpace(code) ? $"/images/banks/{code.ToLower()}.svg" : "/images/banks/default.svg");
+                                var isSel = !string.IsNullOrWhiteSpace(Model.SelectedBankCode)
+                                            && string.Equals(Model.SelectedBankCode, code, StringComparison.OrdinalIgnoreCase);
+
+                                <label class="border rounded-xl p-3 cursor-pointer hover:shadow-sm flex items-center gap-3 @(isSel ? "ring-2 ring-blue-500 border-blue-400" : "")">
+                                    <input type="radio" name="SelectedBankCode" value="@code" class="hidden" @(isSel ? "checked" : null) />
+                                    <img src="@logo" alt="@code" class="h-6 w-6 object-contain" />
+                                    <span class="text-sm font-medium">@code</span>
+                                </label>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Card info -->
+                    <div id="cardBox" class="mt-5 @(Model.PaymentMethod == PaymentMethod.Card ? "" : "hidden")">
+                        <div class="grid sm:grid-cols-2 gap-4">
+                            <div>
+                                <label asp-for="CardHolder" class="block text-sm font-medium text-gray-700"></label>
+                                <input asp-for="CardHolder" placeholder="Nguyen Van A"
+                                       class="mt-1 w-full border-gray-300 rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                                <span asp-validation-for="CardHolder" class="text-sm text-red-600"></span>
+                            </div>
+                            <div>
+                                <label asp-for="CardExpiry" class="block text-sm font-medium text-gray-700"></label>
+                                <input asp-for="CardExpiry" placeholder="MM/YY" inputmode="numeric"
+                                       class="mt-1 w-full border-gray-300 rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                                <span asp-validation-for="CardExpiry" class="text-sm text-red-600"></span>
+                            </div>
+                            <div class="sm:col-span-2">
+                                <label asp-for="CardNumber" class="block text-sm font-medium text-gray-700"></label>
+                                <input asp-for="CardNumber" placeholder="9704 xxxx xxxx xxxx" inputmode="numeric" maxlength="19"
+                                       class="mt-1 w-full border-gray-300 rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                                <span asp-validation-for="CardNumber" class="text-sm text-red-600"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: summary -->
+            <aside class="lg:col-span-1">
+                <div class="sticky top-24 space-y-4">
+                    <div class="card-glass rounded-2xl border overflow-hidden shadow-sm">
+                        <div class="px-6 py-4 border-b bg-gradient-to-r from-blue-50 to-blue-100/60">
+                            <h3 class="text-lg font-semibold flex items-center gap-2">
+                                <i class="fa-solid fa-receipt text-blue-600"></i> Đơn hàng của bạn
+                            </h3>
+                        </div>
+
+                        <div class="px-6 py-4 space-y-3 max-h-[360px] overflow-auto">
+                            @foreach (var it in Model.Items)
+                            {
+                                @await Html.PartialAsync("_CheckoutItemRow",
+                                    new MotorShop.ViewModels.CheckoutLineVm {
+                                        Name = it.ProductName, Quantity = it.Quantity, UnitPrice = it.Price, ImageUrl = it.ImageUrl
+                                    },
+                                    new ViewDataDictionary(ViewData) { ["mode"] = "card" })
+                            }
+                        </div>
+
+                        @if (supportsCoupon)
+                        {
+                            <div class="px-6 pt-2 border-t">
+                                <label class="text-sm font-semibold text-gray-700">Mã giảm giá</label>
+                                <div class="mt-2 flex gap-2">
+                                    <input type="text" name="CouponCode" value="@couponValue"
+                                           placeholder="Nhập mã (VD: MOTOR5)"
+                                           class="flex-1 border-gray-300 rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                                    <button type="submit"
+                                            class="px-4 rounded-xl border font-semibold hover:bg-gray-50">
+                                        Áp dụng
+                                    </button>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">Mã sẽ được kiểm tra & áp dụng khi xác nhận đơn.</p>
+                            </div>
+                        }
+
+                        <div class="px-6 py-4 border-t space-y-2 text-sm">
+                            <div class="flex justify-between text-gray-600">
+                                <span>Tạm tính</span><span>@Model.Subtotal.ToString("#,0") ₫</span>
+                            </div>
+                            <div class="flex justify-between text-gray-600">
+                                <span>Phí vận chuyển</span><span>@Model.ShippingFee.ToString("#,0") ₫</span>
+                            </div>
+                            <div class="flex justify-between text-gray-600">
+                                <span>Giảm giá</span><span>-@Model.DiscountAmount.ToString("#,0") ₫</span>
+                            </div>
+                            <div class="h-px bg-gray-200 my-2"></div>
+                            <div class="flex justify-between text-base font-semibold">
+                                <span>Tổng cộng</span><span class="text-gray-900">@Model.Total.ToString("#,0") ₫</span>
+                            </div>
+                        </div>
+
+                        <div class="px-6 py-4 border-t">
+                            <button id="btnSubmit" type="submit"
+                                    class="w-full py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 btn-3d inline-flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-lock"></i>
+                                <span> Xác nhận & Thanh toán</span>
+                            </button>
+                            <p class="text-[11px] text-gray-500 mt-2 text-center">
+                                <i class="fa-solid fa-shield-halved text-blue-600"></i> Thanh toán an toàn. Không lưu thông tin thẻ.
+                            </p>
+                        </div>
+                    </div>
+
+                    <a asp-controller="Cart" asp-action="Index"
+                       class="block text-center text-sm text-blue-600 hover:text-blue-700 font-medium">
+                        ← Quay lại giỏ hàng
+                    </a>
+                </div>
+            </aside>
+        </form>
+    </div>
+</section>
+
+@section Scripts{
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function toggleDelivery(val){
+            const ship = document.getElementById('shipBox');
+            const pick = document.getElementById('pickupBox');
+            const home = '@((int)DeliveryMethod.HomeDelivery)';
+            if(String(val) === home){
+                ship?.classList.remove('hidden');
+                pick?.classList.add('hidden');
+            } else {
+                ship?.classList.add('hidden');
+                pick?.classList.remove('hidden');
+                updateBranchInfo();
+            }
+        }
+
+        function togglePayment(val){
+            const bank = document.getElementById('bankBox');
+            const card = document.getElementById('cardBox');
+            const CARD  = '@((int)PaymentMethod.Card)';
+            const TRANS = '@((int)PaymentMethod.BankTransfer)';
+            bank?.classList.toggle('hidden', !(String(val) === CARD || String(val) === TRANS));
+            card?.classList.toggle('hidden', String(val) !== CARD);
+        }
+
+        function updateBranchInfo(){
+            const sel  = document.getElementById('PickupBranchId');
+            const card = document.getElementById('branchCard');
+            if(!sel || !card) return;
+            const opt = sel.options[sel.selectedIndex];
+            const name = opt?.dataset?.name || "";
+            const address = opt?.dataset?.address || "";
+            card.querySelector('[data-name]').textContent = name || "—";
+            card.querySelector('[data-address]').textContent = address || "—";
+            card.classList.toggle('hidden', !opt || !opt.value);
+        }
+
+        // Chặn double submit + nhỏ: format card number spacing
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set selected branch từ Model
+            const sel = document.getElementById('PickupBranchId');
+            if (sel) {
+                sel.value = '@(Model.PickupBranchId?.ToString() ?? "")';
+                updateBranchInfo();
+            }
+
+            // Init toggle theo giá trị hiện tại
+            toggleDelivery(document.querySelector('input[name="DeliveryMethod"]:checked')?.value ?? '@((int)DeliveryMethod.HomeDelivery)');
+            togglePayment(document.querySelector('input[name="PaymentMethod"]:checked')?.value ?? '@((int)PaymentMethod.Card)');
+
+            // Prevent double submit
+            const btn = document.getElementById('btnSubmit');
+            if(btn){
+                btn.closest('form')?.addEventListener('submit', () => {
+                    btn.disabled = true;
+                    btn.classList.add('opacity-70');
+                    const icon = btn.querySelector('i');
+                    if(icon){ icon.className = 'fa-solid fa-spinner animate-spin'; }
+                });
+            }
+
+            // Format thẻ: thêm khoảng trắng mỗi 4 số
+            const cardInput = document.querySelector('input[name="CardNumber"]');
+            if(cardInput){
+                cardInput.addEventListener('input', () => {
+                    const raw = cardInput.value.replace(/\D/g,'').slice(0,19);
+                    cardInput.value = raw.replace(/(.{4})/g,'$1 ').trim();
+                });
+            }
+        });
+    </script>
+}

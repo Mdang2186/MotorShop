@@ -1,0 +1,65 @@
+﻿@model IEnumerable<MotorShop.Models.Category>
+@{
+    ViewData["Title"] = "Quản lý danh mục";
+}
+
+<div class="md:flex md:items-center md:justify-between mb-6">
+    <div class="min-w-0 flex-1">
+        <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl tracking-tight">Quản lý danh mục</h2>
+        <p class="mt-1 text-sm text-gray-500">Danh sách tất cả danh mục sản phẩm hiện có trên hệ thống.</p>
+    </div>
+    <div class="mt-4 flex md:ml-4 md:mt-0">
+        <a asp-action="Create" class="inline-flex items-center rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 transition-all duration-200">
+            <i class="fa-solid fa-plus mr-2"></i>
+            Thêm danh mục mới
+        </a>
+    </div>
+</div>
+
+<div class="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-xl overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead>
+                <tr class="bg-gray-50">
+                    <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 sm:pl-6">Tên danh mục</th>
+                    <th scope="col" class="px-3 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Mô tả</th>
+                    <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 bg-white">
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr class="hover:bg-gray-50 transition-colors duration-150">
+                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                                @item.Name
+                            </td>
+                            <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                <div class="flex justify-end gap-2">
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="text-blue-600 bg-blue-50 hover:bg-blue-100 hover:text-blue-800 px-3 py-1.5 rounded-md transition-colors duration-200 flex items-center">
+                                        <i class="fa-regular fa-pen-to-square mr-1.5"></i>Sửa
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="text-red-600 bg-red-50 hover:bg-red-100 hover:text-red-800 px-3 py-1.5 rounded-md transition-colors duration-200 flex items-center">
+                                        <i class="fa-regular fa-trash-can mr-1.5"></i>Xoá
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="3" class="px-6 py-10 text-center text-gray-500 bg-gray-50">
+                            <div class="flex flex-col items-center">
+                                <i class="fa-regular fa-folder-open text-4xl mb-3 text-gray-300"></i>
+                                <p>Chưa có dữ liệu danh mục nào.</p>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
