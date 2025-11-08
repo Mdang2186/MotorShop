@@ -187,7 +187,7 @@ namespace MotorShop.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<string>("EmailOtpCashOnDeliverye")
+                    b.Property<string>("EmailOtpCode")
                         .HasMaxLength(6)
                         .HasColumnType("nvarchar(6)");
 
@@ -256,7 +256,7 @@ namespace MotorShop.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
-                    b.Property<string>("CashOnDeliverye")
+                    b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
@@ -284,7 +284,7 @@ namespace MotorShop.Migrations
 
                     b.HasIndex("Bin");
 
-                    b.HasIndex("CashOnDeliverye");
+                    b.HasIndex("Code");
 
                     b.HasIndex("ShortName");
 
@@ -304,7 +304,7 @@ namespace MotorShop.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<string>("CashOnDeliverye")
+                    b.Property<string>("Code")
                         .HasMaxLength(80)
                         .HasColumnType("nvarchar(80)");
 
@@ -468,7 +468,7 @@ namespace MotorShop.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("TrackingCashOnDeliverye")
+                    b.Property<string>("TrackingCode")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
@@ -693,7 +693,7 @@ namespace MotorShop.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("CashOnDeliverye")
+                    b.Property<string>("Code")
                         .HasMaxLength(40)
                         .HasColumnType("nvarchar(40)");
 

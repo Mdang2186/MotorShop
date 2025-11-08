@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MotorShop")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c8f3141a30a403b12446065888e22ce119fcd940")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8f70cd3dd1a5f96f05478d3a69145de4786e1140")]
 [assembly: System.Reflection.AssemblyProductAttribute("MotorShop")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MotorShop")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -3,8 +3,42 @@
   "WorkspaceRootPath": "D:\\#MyPepositoryGITHUB\\MotorShop\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{A68E8BBE-9601-46E8-87E2-51A607E71C49}|MotorShop\\MotorShop.csproj|d:\\#mypepositorygithub\\motorshop\\motorshop\\data\\seeders\\productseeder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A68E8BBE-9601-46E8-87E2-51A607E71C49}|MotorShop\\MotorShop.csproj|solutionrelative:motorshop\\data\\seeders\\productseeder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A68E8BBE-9601-46E8-87E2-51A607E71C49}|MotorShop\\MotorShop.csproj|d:\\#mypepositorygithub\\motorshop\\motorshop\\data\\seeders\\orderseeder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A68E8BBE-9601-46E8-87E2-51A607E71C49}|MotorShop\\MotorShop.csproj|solutionrelative:motorshop\\data\\seeders\\orderseeder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A68E8BBE-9601-46E8-87E2-51A607E71C49}|MotorShop\\MotorShop.csproj|d:\\#mypepositorygithub\\motorshop\\motorshop\\data\\seeders\\masterdataseeder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A68E8BBE-9601-46E8-87E2-51A607E71C49}|MotorShop\\MotorShop.csproj|solutionrelative:motorshop\\data\\seeders\\masterdataseeder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A68E8BBE-9601-46E8-87E2-51A607E71C49}|MotorShop\\MotorShop.csproj|d:\\#mypepositorygithub\\motorshop\\motorshop\\data\\seeders\\identityseeder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A68E8BBE-9601-46E8-87E2-51A607E71C49}|MotorShop\\MotorShop.csproj|solutionrelative:motorshop\\data\\seeders\\identityseeder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{A68E8BBE-9601-46E8-87E2-51A607E71C49}|MotorShop\\MotorShop.csproj|d:\\#mypepositorygithub\\motorshop\\motorshop\\utilities\\dbinitializer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A68E8BBE-9601-46E8-87E2-51A607E71C49}|MotorShop\\MotorShop.csproj|solutionrelative:motorshop\\utilities\\dbinitializer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A68E8BBE-9601-46E8-87E2-51A607E71C49}|MotorShop\\MotorShop.csproj|d:\\#mypepositorygithub\\motorshop\\motorshop\\migrations\\20251106121019_minha.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A68E8BBE-9601-46E8-87E2-51A607E71C49}|MotorShop\\MotorShop.csproj|solutionrelative:motorshop\\migrations\\20251106121019_minha.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Migrations\\20251106093435_fix.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:MotorShop\\Migrations\\20251106093435_fix.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A68E8BBE-9601-46E8-87E2-51A607E71C49}|MotorShop\\MotorShop.csproj|d:\\#mypepositorygithub\\motorshop\\motorshop\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A68E8BBE-9601-46E8-87E2-51A607E71C49}|MotorShop\\MotorShop.csproj|solutionrelative:motorshop\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/MotorShopDb/True/SqlTable/dbo.AspNetUsers.sql||{0058A1F7-65F3-4DB9-B3D0-CA7E64DD73CD}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/MotorShopDb/True/SqlTable/dbo.AspNetRoles.sql||{0058A1F7-65F3-4DB9-B3D0-CA7E64DD73CD}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/MotorShopDb/True/SqlTable/dbo.Categories.sql||{0058A1F7-65F3-4DB9-B3D0-CA7E64DD73CD}"
@@ -217,10 +251,6 @@
       "RelativeMoniker": "D:0:0:{A68E8BBE-9601-46E8-87E2-51A607E71C49}|MotorShop\\MotorShop.csproj|solutionrelative:motorshop\\views\\shared\\_navbarpartial.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A68E8BBE-9601-46E8-87E2-51A607E71C49}|MotorShop\\MotorShop.csproj|d:\\#mypepositorygithub\\motorshop\\motorshop\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A68E8BBE-9601-46E8-87E2-51A607E71C49}|MotorShop\\MotorShop.csproj|solutionrelative:motorshop\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{A68E8BBE-9601-46E8-87E2-51A607E71C49}|MotorShop\\MotorShop.csproj|d:\\#mypepositorygithub\\motorshop\\motorshop\\utilities\\sd.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A68E8BBE-9601-46E8-87E2-51A607E71C49}|MotorShop\\MotorShop.csproj|solutionrelative:motorshop\\utilities\\sd.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -301,6 +331,10 @@
     {
       "AbsoluteMoniker": "D:0:0:{A68E8BBE-9601-46E8-87E2-51A607E71C49}|MotorShop\\MotorShop.csproj|d:\\#mypepositorygithub\\motorshop\\motorshop\\migrations\\20251106005556_fixprocate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A68E8BBE-9601-46E8-87E2-51A607E71C49}|MotorShop\\MotorShop.csproj|solutionrelative:motorshop\\migrations\\20251106005556_fixprocate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A68E8BBE-9601-46E8-87E2-51A607E71C49}|MotorShop\\MotorShop.csproj|d:\\#mypepositorygithub\\motorshop\\motorshop\\migrations\\20251106115928_fixa.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A68E8BBE-9601-46E8-87E2-51A607E71C49}|MotorShop\\MotorShop.csproj|solutionrelative:motorshop\\migrations\\20251106115928_fixa.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -310,7 +344,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 11,
+          "SelectedChildIndex": 9,
           "Children": [
             {
               "$type": "Bookmark",
@@ -333,22 +367,144 @@
               "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
             },
             {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
-            },
-            {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "dbo.Categories [Data]",
-              "DocumentMoniker": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/MotorShopDb/True/SqlTable/dbo.Categories.sql",
-              "ToolTip": "dbo.Categories [Data]",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
-              "WhenOpened": "2025-11-06T03:23:58.906Z",
-              "EditorCaption": ""
+              "DocumentIndex": 5,
+              "Title": "20251106121019_minha.cs",
+              "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Migrations\\20251106121019_minha.cs",
+              "RelativeDocumentMoniker": "MotorShop\\Migrations\\20251106121019_minha.cs",
+              "ToolTip": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Migrations\\20251106121019_minha.cs",
+              "RelativeToolTip": "MotorShop\\Migrations\\20251106121019_minha.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-06T12:10:19.549Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
+              "Title": "MasterDataSeeder.cs",
+              "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Data\\Seeders\\MasterDataSeeder.cs",
+              "RelativeDocumentMoniker": "MotorShop\\Data\\Seeders\\MasterDataSeeder.cs",
+              "ToolTip": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Data\\Seeders\\MasterDataSeeder.cs",
+              "RelativeToolTip": "MotorShop\\Data\\Seeders\\MasterDataSeeder.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAADQAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-06T03:53:21.301Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "IdentitySeeder.cs",
+              "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Data\\Seeders\\IdentitySeeder.cs",
+              "RelativeDocumentMoniker": "MotorShop\\Data\\Seeders\\IdentitySeeder.cs",
+              "ToolTip": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Data\\Seeders\\IdentitySeeder.cs",
+              "RelativeToolTip": "MotorShop\\Data\\Seeders\\IdentitySeeder.cs",
+              "ViewState": "AgIAACAAAAAAAAAAAADwv1oAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-06T03:53:08.383Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "DbInitializer.cs",
+              "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Utilities\\DbInitializer.cs",
+              "RelativeDocumentMoniker": "MotorShop\\Utilities\\DbInitializer.cs",
+              "ToolTip": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Utilities\\DbInitializer.cs",
+              "RelativeToolTip": "MotorShop\\Utilities\\DbInitializer.cs",
+              "ViewState": "AgIAAIgBAAAAAAAAAADwv74BAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-15T17:35:30.913Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "ProductSeeder.cs",
+              "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Data\\Seeders\\ProductSeeder.cs",
+              "RelativeDocumentMoniker": "MotorShop\\Data\\Seeders\\ProductSeeder.cs",
+              "ToolTip": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Data\\Seeders\\ProductSeeder.cs",
+              "RelativeToolTip": "MotorShop\\Data\\Seeders\\ProductSeeder.cs",
+              "ViewState": "AgIAAC4AAAAAAAAAAAAkwFoAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-06T03:53:34.273Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "OrderSeeder.cs",
+              "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Data\\Seeders\\OrderSeeder.cs",
+              "RelativeDocumentMoniker": "MotorShop\\Data\\Seeders\\OrderSeeder.cs",
+              "ToolTip": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Data\\Seeders\\OrderSeeder.cs",
+              "RelativeToolTip": "MotorShop\\Data\\Seeders\\OrderSeeder.cs",
+              "ViewState": "AgIAABUAAAAAAAAAAAAAADEAAABKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-06T03:53:46.228Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Program.cs",
+              "RelativeDocumentMoniker": "MotorShop\\Program.cs",
+              "ToolTip": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Program.cs",
+              "RelativeToolTip": "MotorShop\\Program.cs",
+              "ViewState": "AgIAAGIAAAAAAAAAAAAUwHgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-15T12:59:28.056Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 84,
+              "Title": "20251106115928_fixa.cs",
+              "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Migrations\\20251106115928_fixa.cs",
+              "RelativeDocumentMoniker": "MotorShop\\Migrations\\20251106115928_fixa.cs",
+              "ToolTip": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Migrations\\20251106115928_fixa.cs",
+              "RelativeToolTip": "MotorShop\\Migrations\\20251106115928_fixa.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-06T11:59:29.078Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "20251106093435_fix.cs",
+              "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Migrations\\20251106093435_fix.cs",
+              "RelativeDocumentMoniker": "MotorShop\\Migrations\\20251106093435_fix.cs",
+              "ToolTip": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Migrations\\20251106093435_fix.cs",
+              "RelativeToolTip": "MotorShop\\Migrations\\20251106093435_fix.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-06T09:34:35.411Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "dbo.AspNetRoles.sql",
+              "DocumentMoniker": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/MotorShopDb/True/SqlTable/dbo.AspNetRoles.sql",
+              "ToolTip": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/MotorShopDb/True/SqlTable/dbo.AspNetRoles.sql",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
+              "WhenOpened": "2025-11-06T04:01:18.054Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "dbo.AspNetUsers.sql",
+              "DocumentMoniker": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/MotorShopDb/True/SqlTable/dbo.AspNetUsers.sql",
+              "ToolTip": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/MotorShopDb/True/SqlTable/dbo.AspNetUsers.sql",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
+              "WhenOpened": "2025-11-06T04:01:26.509Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "dbo.Categories.sql",
+              "DocumentMoniker": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/MotorShopDb/True/SqlTable/dbo.Categories.sql",
+              "ToolTip": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/MotorShopDb/True/SqlTable/dbo.Categories.sql",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
+              "WhenOpened": "2025-11-06T03:23:58.906Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
               "Title": "Index.cshtml",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Areas\\Admin\\Views\\Dashboard\\Index.cshtml",
               "RelativeDocumentMoniker": "MotorShop\\Areas\\Admin\\Views\\Dashboard\\Index.cshtml",
@@ -356,12 +512,11 @@
               "RelativeToolTip": "MotorShop\\Areas\\Admin\\Views\\Dashboard\\Index.cshtml",
               "ViewState": "AgIAANEAAAAAAAAAAAAswOkAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-10-15T17:42:27.042Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-15T17:42:27.042Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 17,
               "Title": "DomainEnums.cs",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Models\\Enums\\DomainEnums.cs",
               "RelativeDocumentMoniker": "MotorShop\\Models\\Enums\\DomainEnums.cs",
@@ -369,12 +524,11 @@
               "RelativeToolTip": "MotorShop\\Models\\Enums\\DomainEnums.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-06T02:04:11.976Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-06T02:04:11.976Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 15,
               "Title": "Index.cshtml",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Areas\\Admin\\Views\\Order\\Index.cshtml",
               "RelativeDocumentMoniker": "MotorShop\\Areas\\Admin\\Views\\Order\\Index.cshtml",
@@ -382,12 +536,11 @@
               "RelativeToolTip": "MotorShop\\Areas\\Admin\\Views\\Order\\Index.cshtml",
               "ViewState": "AgIAAGcAAAAAAAAAAAAwwLQAAAAGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-10-15T18:05:05.464Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-15T18:05:05.464Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 13,
               "Title": "Details.cshtml",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Areas\\Admin\\Views\\Order\\Details.cshtml",
               "RelativeDocumentMoniker": "MotorShop\\Areas\\Admin\\Views\\Order\\Details.cshtml",
@@ -395,25 +548,11 @@
               "RelativeToolTip": "MotorShop\\Areas\\Admin\\Views\\Order\\Details.cshtml",
               "ViewState": "AgIAAMkAAAAAAAAAAAAcwPkAAAAGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-11-06T00:45:50.999Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-06T00:45:50.999Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "DbInitializer.cs",
-              "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Utilities\\DbInitializer.cs",
-              "RelativeDocumentMoniker": "MotorShop\\Utilities\\DbInitializer.cs",
-              "ToolTip": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Utilities\\DbInitializer.cs",
-              "RelativeToolTip": "MotorShop\\Utilities\\DbInitializer.cs",
-              "ViewState": "AgIAABYAAAAAAAAAAAAqwCcAAAARAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-15T17:35:30.913Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 16,
               "Title": "OrderController.cs",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Areas\\Admin\\Controllers\\OrderController.cs",
               "RelativeDocumentMoniker": "MotorShop\\Areas\\Admin\\Controllers\\OrderController.cs",
@@ -421,12 +560,11 @@
               "RelativeToolTip": "MotorShop\\Areas\\Admin\\Controllers\\OrderController.cs",
               "ViewState": "AgIAADkAAAAAAAAAAAAwwHUAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-05T15:48:01.322Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-05T15:48:01.322Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 12,
               "Title": "_AdminLayout.cshtml",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Areas\\Admin\\Views\\Shared\\_AdminLayout.cshtml",
               "RelativeDocumentMoniker": "MotorShop\\Areas\\Admin\\Views\\Shared\\_AdminLayout.cshtml",
@@ -434,12 +572,11 @@
               "RelativeToolTip": "MotorShop\\Areas\\Admin\\Views\\Shared\\_AdminLayout.cshtml",
               "ViewState": "AgIAAGMAAAAAAAAAAAAwwKEAAAAHAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-11-05T15:39:02.167Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-05T15:39:02.167Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 19,
               "Title": "CategoryController.cs",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Areas\\Admin\\Controllers\\CategoryController.cs",
               "RelativeDocumentMoniker": "MotorShop\\Areas\\Admin\\Controllers\\CategoryController.cs",
@@ -447,12 +584,11 @@
               "RelativeToolTip": "MotorShop\\Areas\\Admin\\Controllers\\CategoryController.cs",
               "ViewState": "AgIAABUAAAAAAAAAAAAwwFEAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-05T10:30:32.836Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-05T10:30:32.836Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 18,
               "Title": "CartItem.cs",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Models\\CartItem.cs",
               "RelativeDocumentMoniker": "MotorShop\\Models\\CartItem.cs",
@@ -460,25 +596,23 @@
               "RelativeToolTip": "MotorShop\\Models\\CartItem.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-06T02:14:48.624Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-06T02:14:48.624Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "MotorShop",
+              "DocumentIndex": 14,
+              "Title": "MotorShop.csproj",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\MotorShop.csproj",
               "RelativeDocumentMoniker": "MotorShop\\MotorShop.csproj",
               "ToolTip": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\MotorShop.csproj",
               "RelativeToolTip": "MotorShop\\MotorShop.csproj",
               "ViewState": "AgIAABgAAAAAAAAAAAAAACkAAAAuAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2025-11-06T02:14:02.166Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-06T02:14:02.166Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 20,
               "Title": "AccountController.cs",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Controllers\\AccountController.cs",
               "RelativeDocumentMoniker": "MotorShop\\Controllers\\AccountController.cs",
@@ -486,12 +620,11 @@
               "RelativeToolTip": "MotorShop\\Controllers\\AccountController.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAPsAAAANAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-05T15:35:38.214Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-05T15:35:38.214Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 21,
               "Title": "UserController.cs",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Areas\\Admin\\Controllers\\UserController.cs",
               "RelativeDocumentMoniker": "MotorShop\\Areas\\Admin\\Controllers\\UserController.cs",
@@ -499,12 +632,11 @@
               "RelativeToolTip": "MotorShop\\Areas\\Admin\\Controllers\\UserController.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAADAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-05T10:30:39.276Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-05T10:30:39.276Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 22,
               "Title": "ProductController.cs",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Areas\\Admin\\Controllers\\ProductController.cs",
               "RelativeDocumentMoniker": "MotorShop\\Areas\\Admin\\Controllers\\ProductController.cs",
@@ -512,22 +644,20 @@
               "RelativeToolTip": "MotorShop\\Areas\\Admin\\Controllers\\ProductController.cs",
               "ViewState": "AgIAAEsAAAAAAAAAAAAwwIcAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-15T17:49:29.87Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-15T17:49:29.87Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
-              "Title": "dbo.Orders [Data]",
+              "DocumentIndex": 23,
+              "Title": "dbo.Orders.sql",
               "DocumentMoniker": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/MotorShopDb/True/SqlTable/dbo.Orders.sql",
-              "ToolTip": "dbo.Orders [Data]",
+              "ToolTip": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/MotorShopDb/True/SqlTable/dbo.Orders.sql",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
-              "WhenOpened": "2025-11-06T02:08:16.258Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-06T02:08:16.258Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 24,
               "Title": "DashboardController.cs",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Areas\\Admin\\Controllers\\DashboardController.cs",
               "RelativeDocumentMoniker": "MotorShop\\Areas\\Admin\\Controllers\\DashboardController.cs",
@@ -535,12 +665,11 @@
               "RelativeToolTip": "MotorShop\\Areas\\Admin\\Controllers\\DashboardController.cs",
               "ViewState": "AgIAAAEAAAAAAAAAAAAwwD0AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-15T17:41:54.313Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-15T17:41:54.313Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 18,
+              "DocumentIndex": 27,
               "Title": "Index.cshtml",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Views\\Home\\Index.cshtml",
               "RelativeDocumentMoniker": "MotorShop\\Views\\Home\\Index.cshtml",
@@ -548,12 +677,11 @@
               "RelativeToolTip": "MotorShop\\Views\\Home\\Index.cshtml",
               "ViewState": "AgIAACoAAAAAAAAAAAAAAEwAAABKAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-10-15T17:38:44.225Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-15T17:38:44.225Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 20,
+              "DocumentIndex": 29,
               "Title": "_ViewStart.cshtml",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Areas\\Admin\\Views\\_ViewStart.cshtml",
               "RelativeDocumentMoniker": "MotorShop\\Areas\\Admin\\Views\\_ViewStart.cshtml",
@@ -561,12 +689,11 @@
               "RelativeToolTip": "MotorShop\\Areas\\Admin\\Views\\_ViewStart.cshtml",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-11-05T16:07:50.67Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-05T16:07:50.67Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 25,
               "Title": "HttpRequestExtensions.cs",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Utilities\\HttpRequestExtensions.cs",
               "RelativeDocumentMoniker": "MotorShop\\Utilities\\HttpRequestExtensions.cs",
@@ -574,12 +701,11 @@
               "RelativeToolTip": "MotorShop\\Utilities\\HttpRequestExtensions.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-06T01:25:51.808Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-06T01:25:51.808Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 26,
               "Title": "_ViewImports.cshtml",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Areas\\Admin\\Views\\_ViewImports.cshtml",
               "RelativeDocumentMoniker": "MotorShop\\Areas\\Admin\\Views\\_ViewImports.cshtml",
@@ -587,12 +713,11 @@
               "RelativeToolTip": "MotorShop\\Areas\\Admin\\Views\\_ViewImports.cshtml",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-10-15T17:43:01.378Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-15T17:43:01.378Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 19,
+              "DocumentIndex": 28,
               "Title": "Privacy.cshtml",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Views\\Home\\Privacy.cshtml",
               "RelativeDocumentMoniker": "MotorShop\\Views\\Home\\Privacy.cshtml",
@@ -600,12 +725,11 @@
               "RelativeToolTip": "MotorShop\\Views\\Home\\Privacy.cshtml",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-11-06T01:08:23.273Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-06T01:08:23.273Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 21,
+              "DocumentIndex": 30,
               "Title": "_ProductForm.cshtml",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Areas\\Admin\\Views\\Product\\_ProductForm.cshtml",
               "RelativeDocumentMoniker": "MotorShop\\Areas\\Admin\\Views\\Product\\_ProductForm.cshtml",
@@ -617,7 +741,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 22,
+              "DocumentIndex": 31,
               "Title": "Index.cshtml",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Areas\\Admin\\Views\\Category\\Index.cshtml",
               "RelativeDocumentMoniker": "MotorShop\\Areas\\Admin\\Views\\Category\\Index.cshtml",
@@ -629,7 +753,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 75,
+              "DocumentIndex": 83,
               "Title": "20251106005556_fixprocate.cs",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Migrations\\20251106005556_fixprocate.cs",
               "RelativeDocumentMoniker": "MotorShop\\Migrations\\20251106005556_fixprocate.cs",
@@ -641,7 +765,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 27,
+              "DocumentIndex": 36,
               "Title": "Create.cshtml",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Areas\\Admin\\Views\\Product\\Create.cshtml",
               "RelativeDocumentMoniker": "MotorShop\\Areas\\Admin\\Views\\Product\\Create.cshtml",
@@ -653,7 +777,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 26,
+              "DocumentIndex": 35,
               "Title": "Edit.cshtml",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Areas\\Admin\\Views\\Product\\Edit.cshtml",
               "RelativeDocumentMoniker": "MotorShop\\Areas\\Admin\\Views\\Product\\Edit.cshtml",
@@ -665,7 +789,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 25,
+              "DocumentIndex": 34,
               "Title": "Product.cs",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Models\\Product.cs",
               "RelativeDocumentMoniker": "MotorShop\\Models\\Product.cs",
@@ -677,7 +801,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 24,
+              "DocumentIndex": 33,
               "Title": "Category.cs",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Models\\Category.cs",
               "RelativeDocumentMoniker": "MotorShop\\Models\\Category.cs",
@@ -689,7 +813,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 23,
+              "DocumentIndex": 32,
               "Title": "appsettings.json",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\appsettings.json",
               "RelativeDocumentMoniker": "MotorShop\\appsettings.json",
@@ -701,7 +825,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 28,
+              "DocumentIndex": 37,
               "Title": "_CategoryForm.cshtml",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Areas\\Admin\\Views\\Category\\_CategoryForm.cshtml",
               "RelativeDocumentMoniker": "MotorShop\\Areas\\Admin\\Views\\Category\\_CategoryForm.cshtml",
@@ -713,7 +837,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 29,
+              "DocumentIndex": 38,
               "Title": "_SidebarPartial.cshtml",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Areas\\Admin\\Views\\Shared\\_SidebarPartial.cshtml",
               "RelativeDocumentMoniker": "MotorShop\\Areas\\Admin\\Views\\Shared\\_SidebarPartial.cshtml",
@@ -725,7 +849,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 30,
+              "DocumentIndex": 39,
               "Title": "Index.cshtml",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Areas\\Admin\\Views\\Product\\Index.cshtml",
               "RelativeDocumentMoniker": "MotorShop\\Areas\\Admin\\Views\\Product\\Index.cshtml",
@@ -737,7 +861,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 31,
+              "DocumentIndex": 40,
               "Title": "Delete.cshtml",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Areas\\Admin\\Views\\Product\\Delete.cshtml",
               "RelativeDocumentMoniker": "MotorShop\\Areas\\Admin\\Views\\Product\\Delete.cshtml",
@@ -749,7 +873,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 32,
+              "DocumentIndex": 41,
               "Title": "ApplicationDbContextModelSnapshot.cs",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Migrations\\ApplicationDbContextModelSnapshot.cs",
               "RelativeDocumentMoniker": "MotorShop\\Migrations\\ApplicationDbContextModelSnapshot.cs",
@@ -757,12 +881,11 @@
               "RelativeToolTip": "MotorShop\\Migrations\\ApplicationDbContextModelSnapshot.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-05T17:52:58.788Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-05T17:52:58.788Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 33,
+              "DocumentIndex": 42,
               "Title": "OrderItem.cs",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Models\\OrderItem.cs",
               "RelativeDocumentMoniker": "MotorShop\\Models\\OrderItem.cs",
@@ -774,7 +897,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 34,
+              "DocumentIndex": 43,
               "Title": "Order.cs",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Models\\Order.cs",
               "RelativeDocumentMoniker": "MotorShop\\Models\\Order.cs",
@@ -782,12 +905,11 @@
               "RelativeToolTip": "MotorShop\\Models\\Order.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABoAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-15T17:18:26.841Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-15T17:18:26.841Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 35,
+              "DocumentIndex": 44,
               "Title": "HomeController.cs",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Controllers\\HomeController.cs",
               "RelativeDocumentMoniker": "MotorShop\\Controllers\\HomeController.cs",
@@ -799,7 +921,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 36,
+              "DocumentIndex": 45,
               "Title": "CartController.cs",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Controllers\\CartController.cs",
               "RelativeDocumentMoniker": "MotorShop\\Controllers\\CartController.cs",
@@ -807,12 +929,11 @@
               "RelativeToolTip": "MotorShop\\Controllers\\CartController.cs",
               "ViewState": "AgIAAAcAAAAAAAAAAAAqwDcAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-15T17:57:37.794Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-15T17:57:37.794Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 37,
+              "DocumentIndex": 46,
               "Title": "ProductsController.cs",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Controllers\\ProductsController.cs",
               "RelativeDocumentMoniker": "MotorShop\\Controllers\\ProductsController.cs",
@@ -824,7 +945,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 38,
+              "DocumentIndex": 47,
               "Title": "ApplicationDbContext.cs",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Data\\ApplicationDbContext.cs",
               "RelativeDocumentMoniker": "MotorShop\\Data\\ApplicationDbContext.cs",
@@ -832,12 +953,11 @@
               "RelativeToolTip": "MotorShop\\Data\\ApplicationDbContext.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-15T17:19:15.36Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-15T17:19:15.36Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 40,
+              "DocumentIndex": 49,
               "Title": "Index.cshtml",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Areas\\Admin\\Views\\User\\Index.cshtml",
               "RelativeDocumentMoniker": "MotorShop\\Areas\\Admin\\Views\\User\\Index.cshtml",
@@ -849,7 +969,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 39,
+              "DocumentIndex": 48,
               "Title": "DashboardViewModel.cs",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\ViewModels\\DashboardViewModel.cs",
               "RelativeDocumentMoniker": "MotorShop\\ViewModels\\DashboardViewModel.cs",
@@ -861,7 +981,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 44,
+              "DocumentIndex": 53,
               "Title": "_ManageLayout.cshtml",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Views\\Shared\\_ManageLayout.cshtml",
               "RelativeDocumentMoniker": "MotorShop\\Views\\Shared\\_ManageLayout.cshtml",
@@ -873,7 +993,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 45,
+              "DocumentIndex": 54,
               "Title": "_ViewStart.cshtml",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Views\\_ViewStart.cshtml",
               "RelativeDocumentMoniker": "MotorShop\\Views\\_ViewStart.cshtml",
@@ -885,7 +1005,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 42,
+              "DocumentIndex": 51,
               "Title": "_FooterPartial.cshtml",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Views\\Shared\\_FooterPartial.cshtml",
               "RelativeDocumentMoniker": "MotorShop\\Views\\Shared\\_FooterPartial.cshtml",
@@ -897,7 +1017,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 46,
+              "DocumentIndex": 55,
               "Title": "_ViewImports.cshtml",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Views\\_ViewImports.cshtml",
               "RelativeDocumentMoniker": "MotorShop\\Views\\_ViewImports.cshtml",
@@ -909,7 +1029,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 47,
+              "DocumentIndex": 56,
               "Title": "_ValidationScriptsPartial.cshtml",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Views\\Shared\\_ValidationScriptsPartial.cshtml",
               "RelativeDocumentMoniker": "MotorShop\\Views\\Shared\\_ValidationScriptsPartial.cshtml",
@@ -921,7 +1041,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 41,
+              "DocumentIndex": 50,
               "Title": "_Layout.cshtml",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Views\\Shared\\_Layout.cshtml",
               "RelativeDocumentMoniker": "MotorShop\\Views\\Shared\\_Layout.cshtml",
@@ -933,7 +1053,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 43,
+              "DocumentIndex": 52,
               "Title": "_LoginPartial.cshtml",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Views\\Shared\\_LoginPartial.cshtml",
               "RelativeDocumentMoniker": "MotorShop\\Views\\Shared\\_LoginPartial.cshtml",
@@ -941,12 +1061,11 @@
               "RelativeToolTip": "MotorShop\\Views\\Shared\\_LoginPartial.cshtml",
               "ViewState": "AgIAAIMAAAAAAAAAAAAAACEAAAAGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-10-15T17:38:15.789Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-15T17:38:15.789Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 48,
+              "DocumentIndex": 57,
               "Title": "Login.cshtml",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Views\\Account\\Login.cshtml",
               "RelativeDocumentMoniker": "MotorShop\\Views\\Account\\Login.cshtml",
@@ -954,12 +1073,11 @@
               "RelativeToolTip": "MotorShop\\Views\\Account\\Login.cshtml",
               "ViewState": "AgIAAAkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-11-05T16:04:09.772Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-05T16:04:09.772Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 49,
+              "DocumentIndex": 58,
               "Title": "Manage.cshtml",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Views\\Account\\Manage.cshtml",
               "RelativeDocumentMoniker": "MotorShop\\Views\\Account\\Manage.cshtml",
@@ -967,12 +1085,11 @@
               "RelativeToolTip": "MotorShop\\Views\\Account\\Manage.cshtml",
               "ViewState": "AgIAAAYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-11-05T16:03:51.131Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-05T16:03:51.131Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 50,
+              "DocumentIndex": 59,
               "Title": "_PaginationPartial.cshtml",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Views\\Shared\\_PaginationPartial.cshtml",
               "RelativeDocumentMoniker": "MotorShop\\Views\\Shared\\_PaginationPartial.cshtml",
@@ -984,7 +1101,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 51,
+              "DocumentIndex": 60,
               "Title": "_ToastPartial.cshtml",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Views\\Shared\\_ToastPartial.cshtml",
               "RelativeDocumentMoniker": "MotorShop\\Views\\Shared\\_ToastPartial.cshtml",
@@ -996,7 +1113,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 52,
+              "DocumentIndex": 61,
               "Title": "_ManageNav.cshtml",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Views\\Shared\\_ManageNav.cshtml",
               "RelativeDocumentMoniker": "MotorShop\\Views\\Shared\\_ManageNav.cshtml",
@@ -1004,12 +1121,11 @@
               "RelativeToolTip": "MotorShop\\Views\\Shared\\_ManageNav.cshtml",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-11-05T16:02:53.178Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-05T16:02:53.178Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 53,
+              "DocumentIndex": 62,
               "Title": "_NavbarPartial.cshtml",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Views\\Shared\\_NavbarPartial.cshtml",
               "RelativeDocumentMoniker": "MotorShop\\Views\\Shared\\_NavbarPartial.cshtml",
@@ -1021,19 +1137,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 54,
-              "Title": "Program.cs",
-              "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Program.cs",
-              "RelativeDocumentMoniker": "MotorShop\\Program.cs",
-              "ToolTip": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Program.cs",
-              "RelativeToolTip": "MotorShop\\Program.cs",
-              "ViewState": "AgIAAEMAAAAAAAAAAAAAAEkAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-15T12:59:28.056Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 55,
+              "DocumentIndex": 63,
               "Title": "SD.cs",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Utilities\\SD.cs",
               "RelativeDocumentMoniker": "MotorShop\\Utilities\\SD.cs",
@@ -1041,12 +1145,11 @@
               "RelativeToolTip": "MotorShop\\Utilities\\SD.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAACMAAABFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-05T13:35:57.927Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-05T13:35:57.927Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 56,
+              "DocumentIndex": 64,
               "Title": "ProductIndexViewModel.cs",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\ViewModels\\ProductIndexViewModel.cs",
               "RelativeDocumentMoniker": "MotorShop\\ViewModels\\ProductIndexViewModel.cs",
@@ -1058,7 +1161,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 57,
+              "DocumentIndex": 65,
               "Title": "_ProductCardPartial.cshtml",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Views\\Shared\\_ProductCardPartial.cshtml",
               "RelativeDocumentMoniker": "MotorShop\\Views\\Shared\\_ProductCardPartial.cshtml",
@@ -1070,7 +1173,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 58,
+              "DocumentIndex": 66,
               "Title": "Index.cshtml",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Views\\Products\\Index.cshtml",
               "RelativeDocumentMoniker": "MotorShop\\Views\\Products\\Index.cshtml",
@@ -1082,7 +1185,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 67,
+              "DocumentIndex": 75,
               "Title": "ProductsControllerz.cs",
               "DocumentMoniker": "D:\\2. TH\u1EF0C T\u1EACP L\u1EACP TR\u00CCNH .NET\\MotorShop\\MotorShop\\Controllers\\ProductsControllerz.cs",
               "RelativeDocumentMoniker": "..\\..\\2. TH\u1EF0C T\u1EACP L\u1EACP TR\u00CCNH .NET\\MotorShop\\MotorShop\\Controllers\\ProductsControllerz.cs",
@@ -1094,7 +1197,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 60,
+              "DocumentIndex": 68,
               "Title": "site.css",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\wwwroot\\css\\site.css",
               "RelativeDocumentMoniker": "MotorShop\\wwwroot\\css\\site.css",
@@ -1106,7 +1209,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 59,
+              "DocumentIndex": 67,
               "Title": "site.js",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\wwwroot\\js\\site.js",
               "RelativeDocumentMoniker": "MotorShop\\wwwroot\\js\\site.js",
@@ -1114,12 +1217,11 @@
               "RelativeToolTip": "MotorShop\\wwwroot\\js\\site.js",
               "ViewState": "AgIAAAAAAAAAAAAAAAAowDAAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2025-10-15T18:17:03.618Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-15T18:17:03.618Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 62,
+              "DocumentIndex": 70,
               "Title": "Checkout.cshtml",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Views\\Order\\Checkout.cshtml",
               "RelativeDocumentMoniker": "MotorShop\\Views\\Order\\Checkout.cshtml",
@@ -1127,12 +1229,11 @@
               "RelativeToolTip": "MotorShop\\Views\\Order\\Checkout.cshtml",
               "ViewState": "AgIAAAUAAAAAAAAAAAAowDUAAAAGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-10-15T18:03:22.482Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-15T18:03:22.482Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 69,
+              "DocumentIndex": 77,
               "Title": "OrderConfirmationz.cshtml",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Views\\Order\\OrderConfirmationz.cshtml",
               "RelativeDocumentMoniker": "MotorShop\\Views\\Order\\OrderConfirmationz.cshtml",
@@ -1144,7 +1245,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 61,
+              "DocumentIndex": 69,
               "Title": "History.cshtml",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Views\\Order\\History.cshtml",
               "RelativeDocumentMoniker": "MotorShop\\Views\\Order\\History.cshtml",
@@ -1156,7 +1257,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 70,
+              "DocumentIndex": 78,
               "Title": "OrderControllerz.cs",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Areas\\Admin\\Controllers\\OrderControllerz.cs",
               "RelativeDocumentMoniker": "MotorShop\\Areas\\Admin\\Controllers\\OrderControllerz.cs",
@@ -1168,7 +1269,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 68,
+              "DocumentIndex": 76,
               "Title": "OrderController.cs",
               "DocumentMoniker": "D:\\2. TH\u1EF0C T\u1EACP L\u1EACP TR\u00CCNH .NET\\MotorShop\\MotorShop\\Controllers\\OrderController.cs",
               "RelativeDocumentMoniker": "..\\..\\2. TH\u1EF0C T\u1EACP L\u1EACP TR\u00CCNH .NET\\MotorShop\\MotorShop\\Controllers\\OrderController.cs",
@@ -1180,7 +1281,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 71,
+              "DocumentIndex": 79,
               "Title": "CheckoutViewModelz.cs",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\ViewModels\\CheckoutViewModelz.cs",
               "RelativeDocumentMoniker": "MotorShop\\ViewModels\\CheckoutViewModelz.cs",
@@ -1192,7 +1293,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 63,
+              "DocumentIndex": 71,
               "Title": "Index.cshtml",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Views\\Cart\\Index.cshtml",
               "RelativeDocumentMoniker": "MotorShop\\Views\\Cart\\Index.cshtml",
@@ -1204,7 +1305,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 64,
+              "DocumentIndex": 72,
               "Title": "CartService.cs",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Services\\CartService.cs",
               "RelativeDocumentMoniker": "MotorShop\\Services\\CartService.cs",
@@ -1212,12 +1313,11 @@
               "RelativeToolTip": "MotorShop\\Services\\CartService.cs",
               "ViewState": "AgIAABIAAAAAAAAAAAAqwEIAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-15T17:56:32.706Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-15T17:56:32.706Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 72,
+              "DocumentIndex": 80,
               "Title": "_AdminLayoutz.cshtml",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Areas\\Admin\\Views\\Shared\\_AdminLayoutz.cshtml",
               "RelativeDocumentMoniker": "MotorShop\\Areas\\Admin\\Views\\Shared\\_AdminLayoutz.cshtml",
@@ -1229,7 +1329,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 65,
+              "DocumentIndex": 73,
               "Title": "ScaffoldingReadMe.txt",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\ScaffoldingReadMe.txt",
               "RelativeDocumentMoniker": "MotorShop\\ScaffoldingReadMe.txt",
@@ -1237,12 +1337,11 @@
               "RelativeToolTip": "MotorShop\\ScaffoldingReadMe.txt",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003109|",
-              "WhenOpened": "2025-10-15T17:39:52.887Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-15T17:39:52.887Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 73,
+              "DocumentIndex": 81,
               "Title": "20251015173012_InitialProjectSetup.cs",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Migrations\\20251015173012_InitialProjectSetup.cs",
               "RelativeDocumentMoniker": "MotorShop\\Migrations\\20251015173012_InitialProjectSetup.cs",
@@ -1254,7 +1353,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 74,
+              "DocumentIndex": 82,
               "Title": "Brandz.cs",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Models\\Brandz.cs",
               "RelativeDocumentMoniker": "MotorShop\\Models\\Brandz.cs",
@@ -1266,7 +1365,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 66,
+              "DocumentIndex": 74,
               "Title": "ApplicationUser.cs",
               "DocumentMoniker": "D:\\#MyPepositoryGITHUB\\MotorShop\\MotorShop\\Models\\ApplicationUser.cs",
               "RelativeDocumentMoniker": "MotorShop\\Models\\ApplicationUser.cs",
@@ -1274,8 +1373,11 @@
               "RelativeToolTip": "MotorShop\\Models\\ApplicationUser.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-15T17:17:08.292Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-15T17:17:08.292Z"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
             }
           ]
         }

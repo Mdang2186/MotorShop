@@ -2069,3 +2069,4 @@ D:\#MyPepositoryGITHUB\MotorShop\MotorShop\obj\Debug\net9.0\compressed\50wtfy00f
 D:\#MyPepositoryGITHUB\MotorShop\MotorShop\obj\Debug\net9.0\compressed\j0mzj05skj-kphfcduog5.gz
 D:\#MyPepositoryGITHUB\MotorShop\MotorShop\obj\Debug\net9.0\compressed\2xp0523e6u-yy5ingla8m.gz
 D:\#MyPepositoryGITHUB\MotorShop\MotorShop\obj\Debug\net9.0\compressed\llv1979vsl-fsoppebu2v.gz
+D:\#MyPepositoryGITHUB\MotorShop\MotorShop\bin\Debug\net9.0\Bogus.dll
