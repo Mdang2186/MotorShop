@@ -14,13 +14,13 @@ namespace MotorShop.Models
         public required string Name { get; set; }
 
         [StringLength(50, ErrorMessage = "Mã SKU tối đa 50 ký tự")]
-        public string? SKU { get; set; } // <--- ĐÃ THÊM ĐỂ SỬA LỖI
+        public string? SKU { get; set; }
 
         [StringLength(4000)]
         public string? Description { get; set; }
 
         [Column(TypeName = "decimal(18, 2)")]
-        [Range(0, 100000000)]
+        // [Range(0, 100000000)] // <-- ĐÃ GỠ BỎ GIỚI HẠN
         public decimal Price { get; set; }
 
         [Column(TypeName = "decimal(18, 2)")]
@@ -29,8 +29,7 @@ namespace MotorShop.Models
         [Range(0, int.MaxValue)]
         public int StockQuantity { get; set; }
 
-        [StringLength(500)]
-        public string? ImageUrl { get; set; }
+        public string? ImageUrl { get; set; } // Vẫn giữ làm ảnh dự phòng
 
         [Range(1900, 2100)]
         public int Year { get; set; }
@@ -38,8 +37,8 @@ namespace MotorShop.Models
         [StringLength(180)]
         public string? Slug { get; set; }
 
-        public bool IsActive { get; set; } = true; // <--- ĐÃ THÊM ĐỂ SỬA LỖI (Dùng cho quản lý nội bộ)
-        public bool IsPublished { get; set; } = true; // (Dùng để hiển thị ra web khách hàng)
+        public bool IsActive { get; set; } = true;
+        public bool IsPublished { get; set; } = true;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }

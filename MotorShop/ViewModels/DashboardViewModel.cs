@@ -1,11 +1,10 @@
-﻿using System.Collections.Generic;
-using MotorShop.Models;
+﻿using MotorShop.Models;
 
 namespace MotorShop.ViewModels
 {
     public class DashboardViewModel
     {
-        // KPI
+        // 1. Thống kê nhanh
         public decimal MonthlyRevenue { get; set; }
         public decimal TodayRevenue { get; set; }
         public int NewOrdersToday { get; set; }
@@ -13,14 +12,15 @@ namespace MotorShop.ViewModels
         public int NewCustomersToday { get; set; }
         public int TotalProducts { get; set; }
 
-        // Charts
+        // 2. Biểu đồ doanh thu (Line)
         public List<string> RevenueChartLabels { get; set; } = new();
         public List<decimal> RevenueChartData { get; set; } = new();
+
+        // 3. Biểu đồ trạng thái đơn (Doughnut)
         public List<string> OrderStatusLabels { get; set; } = new();
         public List<int> OrderStatusCounts { get; set; } = new();
 
-        // Recent
+        // 4. Danh sách
         public List<Order> RecentOrders { get; set; } = new();
-        public List<ApplicationUser> RecentCustomers { get; set; } = new();
     }
 }

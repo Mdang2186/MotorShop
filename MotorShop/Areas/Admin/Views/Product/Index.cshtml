@@ -2,103 +2,198 @@
 @{
     ViewData["Title"] = "Sản phẩm";
 
-    // Lấy lại các filter hiện tại để giữ nguyên khi chuyển trang
+    // Lấy lại đầy đủ các giá trị filter
     var q = (string?)ViewBag.Q ?? string.Empty;
+    var status = (string?)ViewBag.Status ?? "";
     var sort = (string?)ViewBag.Sort ?? "new";
-    var brandId = Context.Request.Query["brandId"].ToString();
-    var categoryId = Context.Request.Query["categoryId"].ToString();
-
+    var brandId = Context.Request.Query["brandId"];
+    var categoryId = Context.Request.Query["categoryId"];
     int page = (int)(ViewBag.Page ?? 1);
+    int pageSize = (int)(ViewBag.PageSize ?? 15);
     int totalPages = (int)(ViewBag.TotalPages ?? 1);
 }
 
-<h1 class="text-2xl font-semibold mb-4">Sản phẩm</h1>
+<h1 class="text-2xl font-semibold mb-4 text-slate-900">Sản phẩm</h1>
 
-<form method="get" class="grid grid-cols-1 md:grid-cols-5 gap-3 mb-4">
-    <input name="q" value="@q" class="border rounded-md px-3 py-2" placeholder="Tìm theo tên..." />
-
-    <select name="brandId" asp-items="ViewBag.Brands" class="border rounded-md px-3 py-2">
-        <option value="">-- Brand --</option>
-    </select>
-
-    <select name="categoryId" asp-items="ViewBag.Categories" class="border rounded-md px-3 py-2">
-        <option value="">-- Category --</option>
-    </select>
-
-    <select name="sort" class="border rounded-md px-3 py-2">
-        <option value="new" selected="@(sort == "new")">Mới nhất</option>
-        <option value="price_asc" selected="@(sort == "price_asc")">Giá tăng dần</option>
-        <option value="price_desc" selected="@(sort == "price_desc")">Giá giảm dần</option>
-        <option value="stock" selected="@(sort == "stock")">Tồn kho</option>
-    </select>
-
-    <button class="px-3 py-2 rounded-md bg-slate-900 text-white">Lọc</button>
-</form>
-
-<div class="mb-3">
-    <a asp-action="Create" class="px-3 py-2 rounded-md bg-blue-600 text-white">
-        <i class="fa fa-plus mr-1"></i>Thêm sản phẩm
-    </a>
-</div>
-
-<div class="overflow-x-auto bg-white rounded-xl shadow">
-    <table class="min-w-full text-sm">
-        <thead>
-            <tr class="text-left text-slate-500">
-                <th class="p-3">#</th>
-                <th>Tên</th>
-                <th>Brand</th>
-                <th>Category</th>
-                <th>Giá</th>
-                <th>Tồn</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var p in Model)
-            {
-                <tr class="border-t">
-                    <td class="p-3">@p.Id</td>
-                    <td>
-                        <div class="flex items-center gap-3">
-                            @if (!string.IsNullOrWhiteSpace(p.ImageUrl))
-                            {
-                                <img src="@p.ImageUrl" class="w-12 h-12 object-cover rounded" />
-                            }
-                            <div>
-                                <div class="font-medium">@p.Name</div>
-                                <div class="text-slate-500 text-xs">Năm: @p.Year</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td>@p.Brand?.Name</td>
-                    <td>@p.Category?.Name</td>
-                    <td>@p.Price.ToString("N0") đ</td>
-                    <td>@p.StockQuantity</td>
-                    <td class="text-right pr-3">
-                        <a asp-action="Edit" asp-route-id="@p.Id" class="text-blue-600 hover:underline">Sửa</a>
-                        <span class="mx-1">·</span>
-                        <a asp-action="Delete" asp-route-id="@p.Id" class="text-red-600 hover:underline">Xoá</a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</div>
-
-@if (totalPages > 1)
-{
-    <div class="flex justify-end gap-1 mt-3">
-        @for (var i = 1; i <= totalPages; i++)
-        {
-            <a class="px-3 py-1 rounded border @(i == page ? "bg-slate-900 text-white" : "bg-white")"
-               asp-route-page="@i"
-               asp-route-q="@q"
-               asp-route-brandId="@(brandId)"
-               asp-route-categoryId="@(categoryId)"
-               asp-route-sort="@(sort)">
-                @i
-            </a>
-        }
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+    <div class="bg-white p-4 rounded-lg shadow ring-1 ring-black/5">
+        <div class="text-xs font-medium text-slate-500 uppercase">Tổng SP</div>
+        <div class="text-2xl font-bold text-slate-900">@(((int?)ViewBag.TotalProducts ?? 0).ToString("N0"))</div>
     </div>
+    <div class="bg-white p-4 rounded-lg shadow ring-1 ring-black/5">
+        <div class="text-xs font-medium text-slate-500 uppercase">Đang bán</div>
+        <div class="text-2xl font-bold text-green-600">@(((int?)ViewBag.ActiveProducts ?? 0).ToString("N0"))</div>
+    </div>
+    <div class="bg-white p-4 rounded-lg shadow ring-1 ring-black/5">
+        <div class="text-xs font-medium text-slate-500 uppercase">Hết hàng</div>
+        <div class="text-2xl font-bold text-red-600">@(((int?)ViewBag.OutOfStockProducts ?? 0).ToString("N0"))</div>
+    </div>
+    <div class="bg-white p-4 rounded-lg shadow ring-1 ring-black/5">
+        <div class="text-xs font-medium text-slate-500 uppercase">Ngừng KD</div>
+        <div class="text-2xl font-bold text-slate-400">@(((int?)ViewBag.InactiveProducts ?? 0).ToString("N0"))</div>
+    </div>
+    <div class="bg-white p-4 rounded-lg shadow ring-1 ring-black/5 col-span-2 lg:col-span-1">
+        <div class="text-xs font-medium text-slate-500 uppercase">Giá trị tồn kho</div>
+        <div class="text-2xl font-bold text-blue-600">@(((decimal?)ViewBag.TotalStockValue ?? 0).ToString("N0")) ₫</div>
+    </div>
+</div>
+
+<div class="bg-white rounded-xl shadow ring-1 ring-black/5">
+
+    <form method="get" class="p-4 border-b border-gray-100">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex flex-wrap items-center gap-3">
+                <input name="q" value="@q" class="border rounded-md px-3 py-2 text-sm w-40" placeholder="Tìm tên, SKU..." />
+
+                <select name="sort" class="border rounded-md px-3 py-2 text-sm">
+                    <option value="new" selected="@(sort == "new")">Sắp xếp: Mới nhất</option>
+                    <option value="price_asc" selected="@(sort == "price_asc")">Sắp xếp: Giá tăng dần</option>
+                    <option value="price_desc" selected="@(sort == "price_desc")">Sắp xếp: Giá giảm dần</option>
+                    <option value="stock" selected="@(sort == "stock")">Sắp xếp: Tồn kho</option>
+                </select>
+
+                <select name="pageSize" class="border rounded-md px-3 py-2 text-sm">
+                    <option value="15" selected="@(pageSize == 15)">Hiển thị: 15</option>
+                    <option value="25" selected="@(pageSize == 25)">Hiển thị: 25</option>
+                    <option value="50" selected="@(pageSize == 50)">Hiển thị: 50</option>
+                </select>
+
+                <select name="status" class="border rounded-md px-3 py-2 text-sm">
+                    <option value="" selected="@(status == "")">-- Trạng thái --</option>
+                    <option value="active" selected="@(status == "active")">Đang kinh doanh</option>
+                    <option value="outofstock" selected="@(status == "outofstock")">Hết hàng</option>
+                    <option value="inactive" selected="@(status == "inactive")">Ngừng kinh doanh</option>
+                </select>
+
+                <select name="categoryId" asp-items="ViewBag.Categories" class="border rounded-md px-3 py-2 text-sm">
+                    <option value="">-- Category --</option>
+                </select>
+
+                <select name="brandId" asp-items="ViewBag.Brands" class="border rounded-md px-3 py-2 text-sm">
+                    <option value="">-- Brand --</option>
+                </select>
+
+                <button class="px-3 py-2 rounded-md bg-slate-100 text-slate-700 text-sm font-medium hover:bg-slate-200">Lọc</button>
+            </div>
+
+            <div>
+                <a asp-action="Create" class="px-3 py-2 rounded-md bg-blue-600 text-white text-sm font-medium shadow-sm hover:bg-blue-700">
+                    <i class="fa fa-plus mr-1"></i>Thêm sản phẩm
+                </a>
+            </div>
+        </div>
+    </form>
+
+    <div class="overflow-x-auto">
+        <table class="min-w-full text-sm">
+            <thead>
+                <tr class="text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                    <th class="px-6 py-3">#</th>
+                    <th class="px-6 py-3 w-1/3">Tên sản phẩm</th>
+                    <th class="px-6 py-3">Brand</th>
+                    <th class="px-6 py-3">Category</th>
+                    <th class="px-6 py-3">Giá</th>
+                    <th class="px-6 py-3 text-center">Tồn</th>
+                    <th class="px-6 py-3">Trạng thái</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                @foreach (var p in Model)
+                {
+                    <tr class="clickable-row" data-href="@Url.Action("Details", "Product", new { id = p.Id })">
+                        <td class="px-6 py-3 text-slate-500">
+                            @p.Id
+                        </td>
+
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-4">
+                                @if (!string.IsNullOrWhiteSpace(p.PrimaryImageUrl))
+                                {
+                                    <img src="@p.PrimaryImageUrl" class="w-14 h-14 object-cover rounded-lg" />
+                                }
+                                else
+                                {
+                                    <div class="w-14 h-14 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
+                                        <i class="fa fa-image fa-lg"></i>
+                                    </div>
+                                }
+                                <div>
+                                    <div class="font-semibold text-slate-900">
+                                        @p.Name
+                                    </div>
+                                    <div class="text-slate-500 text-xs font-mono mt-1">Năm: @(p.Year)</div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td class="px-6 py-4 text-slate-700">@p.Brand?.Name</td>
+                        <td class="px-6 py-4 text-slate-700">@p.Category?.Name</td>
+                        <td class="px-6 py-4 font-medium text-slate-900">@p.Price.ToString("N0") ₫</td>
+                        <td class="px-6 py-4 text-center font-medium text-slate-900">@p.StockQuantity</td>
+
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            @if (!p.IsActive)
+                            {
+                                <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700">Ngừng KD</span>
+                            }
+                            else if (p.StockQuantity <= 0)
+                            {
+                                <span class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-700">Hết hàng</span>
+                            }
+                            else
+                            {
+                                <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-700">Đang bán</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (totalPages > 1)
+    {
+        <div class="p-4 border-t border-gray-100">
+            <div class="flex justify-end gap-1">
+                @for (var i = 1; i <= totalPages; i++)
+                {
+                    <a class="px-3 py-1 rounded border @(i == page ? "bg-slate-900 text-white" : "bg-white hover:bg-slate-50")"
+                       asp-route-page="@i"
+                       asp-route-q="@q"
+                       asp-route-brandId="@brandId"
+                       asp-route-categoryId="@categoryId"
+                       asp-route-status="@status"
+                       asp-route-sort="@sort"
+                       asp-route-pageSize="@pageSize">
+                        @i
+                    </a>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const rows = document.querySelectorAll("tr.clickable-row");
+            rows.forEach(row => {
+                row.style.cursor = "pointer"; // Thêm con trỏ chuột
+                row.addEventListener("mouseover", () => {
+                    row.classList.add("bg-gray-50"); // Thêm hiệu ứng hover
+                });
+                row.addEventListener("mouseout", () => {
+                    row.classList.remove("bg-gray-50");
+                });
+                row.addEventListener("click", () => {
+                    const href = row.getAttribute("data-href");
+                    if (href) {
+                        window.location.href = href;
+                    }
+                });
+            });
+        });
+    </script>
+
+    <partial name="_ValidationScriptsPartial" />
 }

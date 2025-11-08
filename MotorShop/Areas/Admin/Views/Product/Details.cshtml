@@ -1,0 +1,116 @@
+﻿@model MotorShop.Models.Product
+@{
+    ViewData["Title"] = "Chi tiết sản phẩm";
+    var primaryImage = Model.PrimaryImageUrl;
+    var otherImages = Model.Images.Where(i => i.ImageUrl != primaryImage).ToList();
+}
+
+<div class="max-w-6xl mx-auto">
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-900">Chi tiết sản phẩm</h1>
+            <a asp-action="Index" class="text-slate-500 hover:text-blue-600 flex items-center gap-1 text-sm font-medium transition-colors mt-1">
+                <i class="fa-solid fa-arrow-left"></i> Quay lại danh sách
+            </a>
+        </div>
+        <div class="flex items-center gap-2">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
+                <i class="fa-solid fa-pen-to-square mr-1"></i> Sửa
+            </a>
+            <a asp-action="Delete" asp-route-id="@Model.Id" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors shadow-sm">
+                <i class="fa-solid fa-trash-can mr-1"></i> Xoá
+            </a>
+        </div>
+    </div>
+
+    <div class="bg-white shadow-sm ring-1 ring-black/5 rounded-xl overflow-hidden">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 sm:p-8">
+
+            <div class="md:col-span-1 space-y-3">
+                @if (!string.IsNullOrWhiteSpace(primaryImage))
+                {
+                    <img src="@primaryImage" alt="@Model.Name" class="w-full h-auto rounded-lg border border-gray-200 shadow-sm object-cover aspect-square" />
+                }
+                else
+                {
+                    <div class="w-full aspect-square bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200 text-gray-400">
+                        <i class="fa-solid fa-image text-4xl"></i>
+                    </div>
+                }
+
+                @if (otherImages.Any())
+                {
+                    <div class="grid grid-cols-5 gap-2">
+                        @foreach (var image in otherImages)
+                        {
+                            <img src="@image.ImageUrl" alt="@image.Caption" class="w-full h-auto rounded border border-gray-200 object-cover aspect-square" />
+                        }
+                    </div>
+                }
+            </div>
+
+            <div class="md:col-span-1 space-y-4">
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-900">@Model.Name</h2>
+                    <div class="mt-2">
+                        @if (!Model.IsActive)
+                        {
+                            <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700">
+                                <i class="fa-solid fa-circle-xmark mr-2"></i> Ngừng kinh doanh
+                            </span>
+                        }
+                        else if (Model.StockQuantity <= 0)
+                        {
+                            <span class="inline-flex items-center rounded-full bg-red-100 px-3 py-1 text-sm font-medium text-red-700">
+                                <i class="fa-solid fa-box-open mr-2"></i> Hết hàng
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-700">
+                                <i class="fa-solid fa-check-circle mr-2"></i> Đang kinh doanh
+                            </span>
+                        }
+                    </div>
+                </div>
+
+                <div class="border-t border-gray-100 pt-4 space-y-3 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-500 font-medium">Giá bán:</span>
+                        <span class="font-bold text-blue-600 text-lg">@Model.Price.ToString("N0") ₫</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-500 font-medium">Tồn kho:</span>
+                        <span class="font-bold @(Model.StockQuantity > 0 ? "text-green-600" : "text-red-600") text-lg">@Model.StockQuantity</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-500 font-medium">Mã SKU:</span>
+                        <span class="font-medium text-gray-900 font-mono">@Model.SKU</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-500 font-medium">Thương hiệu:</span>
+                        <span class="font-medium text-gray-900">@Model.Brand?.Name</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-500 font-medium">Danh mục:</span>
+                        <span class="font-medium text-gray-900">@Model.Category?.Name</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-500 font-medium">Năm sản xuất:</span>
+                        <span class="font-medium text-gray-900">@Model.Year</span>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.Description))
+                {
+                    <div class="mt-4 pt-4 border-t border-gray-100">
+                        <h4 class="text-sm font-medium text-gray-600 mb-2">Mô tả sản phẩm</h4>
+                        <div class="p-4 bg-gray-50 rounded-md text-sm text-gray-700 italic border border-gray-100 prose-sm max-h-48 overflow-y-auto">
+                            <p>@Model.Description</p>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

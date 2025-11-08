@@ -1,0 +1,66 @@
+﻿@model MotorShop.ViewModels.ManageUserViewModel
+@{
+    ViewData["Title"] = "Quản lý quyền";
+}
+
+<div class="max-w-7xl mx-auto">
+    <form method="post" asp-action="Manage">
+        <input type="hidden" asp-for="UserId" />
+
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-900">@Model.UserName</h1>
+                <a asp-action="Index" class="text-slate-500 hover:text-blue-600 flex items-center gap-1 text-sm font-medium transition-colors">
+                    <i class="fa-solid fa-arrow-left"></i> Quay lại danh sách
+                </a>
+            </div>
+            <div class="flex items-center gap-3">
+                <a asp-action="Index" class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors">Hủy</a>
+                <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
+                    <i class="fa-solid fa-save mr-1"></i> Lưu thay đổi
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <div class="lg:col-span-2 space-y-6">
+                <div class="bg-white p-5 rounded-lg shadow ring-1 ring-black/5">
+                    <h3 class="text-lg font-medium text-gray-800 mb-4">Thông tin người dùng</h3>
+                    <div class_ ="space-y-3 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">User ID:</span>
+                            <span class="font-medium text-gray-900 font-mono">@Model.UserId</span>
+                        </div>
+                        <div class_ ="flex justify-between">
+                            <span class="text-gray-500">Email:</span>
+                            <span class="font-medium text-gray-900">@Model.Email</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Ngày tạo:</span>
+                            <span class="font-medium text-gray-900">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-1 space-y-6">
+                <div class="bg-white p-5 rounded-lg shadow ring-1 ring-black/5">
+                    <h3 class="text-lg font-medium text-gray-800 mb-4">Phân quyền</h3>
+                    <div class="space-y-4">
+                        @for (int i = 0; i < Model.Roles.Count; i++)
+                        {
+                            <input type="hidden" asp-for="Roles[i].RoleId" />
+                            <input type="hidden" asp-for="Roles[i].RoleName" />
+                            <div class="flex items-center gap-3">
+                                <input asp-for="Roles[i].IsSelected" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                                <label asp-for="Roles[i].IsSelected" class="font-medium text-gray-700">@Model.Roles[i].RoleName</label>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </form>
+</div>

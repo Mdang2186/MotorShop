@@ -1,7 +1,7 @@
 ﻿using MotorShop.Models;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-// OrderItem.cs
+
 namespace MotorShop.Models
 {
     public class OrderItem
@@ -12,7 +12,7 @@ namespace MotorShop.Models
         public int Quantity { get; set; }
 
         [Column(TypeName = "decimal(18, 2)")]
-        [Range(0, 100000000)]
+        // [Range(0, 100000000)] // <-- ĐÃ GỠ BỎ GIỚI HẠN
         public decimal UnitPrice { get; set; }
 
         // FK
