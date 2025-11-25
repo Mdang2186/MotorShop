@@ -199,7 +199,16 @@ namespace MotorShop.Controllers
             }
             if (!user.EmailConfirmed)
             {
-                TempData[SD.Temp_Warning] = "Email chưa xác nhận. Vui lòng nhập mã OTP.";
+                if (user.EmailOtpExpiryUtc == null || user.EmailOtpExpiryUtc < DateTime.UtcNow)
+                {
+                    await SendOtpAsync(user, "resend");
+                    TempData[SD.Temp_Warning] = "Email chưa xác nhận. Chúng tôi đã gửi mã OTP mới.";
+                }
+                else
+                {
+                    TempData[SD.Temp_Warning] = "Email chưa xác nhận. Vui lòng nhập mã OTP đã gửi.";
+                }
+
                 return RedirectToAction(nameof(VerifyEmailCode), new { email = user.Email });
             }
 
@@ -222,7 +231,7 @@ namespace MotorShop.Controllers
             return View(vm);
         }
 
-        [Authorize]
+
         [HttpPost]
         public async Task<IActionResult> Logout()
         {

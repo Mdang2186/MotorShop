@@ -43,7 +43,7 @@
             {
                 <div class="relative group">
                     <button class="inline-flex items-center gap-2">
-                        <img src="@(string.IsNullOrWhiteSpace(Model?.AvatarUrl) ? Url.Content("~/images/avatars/default.png") : Model!.AvatarUrl)"
+                        <img src="@(string.IsNullOrWhiteSpace(Model?.Avatar) ? Url.Content("~/images/avatars/default.png") : Model!.Avatar)"
                              class="w-8 h-8 rounded-full object-cover border border-gray-200" />
                         <span class="hidden md:inline text-sm font-semibold">@((Model?.FullName ?? User.Identity!.Name) ?? "Tài khoản")</span>
                         <i class="fa-solid fa-chevron-down text-xs text-gray-500"></i>

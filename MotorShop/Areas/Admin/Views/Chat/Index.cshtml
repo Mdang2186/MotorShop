@@ -1,0 +1,240 @@
+﻿@model MotorShop.Models.Entities.ChatThread
+@using MotorShop.Models.Entities
+@{
+    ViewData["Title"] = "Chăm sóc  Khách hàng";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var threads = ViewBag.Threads as List<ChatThread> ?? new List<ChatThread>();
+     
+    var activeCustomer = Model?.Customer;
+    var customerName = activeCustomer?.FullName ?? activeCustomer?.UserName ?? "Khách hàng";
+    var customerAvatar = activeCustomer?.Avatar;
+    var initial = !string.IsNullOrEmpty(customerName) ? customerName.Substring(0, 1).ToUpper() : "K";
+
+    var allSharedImages = new List<string>();
+    if (Model != null)
+    {
+        foreach (var m in Model.Messages.Where(x => x.Content.Contains("/images/chat/")))
+        {
+            allSharedImages.AddRange(m.Content.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Where(x => x.Trim().StartsWith("/images/chat/")));
+        }
+    }
+}
+<link rel="stylesheet" href="~/css/admin/chat.css" />
+
+<div class="ms-wrapper">
+    <div class="ms-sidebar">
+        <div class="sidebar-header">
+            <h4 style="font-weight:800; margin:0 0 15px 0;">Chat</h4>
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass text-muted"></i>
+                <input type="text" id="searchBox" placeholder="Tìm khách hàng...">
+            </div>
+        </div>
+        <div class="thread-list" id="threadListContainer">
+            @if (threads.Any())
+            {
+                foreach (var t in threads)
+                {
+                    var isActive = Model != null && Model.Id == t.Id;
+                    var tName = t.Customer?.FullName ?? t.Customer?.UserName ?? "Khách";
+                    var tAvt = t.Customer?.Avatar;
+                    var tInit = !string.IsNullOrEmpty(tName) ? tName.Substring(0, 1).ToUpper() : "K";
+                    var lastTime = t.LastMessageAt.HasValue ? t.LastMessageAt.Value.ToString("o") : "";
+
+                    <a href="@Url.Action("Index", "Chat", new { area = "Admin", id = t.Id })"
+                       class="thread-item @(isActive ? "active" : "")" data-thread-id="@t.Id">
+                        <div class="avatar-sm">
+                            @if (!string.IsNullOrEmpty(tAvt))
+                            {
+                                <img src="@tAvt" />
+                            }
+                            else
+                            {
+
+                                @tInit
+                            }
+                        </div>
+                        <div class="t-info">
+                            <div class="t-name">@tName</div>
+                            <div class="t-preview">
+                                <span class="preview-txt">@(t.LastMessagePreview?.Contains("/images/chat/") == true ? "Đã gửi ảnh" : t.LastMessagePreview)</span>
+                                <span class="local-time-preview" data-utc="@lastTime"></span>
+                            </div>
+                        </div>
+                    </a>
+                }
+            }
+        </div>
+    </div>
+
+    <div class="ms-chat-main">
+        @if (Model != null)
+        {
+            <div class="chat-header">
+                <div class="u-info">
+                    <div class="avatar-header">
+                        @if (!string.IsNullOrEmpty(customerAvatar))
+                        {
+                            <img src="@customerAvatar" />
+                        }
+                        else
+                        {
+
+                            @initial
+                        }
+                    </div>
+                    <div class="u-text">
+                        <h5 class="u-name">@customerName</h5>
+                        <div class="u-status"><span class="status-dot"></span> Đang hoạt động</div>
+                    </div>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn-ico active" id="btnToggleInfo" title="Thông tin"><i class="fa-solid fa-circle-info"></i></button>
+                </div>
+            </div>
+
+            <div class="chat-body" id="chatBody">
+                @{
+                    var sortedMessages = Model.Messages.OrderBy(m => m.SentAt).ToList();
+                }
+                @for (int i = 0; i < sortedMessages.Count; i++)
+                {
+                    var msg = sortedMessages[i];
+                    var isMe = msg.IsFromStaff;
+                    var content = msg.Content ?? "";
+                    var timeUtc = msg.SentAt.ToString("o");
+
+                    // Logic gom nhóm
+                    bool nextIsSame = (i < sortedMessages.Count - 1) && (sortedMessages[i + 1].IsFromStaff == isMe);
+                    bool prevIsSame = (i > 0) && (sortedMessages[i - 1].IsFromStaff == isMe);
+                    string sequenceClass = prevIsSame ? "seq-middle" : "sequence-start";
+                    if (!nextIsSame) sequenceClass += " seq-end";
+
+                    <div class="msg-row @(isMe ? "me" : "other") @sequenceClass">
+                        @if (!isMe)
+                        {
+                            <div style="width:32px; flex-shrink:0;">
+                                @if (!nextIsSame)
+                                {
+                                    <div class="avatar-sm" style="width:32px; height:32px; font-size:12px;">
+                                        @if (!string.IsNullOrEmpty(customerAvatar))
+                                        {
+                                            <img src="@customerAvatar" />
+                                        }
+                                        else
+                                        {
+
+                                            @initial
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        }
+
+                        <div style="flex:1; max-width:100%;">
+                            @if (content.Contains("/images/chat/"))
+                            {
+                                var images = content.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                                .Where(x => x.Trim().StartsWith("/images/chat/"))
+                                .ToList();
+                                <div class="msg-bubble is-gallery">
+                                    <div class="grid-container" data-count="@images.Count">
+                                        @foreach (var img in images)
+                                        {
+                                            <img src="@img.Trim()" onclick="window.open(this.src)" />
+                                        }
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="msg-bubble">@Html.Raw(content.Replace("\n", "<br>"))</div>
+                            }
+                            <span class="msg-time local-time" data-utc="@timeUtc"></span>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="chat-footer">
+                <input type="file" id="imgUpload" accept="image/*" multiple hidden />
+                <button class="btn-ico" onclick="document.getElementById('imgUpload').click()"><i class="fa-regular fa-image"></i></button>
+                <div class="inp-wrap">
+                    <textarea id="chatInput" class="chat-inp" rows="1" placeholder="Nhập tin nhắn..."></textarea>
+                </div>
+                <button id="sendBtn" class="btn-ico" style="background:var(--primary); color:#fff; width:40px; height:40px;" disabled>
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </div>
+
+            <input type="hidden" id="activeThreadId" value="@Model.Id" />
+            <input type="hidden" id="currentAvatar" value="@customerAvatar" />
+            <input type="hidden" id="currentInitial" value="@initial" />
+        }
+        else
+        {
+            <div class="d-flex flex-column align-items-center justify-content-center h-100 text-muted" style="opacity:0.6;">
+                <i class="fa-brands fa-facebook-messenger fa-4x mb-3 text-primary"></i>
+                <h4>Trung tâm tin nhắn</h4>
+                <p>Chọn một khách hàng để bắt đầu.</p>
+            </div>
+        }
+    </div>
+
+    @if (Model != null)
+    {
+        <div class="ms-info-sidebar open" id="infoSidebar">
+            <div class="info-header">
+                <div class="avatar-lg">
+                    @if (!string.IsNullOrEmpty(customerAvatar))
+                    {
+                        <img src="@customerAvatar" />
+                    }
+                    else
+                    {
+
+                        @initial
+                    }
+                </div>
+                <h5 style="font-weight:700; font-size:18px; margin-bottom:4px;">@customerName</h5>
+                <span class="badge bg-primary bg-opacity-10 text-primary">Khách hàng</span>
+            </div>
+
+            <div class="info-body">
+                <div class="info-group">
+                    <div class="info-label">Thông tin cá nhân</div>
+                    @if (activeCustomer != null)
+                    {
+                        <div class="info-row" title="Email"><i class="fa-regular fa-envelope"></i> <span>@(activeCustomer.Email ?? "---")</span></div>
+                        <div class="info-row" title="SĐT"><i class="fa-solid fa-phone"></i> <span>@(activeCustomer.PhoneNumber ?? "---")</span></div>
+                        <div class="info-row" title="Địa chỉ"><i class="fa-solid fa-location-dot"></i> <span>@(activeCustomer.Address ?? "---")</span></div>
+                    }
+                </div>
+
+                <div class="info-group">
+                    <div class="info-label">Ảnh đã gửi (@allSharedImages.Count)</div>
+                    @if (allSharedImages.Any())
+                    {
+                        <div class="media-grid">
+                            @foreach (var img in allSharedImages.Take(9))
+                            {
+                                <div class="media-thumb"><img src="@img.Trim()" onclick="window.open(this.src)" /></div>
+                            }
+                        </div>
+                        @if (allSharedImages.Count > 9)
+                        {
+                            <div class="text-center mt-2"><a href="#" class="small text-decoration-none">Xem tất cả</a></div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-muted small">Chưa có ảnh nào.</div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+<script src="~/js/admin/chat.js"></script> 
+    

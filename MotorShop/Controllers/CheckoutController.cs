@@ -125,10 +125,13 @@ namespace MotorShop.Controllers
         // ============================================
         // POST: /Checkout (đặt hàng + thanh toán mô phỏng)
         // ============================================
+        // ============================================
+        // POST: /Checkout (đặt hàng + thanh toán mô phỏng)
+        // ============================================
         [HttpPost]
         public async Task<IActionResult> Index(CheckoutViewModel vm, CancellationToken ct)
         {
-            // Lấy lại items hiện tại (không tin vào client)
+            // 1. Lấy lại items hiện tại từ Session (Server-side authority - không tin client)
             var items = _cart.GetCartItems();
 
             // Nếu người dùng chỉ chọn subset -> lọc lại theo SelectedProductIds
@@ -144,7 +147,7 @@ namespace MotorShop.Controllers
                 return RedirectToAction("Index", "Products");
             }
 
-            // Lưu session checkout từ input user
+            // Lưu session checkout từ input user để giữ trạng thái nếu validation lỗi
             var ss = _cart.GetCheckoutSession() ?? new CartService.CheckoutSession();
             ss.DeliveryMethod = vm.DeliveryMethod;
             ss.PaymentMethod = vm.PaymentMethod;
@@ -158,12 +161,23 @@ namespace MotorShop.Controllers
             ss.CardExpiry = vm.CardExpiry?.Trim();
             _cart.SaveCheckoutSession(ss);
 
-            // Tính lại tổng tiền server-side theo subset
+            // ==================================================================================
+            // [FIX LOGIC] TÍNH TOÁN LẠI TIỀN (Dùng biến cục bộ để ép buộc giá trị đúng)
+            // ==================================================================================
+            var calculatedSubtotal = items.Sum(i => i.Subtotal);
+
+            // Tính phí ship dựa trên phương thức giao hàng user chọn (HomeDelivery = 30k, Store = 0)
+            var calculatedShippingFee = CalculateShipping(vm.DeliveryMethod);
+
+            var calculatedDiscount = 0m; // Mở rộng sau này nếu có mã giảm giá
+            var calculatedTotal = calculatedSubtotal + calculatedShippingFee - calculatedDiscount;
+
+            // Cập nhật ngược lại vào ViewModel để hiển thị đúng nếu View được trả về (do lỗi validation)
             vm.Items = items;
-            vm.Subtotal = items.Sum(i => i.Subtotal);
-            vm.ShippingFee = CalculateShipping(vm.DeliveryMethod);
-            vm.DiscountAmount = 0;
-            vm.Total = vm.Subtotal + vm.ShippingFee - vm.DiscountAmount;
+            vm.Subtotal = calculatedSubtotal;
+            vm.ShippingFee = calculatedShippingFee;
+            vm.DiscountAmount = calculatedDiscount;
+            vm.Total = calculatedTotal;
 
             // ======================
             // VALIDATIONS phía server
@@ -251,20 +265,25 @@ namespace MotorShop.Controllers
                 }
 
                 var me = await _userManager.GetUserAsync(User);
+
+                // [FIX LOGIC] Sử dụng biến calculatedShippingFee và calculatedTotal thay vì vm.*
                 var order = new Order
                 {
                     UserId = me!.Id,
                     OrderDate = DateTime.UtcNow,
                     Status = OrderStatus.Processing,
-                    TotalAmount = vm.Total,
+
+                    // QUAN TRỌNG: Gán giá trị từ biến tính toán cục bộ để đảm bảo chính xác
+                    ShippingFee = calculatedShippingFee,
+                    TotalAmount = calculatedTotal,
+                    DiscountAmount = calculatedDiscount,
+
                     DeliveryMethod = vm.DeliveryMethod,
                     PickupBranchId = vm.DeliveryMethod == DeliveryMethod.PickupAtStore ? vm.PickupBranchId : null,
                     ShippingAddress = vm.DeliveryMethod == DeliveryMethod.HomeDelivery ? vm.ShippingAddress : null,
                     ReceiverName = vm.ReceiverName,
                     ReceiverPhone = vm.ReceiverPhone,
                     ReceiverEmail = vm.ReceiverEmail,
-                    ShippingFee = vm.ShippingFee,
-                    DiscountAmount = vm.DiscountAmount,
                     PaymentMethod = vm.PaymentMethod,
                     PaymentStatus = PaymentStatus.Pending
                 };
@@ -324,7 +343,7 @@ namespace MotorShop.Controllers
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "Gửi email xác nhận thanh toán thất bại (OrderId={OrderId})", /*OrderId*/ 0);
+                    _logger.LogWarning(ex, "Gửi email xác nhận thanh toán thất bại (OrderId={OrderId})", 0);
                 }
 
                 // Clear session/giỏ

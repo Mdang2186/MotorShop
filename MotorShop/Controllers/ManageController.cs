@@ -57,7 +57,7 @@ namespace MotorShop.Controllers
                 FullName = user.FullName ?? "",
                 PhoneNumber = user.PhoneNumber,
                 Address = user.Address,
-                CurrentAvatarUrl = user.AvatarUrl
+                CurrentAvatarUrl = user.Avatar
             };
             return View(vm);
         }
@@ -72,7 +72,7 @@ namespace MotorShop.Controllers
             if (!ModelState.IsValid)
             {
                 vm.Username = user.UserName ?? "";
-                vm.CurrentAvatarUrl = user.AvatarUrl;
+                vm.CurrentAvatarUrl = user.Avatar;
                 return View(vm);
             }
 
@@ -101,7 +101,7 @@ namespace MotorShop.Controllers
                 {
                     foreach (var e in setPhone.Errors) ModelState.AddModelError("", e.Description);
                     vm.Username = user.UserName ?? "";
-                    vm.CurrentAvatarUrl = user.AvatarUrl;
+                    vm.CurrentAvatarUrl = user.Avatar;
                     return View(vm);
                 }
             }
@@ -120,7 +120,7 @@ namespace MotorShop.Controllers
                 if (!ModelState.IsValid)
                 {
                     vm.Username = user.UserName ?? "";
-                    vm.CurrentAvatarUrl = user.AvatarUrl;
+                    vm.CurrentAvatarUrl = user.Avatar;
                     return View(vm);
                 }
 
@@ -128,11 +128,11 @@ namespace MotorShop.Controllers
                 Directory.CreateDirectory(folder);
 
                 // Xoá ảnh cũ (best-effort)
-                if (!string.IsNullOrWhiteSpace(user.AvatarUrl))
+                if (!string.IsNullOrWhiteSpace(user.Avatar))
                 {
                     try
                     {
-                        var old = Path.Combine(_env.WebRootPath, user.AvatarUrl.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+                        var old = Path.Combine(_env.WebRootPath, user.Avatar.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
                         if (System.IO.File.Exists(old)) System.IO.File.Delete(old);
                     }
                     catch { /* ignore */ }
@@ -144,7 +144,7 @@ namespace MotorShop.Controllers
                 {
                     await vm.AvatarFile.CopyToAsync(fs, ct);
                 }
-                user.AvatarUrl = $"/images/avatars/{fileName}";
+                user.Avatar = $"/images/avatars/{fileName}";
                 changed = true;
             }
 
@@ -155,7 +155,7 @@ namespace MotorShop.Controllers
                 {
                     foreach (var e in upd.Errors) ModelState.AddModelError("", e.Description);
                     vm.Username = user.UserName ?? "";
-                    vm.CurrentAvatarUrl = user.AvatarUrl;
+                    vm.CurrentAvatarUrl = user.Avatar;
                     return View(vm);
                 }
             }
@@ -172,16 +172,16 @@ namespace MotorShop.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return NotFound();
 
-            if (!string.IsNullOrWhiteSpace(user.AvatarUrl))
+            if (!string.IsNullOrWhiteSpace(user.Avatar))
             {
                 try
                 {
-                    var path = Path.Combine(_env.WebRootPath, user.AvatarUrl.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+                    var path = Path.Combine(_env.WebRootPath, user.Avatar.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
                     if (System.IO.File.Exists(path)) System.IO.File.Delete(path);
                 }
                 catch { /* ignore */ }
 
-                user.AvatarUrl = null;
+                user.Avatar = null;
                 await _userManager.UpdateAsync(user);
                 await _signInManager.RefreshSignInAsync(user);
             }
@@ -435,7 +435,7 @@ namespace MotorShop.Controllers
                     user.FullName,
                     user.PhoneNumber,
                     user.Address,
-                    user.AvatarUrl,
+                    user.Avatar,
                     user.EmailConfirmed,
                     TwoFactorEnabled = await _userManager.GetTwoFactorEnabledAsync(user)
                 },

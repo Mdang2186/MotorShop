@@ -1,0 +1,14 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "npm",
+			"script": "install",
+			"path": "bin/Debug/net9.0",
+			"group": "clean",
+			"problemMatcher": [],
+			"label": "npm: install - bin/Debug/net9.0",
+			"detail": "install dependencies from package"
+		}
+	]
+}

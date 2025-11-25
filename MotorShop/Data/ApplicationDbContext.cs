@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using MotorShop.Models;
 using System.Globalization;
 using System.Text;
+using MotorShop.Models.Entities; 
 
 namespace MotorShop.Data
 {
@@ -20,6 +21,8 @@ namespace MotorShop.Data
 
         public DbSet<ProductImage> ProductImages => Set<ProductImage>();
         public DbSet<ProductSpecification> ProductSpecifications => Set<ProductSpecification>();
+        public DbSet<ChatThread> ChatThreads { get; set; } = null!;
+        public DbSet<ChatMessage> ChatMessages { get; set; } = null!;
 
         public DbSet<Tag> Tags => Set<Tag>();
         public DbSet<ProductTag> ProductTags => Set<ProductTag>();
@@ -165,6 +168,37 @@ namespace MotorShop.Data
             b.Entity<ApplicationUser>()
                 .Property(x => x.CreatedAt)
                 .HasDefaultValueSql("GETUTCDATE()");
+
+            // ===== ApplicationUser =====
+            b.Entity<ApplicationUser>()
+                .Property(x => x.CreatedAt)
+                .HasDefaultValueSql("GETUTCDATE()");
+
+            // ===== Chat =====
+            b.Entity<ChatThread>()
+       .HasOne(t => t.Customer)
+       .WithMany()
+       .HasForeignKey(t => t.CustomerId)
+       .OnDelete(DeleteBehavior.Restrict);
+
+            b.Entity<ChatThread>()
+                .HasOne(t => t.Staff)
+                .WithMany()
+                .HasForeignKey(t => t.StaffId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            b.Entity<ChatMessage>()
+                .HasOne(m => m.Thread)
+                .WithMany(t => t.Messages)
+                .HasForeignKey(m => m.ThreadId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            b.Entity<ChatMessage>()
+                .HasOne(m => m.Sender)
+                .WithMany()
+                .HasForeignKey(m => m.SenderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
         }
 
         // ====== Auto audit + slug ======

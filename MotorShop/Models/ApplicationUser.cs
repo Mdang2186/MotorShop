@@ -17,9 +17,9 @@ namespace MotorShop.Models
 
         public ICollection<Order> Orders { get; set; } = new List<Order>();
 
-        // Ảnh đại diện (đường dẫn tĩnh trong wwwroot), ví dụ: /images/avatars/xxx.webp
+        // SỬA TẠI ĐÂY: Đổi tên từ AvatarUrl thành Avatar để khớp với View
         [StringLength(255)]
-        public string? AvatarUrl { get; set; }
+        public string? Avatar { get; set; }
 
         // === OTP xác minh email (6 số) ===
         [StringLength(6)]

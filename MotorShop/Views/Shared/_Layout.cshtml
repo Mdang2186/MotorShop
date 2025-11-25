@@ -304,5 +304,7 @@
 
 
     @await RenderSectionAsync("Scripts", required: false)
+    @await Component.InvokeAsync("ChatWidget")
 </body>
 </html>
+

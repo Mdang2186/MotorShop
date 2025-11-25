@@ -31,12 +31,19 @@
                             Đơn hàng
                         </a>
                     </li>
-                    <li>
-                        <a asp-controller="Customer" asp-action="Index" class="@ActiveClass("customer") group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold">
-                            <i class="fa-solid fa-users w-6 text-center text-[16px] shrink-0"></i>
-                            Khách hàng
+                    <li class="nav-item">
+                        <a asp-area="Admin"
+                           asp-controller="Chat"
+                           asp-action="Index"
+                           class="... @ActiveClass("chat")">
+                            <i class="fa-solid fa-comments ..."></i>
+                            <span class="ml-2">Chat hỗ trợ</span>
                         </a>
+
                     </li>
+
+
+
                 </ul>
             </li>
             <li class="mt-auto">

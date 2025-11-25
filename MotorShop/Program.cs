@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using MotorShop.Data;
+using MotorShop.Hubs;
 using MotorShop.Models;
 using MotorShop.Services;
 using MotorShop.Utilities;
@@ -42,10 +43,9 @@ builder.Services
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-// ❗️Thêm Authorization (bắt buộc khi dùng UseAuthorization)
+// Authorization
 builder.Services.AddAuthorization(options =>
 {
-    // Tùy chọn: ví dụ policy cho Admin
     options.AddPolicy("AdminOnly", p => p.RequireRole(SD.Role_Admin));
     // Có thể thêm FallbackPolicy nếu muốn toàn site yêu cầu đăng nhập:
     // options.FallbackPolicy = new AuthorizationPolicyBuilder()
@@ -61,6 +61,12 @@ builder.Services.Configure<DataProtectionTokenProviderOptions>(o =>
 
 // MVC
 builder.Services.AddControllersWithViews();
+
+// SignalR (cho chat)
+builder.Services.AddSignalR();
+
+// Đăng ký ChatService cho DI
+builder.Services.AddScoped<IChatService, ChatService>();
 
 // Session
 builder.Services.AddDistributedMemoryCache();
@@ -93,20 +99,23 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-// ✅ Thứ tự đúng:
+// Thứ tự đúng
 app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Areas
+// Areas (Admin)
 app.MapControllerRoute(
     name: "areas",
     pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
 
-// Default
+// Default route (frontend)
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+// Map Hub cho chat
+app.MapHub<ChatHub>("/chathub");
 
 // =============================
 // 3) SEED DATABASE

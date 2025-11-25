@@ -1,0 +1,100 @@
+﻿@model MotorShop.Models.ViewModels.ChatWidgetViewModel
+@using System.Security.Claims
+
+@{
+    var customerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    var threadId = Model?.ThreadId ?? 0;
+}
+<link rel="stylesheet" href="~/css/chatwidget.css" />
+
+<div class="chat-widget @(Model != null ? "open" : "")" id="chatWidget">
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="shop-info">
+                <div class="shop-logo"><i class="fa-solid fa-motorcycle"></i></div>
+                <div class="shop-text">
+                    <h5>MotorShop</h5>
+                    <span><i class="fa-solid fa-circle" style="font-size:8px;"></i> Trực tuyến</span>
+                </div>
+            </div>
+            <div class="btn-close" id="closeChat"><i class="fa-solid fa-xmark"></i></div>
+        </div>
+
+        <div class="chat-body" id="chatBody">
+            @if (Model != null && Model.Messages.Any())
+            {
+                @foreach (var msg in Model.Messages.OrderBy(m => m.SentAt))
+                {
+                    var isMe = !msg.IsFromStaff;
+                    var content = msg.Content ?? "";
+                    var timeUtc = msg.SentAt.ToString("o");
+
+                    <div class="msg-row @(isMe ? "me" : "other")">
+                        @if (!isMe)
+                        {
+                            <div class="shop-logo" style="width:28px; height:28px; font-size:12px; flex-shrink:0; background:#555;">
+                                <i class="fa-solid fa-headset"></i>
+                            </div>
+                        }
+
+                        <div class="msg-content-wrap">
+                            @if (content.Contains("/images/chat/"))
+                            {
+                                var images = content.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                                .Where(x => x.Trim().StartsWith("/images/chat/"))
+                                .ToList();
+
+                                <div class="msg-bubble is-gallery">
+                                    <div class="gallery-grid" data-count="@images.Count">
+                                        @foreach (var img in images)
+                                        {
+                                            <img src="@img.Trim()" onclick="window.open(this.src)" />
+                                        }
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="msg-bubble">@Html.Raw(content.Replace("\n", "<br>"))</div>
+                            }
+                            <span class="msg-time local-time" data-utc="@timeUtc"></span>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="d-flex flex-column align-items-center justify-content-center h-100 text-muted" style="opacity:0.6;">
+                    <i class="fa-regular fa-comments fa-3x mb-3"></i>
+                    <p style="font-size:13px;">Xin chào! Chúng tôi có thể giúp gì cho bạn?</p>
+                </div>
+            }
+        </div>
+
+        <div class="chat-footer">
+            <input type="file" id="imgUpload" accept="image/*" multiple hidden />
+            <button class="btn-icon" onclick="document.getElementById('imgUpload').click()">
+                <i class="fa-regular fa-image"></i>
+            </button>
+
+            <div class="input-box">
+                <textarea id="chatInput" class="chat-input" rows="1" placeholder="Nhập tin nhắn..."></textarea>
+            </div>
+
+            <button id="sendBtn" class="btn-icon btn-send" disabled>
+                <i class="fa-solid fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="chat-toggle" id="chatToggle">
+        <i class="fa-solid fa-comment-dots"></i>
+        <span id="notiBadge" style="position:absolute; top:0; right:0; width:12px; height:12px; background:red; border:2px solid #fff; border-radius:50%; display:none;"></span>
+    </div>
+
+    <input type="hidden" id="threadIdInput" value="@threadId" />
+    <input type="hidden" id="customerIdInput" value="@customerId" />
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+<script src="~/js/chatwidget.js"></script>
