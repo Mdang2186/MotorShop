@@ -5,7 +5,7 @@
 namespace MotorShop.Migrations
 {
     /// <inheritdoc />
-    public partial class fixa : Migration
+    public partial class a : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

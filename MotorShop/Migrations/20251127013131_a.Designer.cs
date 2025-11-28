@@ -12,8 +12,8 @@ using MotorShop.Data;
 namespace MotorShop.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251106121019_minha")]
-    partial class minha
+    [Migration("20251127013131_a")]
+    partial class a
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -170,7 +170,7 @@ namespace MotorShop.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<string>("AvatarUrl")
+                    b.Property<string>("Avatar")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
@@ -398,6 +398,76 @@ namespace MotorShop.Migrations
                     b.HasIndex("Slug");
 
                     b.ToTable("Categories");
+                });
+
+            modelBuilder.Entity("MotorShop.Models.Entities.ChatMessage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsFromStaff")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("SenderId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ThreadId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SenderId");
+
+                    b.HasIndex("ThreadId");
+
+                    b.ToTable("ChatMessages");
+                });
+
+            modelBuilder.Entity("MotorShop.Models.Entities.ChatThread", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CustomerId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("IsClosed")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastMessageAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LastMessagePreview")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StaffId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerId");
+
+                    b.HasIndex("StaffId");
+
+                    b.ToTable("ChatThreads");
                 });
 
             modelBuilder.Entity("MotorShop.Models.Order", b =>
@@ -803,6 +873,43 @@ namespace MotorShop.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("MotorShop.Models.Entities.ChatMessage", b =>
+                {
+                    b.HasOne("MotorShop.Models.ApplicationUser", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("MotorShop.Models.Entities.ChatThread", "Thread")
+                        .WithMany("Messages")
+                        .HasForeignKey("ThreadId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Sender");
+
+                    b.Navigation("Thread");
+                });
+
+            modelBuilder.Entity("MotorShop.Models.Entities.ChatThread", b =>
+                {
+                    b.HasOne("MotorShop.Models.ApplicationUser", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("MotorShop.Models.ApplicationUser", "Staff")
+                        .WithMany()
+                        .HasForeignKey("StaffId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("Staff");
+                });
+
             modelBuilder.Entity("MotorShop.Models.Order", b =>
                 {
                     b.HasOne("MotorShop.Models.Branch", "PickupBranch")
@@ -923,6 +1030,11 @@ namespace MotorShop.Migrations
             modelBuilder.Entity("MotorShop.Models.Category", b =>
                 {
                     b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("MotorShop.Models.Entities.ChatThread", b =>
+                {
+                    b.Navigation("Messages");
                 });
 
             modelBuilder.Entity("MotorShop.Models.Order", b =>
