@@ -30,6 +30,8 @@ namespace MotorShop.Data
         public DbSet<Branch> Branches => Set<Branch>();
         public DbSet<Bank> Banks => Set<Bank>();      // ⚠️ Đảm bảo Models/Bank.cs có namespace MotorShop.Models
         public DbSet<Shipper> Shippers => Set<Shipper>();
+        public DbSet<AiConversation> AiConversations { get; set; } = null!;
+        public DbSet<AiMessage> AiMessages { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder b)
         {

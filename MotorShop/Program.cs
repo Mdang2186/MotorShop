@@ -5,9 +5,14 @@ using MotorShop.Data;
 using MotorShop.Hubs;
 using MotorShop.Models;
 using MotorShop.Services;
+using MotorShop.Services.Ai;
 using MotorShop.Utilities;
-
+using MotorShop.Services.Ai;
 var builder = WebApplication.CreateBuilder(args);
+
+
+builder.Services.AddScoped<AiQueryParser>();
+builder.Services.AddScoped<AiRecommendationService>();
 
 // =============================
 // 1) REGISTER SERVICES
@@ -30,6 +35,13 @@ builder.Services.AddDbContext<ApplicationDbContext>(opt =>
 #endif
 });
 builder.Services.AddAntiforgery(o => { o.HeaderName = "RequestVerificationToken"; });
+
+builder.Services.Configure<MailSettings>(
+    builder.Configuration.GetSection("MailSettings"));
+
+// THÊM:
+builder.Services.Configure<PaymentSettings>(
+    builder.Configuration.GetSection("PaymentSettings"));
 
 // Identity
 builder.Services

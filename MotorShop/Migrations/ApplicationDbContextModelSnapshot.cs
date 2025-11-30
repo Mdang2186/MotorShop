@@ -155,6 +155,71 @@ namespace MotorShop.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("MotorShop.Models.AiConversation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("LastUpdatedUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LastUserMessage")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AiConversations");
+                });
+
+            modelBuilder.Entity("MotorShop.Models.AiMessage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ConversationId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsUser")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ParsedInsight")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SuggestionsJson")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConversationId");
+
+                    b.ToTable("AiMessages");
+                });
+
             modelBuilder.Entity("MotorShop.Models.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
@@ -870,6 +935,26 @@ namespace MotorShop.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("MotorShop.Models.AiConversation", b =>
+                {
+                    b.HasOne("MotorShop.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("MotorShop.Models.AiMessage", b =>
+                {
+                    b.HasOne("MotorShop.Models.AiConversation", "Conversation")
+                        .WithMany("Messages")
+                        .HasForeignKey("ConversationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Conversation");
+                });
+
             modelBuilder.Entity("MotorShop.Models.Entities.ChatMessage", b =>
                 {
                     b.HasOne("MotorShop.Models.ApplicationUser", "Sender")
@@ -1007,6 +1092,11 @@ namespace MotorShop.Migrations
                     b.Navigation("Product");
 
                     b.Navigation("Tag");
+                });
+
+            modelBuilder.Entity("MotorShop.Models.AiConversation", b =>
+                {
+                    b.Navigation("Messages");
                 });
 
             modelBuilder.Entity("MotorShop.Models.ApplicationUser", b =>

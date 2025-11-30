@@ -1,24 +1,16 @@
 ﻿@using MotorShop.Utilities
 @{
-    // Nav active
+    // 1. Helper xác định menu active
     var ctrl = (ViewContext.RouteData.Values["controller"]?.ToString() ?? "").ToLowerInvariant();
     bool Active(string name) => ctrl == name.ToLowerInvariant();
-    string NavClass(string name)
-        => (Active(name) ? "text-blue-600 font-semibold" : "text-slate-600 hover:text-blue-600")
-           + " px-3 py-2 rounded-md text-sm transition";
 
-    // Toast
-    string? toast =
-        TempData[SD.Temp_Success] as string
-        ?? TempData[SD.Temp_Info] as string
-        ?? TempData[SD.Temp_Warning] as string
-        ?? TempData[SD.Temp_Error] as string;
+    // Thêm whitespace-nowrap để text menu không bao giờ bị xuống dòng
+    string NavClass(string name) => (Active(name) ? "text-blue-600 font-bold" : "text-slate-600 hover:text-blue-600 font-medium")
+                                    + " px-3 py-2 rounded-md text-sm transition whitespace-nowrap";
 
-    string toastType =
-        TempData[SD.Temp_Success] != null ? "success" :
-        TempData[SD.Temp_Info] != null ? "info" :
-        TempData[SD.Temp_Warning] != null ? "warning" : "error";
-
+    // 2. Xử lý Toast Notification
+    string? toast = TempData[SD.Temp_Success] as string ?? TempData[SD.Temp_Info] as string ?? TempData[SD.Temp_Warning] as string ?? TempData[SD.Temp_Error] as string;
+    string toastType = TempData[SD.Temp_Success] != null ? "success" : TempData[SD.Temp_Info] != null ? "info" : TempData[SD.Temp_Warning] != null ? "warning" : "error";
     string ToastBg(string t) => t switch
     {
         "success" => "from-emerald-500 to-emerald-600 shadow-emerald-300/40",
@@ -32,20 +24,16 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="color-scheme" content="light only" />
-    <meta name="theme-color" content="#2563eb" />
     <title>@ViewData["Title"] - MotorShop</title>
 
-    <!-- Tailwind (dev) -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
-    <!-- Project CSS -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 
     @RenderSection("Head", required: false)
 
     <style>
+        /* Nền trang */
         body.bg-future {
             background: radial-gradient(900px 600px at 12% 8%, #eaf2ff 0, transparent 60%), radial-gradient(900px 600px at 88% 6%, #e6fbff 0, transparent 62%), linear-gradient(180deg, #ffffff 0, #f7fbff 100%);
         }
@@ -55,83 +43,135 @@
             backdrop-filter: blur(6px);
         }
 
-        a, button, input {
-            transition: all .18s ease-in-out;
+        /* === CSS HIỆU ỨNG NÚT AI (VIỀN XOAY CẦU VỒNG) === */
+
+        /* 1. Định nghĩa animation xoay */
+        @@keyframes spin-gradient {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* 2. Container bọc ngoài (Tạo hình dáng viên thuốc) */
+        .ai-btn-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden; /* Cắt phần thừa của gradient xoay */
+            border-radius: 999px;
+            padding: 2px; /* ĐỘ DÀY VIỀN MÀU (Khoảng cách giữa inner và outer) */
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+            .ai-btn-wrapper:hover {
+                transform: scale(1.02); /* Phóng to nhẹ khi hover */
+                box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+            }
+
+            /* 3. Lớp giả tạo nền gradient xoay (Nằm dưới cùng) */
+            .ai-btn-wrapper::before {
+                content: "";
+                position: absolute;
+                top: -50%;
+                left: -50%;
+                width: 200%;
+                height: 200%; /* To hơn nút để khi xoay vẫn phủ kín */
+                /* Dải màu cầu vồng giống Google */
+                background: conic-gradient( #ea4335, #fbbc04, #34a853, #4285f4, #9b72cb, #ea4335 );
+                animation: spin-gradient 3s linear infinite; /* Xoay liên tục */
+                z-index: 0;
+            }
+
+        /* 4. Lớp nội dung bên trong (Nền trắng đè lên) */
+        .ai-btn-inner {
+            position: relative;
+            z-index: 1;
+            background: white; /* Che gradient ở giữa */
+            width: 100%;
+            height: 100%;
+            border-radius: 999px; /* Bo tròn trùng khớp wrapper */
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px; /* Khoảng cách lề trong nút */
+        }
+
+        /* 5. Chữ Gradient đẹp mắt */
+        .ai-text-gradient {
+            background: linear-gradient(90deg, #4f46e5, #ec4899);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 700;
         }
     </style>
 </head>
 <body class="bg-future text-slate-800 antialiased">
 
-    <!-- HEADER (đã bỏ topbar) -->
     <header class="sticky top-0 z-50">
         <div class="nav-glass border-b border-slate-100 shadow-sm/50 shadow-[0_5px_25px_rgba(15,23,42,0.04)]">
             <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex h-16 items-center justify-between gap-3">
-                    <!-- Brand -->
-                    <a asp-controller="Home" asp-action="Index" class="flex items-center gap-2" aria-label="Về trang chủ">
+                <div class="flex h-16 items-center justify-between gap-4">
+
+                    <a asp-controller="Home" asp-action="Index" class="flex items-center gap-2 shrink-0" aria-label="Về trang chủ">
                         <div class="relative">
                             <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 grid place-items-center text-white shadow-lg">
                                 <i class="fa-solid fa-motorcycle text-sm"></i>
                             </div>
                             <div class="absolute inset-0 rounded-xl bg-blue-400/40 blur-md -z-10"></div>
                         </div>
-                        <div class="leading-tight">
+                        <div class="leading-tight hidden sm:block">
                             <span class="block font-extrabold text-lg tracking-tight text-slate-900">
                                 Motor<span class="text-blue-600">Shop</span>
-                            </span>
-                            <span class="block text-[10px] uppercase tracking-[0.38em] text-slate-400">
-                                future mobility
                             </span>
                         </div>
                     </a>
 
-                    <!-- Search desktop -->
-                    <form asp-controller="Products" asp-action="Index" method="get"
-                          class="hidden md:flex items-center relative w-72 lg:w-[28rem]" role="search" aria-label="Tìm kiếm sản phẩm">
-                        <label for="q" class="sr-only">Tìm kiếm</label>
-                        <input id="q" name="searchString" type="search" autocomplete="off"
-                               placeholder="Tìm xe, hãng, dòng…"
-                               class="w-full rounded-2xl border border-slate-200 bg-white pl-9 pr-24 py-2 text-sm
-                                      focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm" />
-                        <i class="fa-solid fa-magnifying-glass absolute left-3 text-slate-300 pointer-events-none"></i>
-                        <button type="submit"
-                                class="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-sm">
-                            Tìm
-                        </button>
+                    <form id="global-search-form" asp-controller="Products" asp-action="Index" method="get"
+                          class="hidden md:flex flex-1 max-w-xl items-center relative z-10" role="search">
+
+                        <div class="w-full flex items-center bg-white rounded-full border border-slate-200 shadow-sm focus-within:shadow-md transition-all p-1">
+
+                            <div class="pl-3 text-slate-400">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                            </div>
+
+                            <input id="global-search-input"
+                                   name="searchString"
+                                   type="search"
+                                   autocomplete="off"
+                                   placeholder="Tìm xe, hãng, dòng…"
+                                   class="w-full bg-transparent border-none py-1.5 px-3 text-sm text-slate-700 placeholder-slate-400 focus:ring-0 focus:outline-none" />
+
+                            <a href="@Url.Action("Index", "Ai")" class="ai-btn-wrapper mr-0.5" title="Hỏi trợ lý ảo AI">
+                                <div class="ai-btn-inner">
+                                    <i class="fa-solid fa-wand-magic-sparkles text-sm text-indigo-500"></i>
+                                    <span class="text-xs ai-text-gradient whitespace-nowrap">Chế độ AI</span>
+                                </div>
+                            </a>
+
+                        </div>
                     </form>
 
-                    <!-- Right side -->
-                    <div class="flex items-center gap-1 sm:gap-2">
-                        <!-- Desktop nav -->
-                        <div class="hidden md:flex items-center space-x-1">
-                            <a asp-controller="Home" asp-action="Index" class="@NavClass("home") relative">
-                                Trang chủ
-                                @if (Active("home"))
-                                {
-                                    <span class="absolute left-3 right-3 -bottom-2 h-[3px] rounded-full bg-gradient-to-r from-blue-500 via-cyan-400 to-emerald-400"></span>
-                                }
-                            </a>
-                            <a asp-controller="Products" asp-action="Index" class="@NavClass("products") relative">
-                                Sản phẩm
-                                @if (Active("products"))
-                                {
-                                    <span class="absolute left-3 right-3 -bottom-2 h-[3px] rounded-full bg-gradient-to-r from-blue-500 via-cyan-400 to-emerald-400"></span>
-                                }
-                            </a>
-                            <a asp-controller="Order" asp-action="History" class="@NavClass("order") relative">
-                                Đơn hàng
-                                @if (Active("order"))
-                                {
-                                    <span class="absolute left-3 right-3 -bottom-2 h-[3px] rounded-full bg-gradient-to-r from-blue-500 via-cyan-400 to-emerald-400"></span>
-                                }
-                            </a>
+                    <div class="flex items-center gap-1 sm:gap-2 shrink-0">
+                        <div class="hidden lg:flex items-center space-x-1">
+                            <a asp-controller="Home" asp-action="Index" class="@NavClass("home")">Trang chủ</a>
+                            <a asp-controller="Products" asp-action="Index" class="@NavClass("products")">Sản phẩm</a>
+                            <a asp-controller="Order" asp-action="History" class="@NavClass("order")">Đơn hàng</a>
                         </div>
 
-                        <!-- Cart -->
                         <a asp-controller="Cart" asp-action="Index"
-                           class="relative inline-flex items-center gap-2 px-2.5 py-2 rounded-xl hover:bg-slate-50"
+                           class="relative inline-flex items-center gap-2 px-2.5 py-2 rounded-xl hover:bg-slate-50 text-slate-700"
                            aria-label="Giỏ hàng">
-                            <i class="fa-solid fa-cart-shopping text-lg text-slate-700"></i>
+                            <i class="fa-solid fa-cart-shopping text-lg"></i>
                             <span id="cart-badge"
                                   class="min-w-[20px] px-1.5 h-5 text-[10px] grid place-items-center rounded-full bg-blue-600 text-white shadow">
                                 0
@@ -140,11 +180,7 @@
 
                         <partial name="_LoginPartial" />
 
-                        <!-- Mobile buttons -->
-                        <button id="btn-open-search" class="md:hidden p-2 text-slate-600 hover:text-blue-600" aria-label="Tìm kiếm">
-                            <i class="fa-solid fa-magnifying-glass text-lg"></i>
-                        </button>
-                        <button id="mobile-menu-button" class="md:hidden p-2 text-slate-600 hover:text-blue-600" aria-label="Menu" aria-expanded="false" aria-controls="mobile-menu">
+                        <button id="mobile-menu-button" class="lg:hidden p-2 text-slate-600 hover:text-blue-600">
                             <i class="fa-solid fa-bars text-lg"></i>
                         </button>
                     </div>
@@ -152,50 +188,26 @@
             </nav>
         </div>
 
-        <!-- Mobile search -->
-        <div id="mobile-search" class="md:hidden hidden bg-white border-b border-slate-100">
-            <form asp-controller="Products" asp-action="Index" method="get" class="px-4 py-3" role="search">
-                <label for="mq" class="sr-only">Tìm kiếm</label>
-                <div class="relative">
-                    <input id="mq" name="searchString" type="search" placeholder="Tìm xe, hãng, dòng…"
-                           class="w-full rounded-2xl border border-slate-200 bg-white pl-10 pr-3 py-2
-                                  focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-300"></i>
-                </div>
-            </form>
-        </div>
-
-        <!-- Mobile menu -->
-        <div id="mobile-menu" class="md:hidden hidden bg-white border-b border-slate-100">
-            <div class="px-2 pt-2 pb-3 space-y-1">
-                <a asp-controller="Home" asp-action="Index"
-                   class="block px-3 py-2 rounded-md text-base font-medium hover:bg-slate-50 @(Active("home") ? "text-blue-600" : "text-slate-700")">
-                    Trang chủ
+        <div id="mobile-menu" class="lg:hidden hidden bg-white border-b border-slate-100">
+            <div class="px-4 py-3 space-y-2">
+                <a href="@Url.Action("Index", "Ai")" class="block w-full text-center py-2 rounded-lg bg-indigo-50 text-indigo-700 font-bold border border-indigo-100">
+                    <i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Chế độ AI
                 </a>
-                <a asp-controller="Products" asp-action="Index"
-                   class="block px-3 py-2 rounded-md text-base font-medium hover:bg-slate-50 @(Active("products") ? "text-blue-600" : "text-slate-700")">
-                    Sản phẩm
-                </a>
-                <a asp-controller="Order" asp-action="History"
-                   class="block px-3 py-2 rounded-md text-base font-medium hover:bg-slate-50 @(Active("order") ? "text-blue-600" : "text-slate-700")">
-                    Đơn hàng
-                </a>
+                <a asp-controller="Home" asp-action="Index" class="block py-2 text-slate-700 font-medium">Trang chủ</a>
+                <a asp-controller="Products" asp-action="Index" class="block py-2 text-slate-700 font-medium">Sản phẩm</a>
             </div>
         </div>
     </header>
 
-    <!-- BODY -->
     <main role="main" class="relative">
         @RenderBody()
     </main>
 
-    <!-- FOOTER -->
     <partial name="_FooterPartial" />
 
-    <!-- Toast -->
     <div id="notification"
          class="fixed top-[84px] right-5 z-[1000] min-w-[280px] max-w-sm transition-all duration-500 ease-in-out
-                @(toast == null ? "opacity-0 translate-x-full pointer-events-none" : "opacity-100 translate-x-0")">
+              @(toast == null ? "opacity-0 translate-x-full pointer-events-none" : "opacity-100 translate-x-0")">
         @if (toast != null)
         {
             <div class="flex items-start gap-3 text-white px-4 py-3 rounded-2xl shadow-2xl bg-gradient-to-br @ToastBg(toastType)">
@@ -209,22 +221,23 @@
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-    <form id="af-global" class="hidden">@Html.AntiForgeryToken()</form>
 
     <script>
-        // === Helpers bắt buộc ===
-        window.getCsrf = () =>
-          document.querySelector('#af-global input[name="__RequestVerificationToken"]')?.value || '';
+        // === TOAST HELPER ===
+        window.getCsrf = () => document.querySelector('#af-global input[name="__RequestVerificationToken"]')?.value || '';
 
         window.showToast = (msg, type = "info") => {
           const toast = document.getElementById('notification');
-          let box = toast?.querySelector('.bg-gradient-to-br');
           if (!toast) return alert(msg);
+
+          // Template HTML cho toast
+          let box = toast.querySelector('.bg-gradient-to-br');
           if (!box) {
-            toast.innerHTML =
-              '<div class="flex items-start gap-3 text-white px-4 py-3 rounded-2xl shadow-2xl bg-gradient-to-br"><i class="fa-solid fa-circle-info text-xl mt-0.5"></i><div class="toast-text text-sm leading-5"></div></div>';
-            box = toast.querySelector('.bg-gradient-to-br');
+             toast.innerHTML = '<div class="flex items-start gap-3 text-white px-4 py-3 rounded-2xl shadow-2xl bg-gradient-to-br"><i class="fa-solid fa-circle-info text-xl mt-0.5"></i><div class="toast-text text-sm leading-5"></div></div>';
+             box = toast.querySelector('.bg-gradient-to-br');
           }
+
+          // Set màu sắc
           const map = {
             success: 'from-emerald-500 to-emerald-600 shadow-emerald-300/40',
             warning: 'from-amber-500 to-amber-600 shadow-amber-300/40',
@@ -232,18 +245,24 @@
             info:    'from-blue-600 to-blue-700 shadow-blue-300/40'
           };
           box.className = 'flex items-start gap-3 text-white px-4 py-3 rounded-2xl shadow-2xl bg-gradient-to-br ' + (map[type] || map.info);
+
+          // Set Icon & Text
           const icon = box.querySelector('i');
-          icon.className =
-            'fa-solid ' + (type==='success' ? 'fa-circle-check' : type==='warning' ? 'fa-triangle-exclamation' : type==='error' ? 'fa-circle-exclamation' : 'fa-circle-info') + ' text-xl mt-0.5';
+          icon.className = 'fa-solid ' + (type==='success' ? 'fa-circle-check' : type==='warning' ? 'fa-triangle-exclamation' : type==='error' ? 'fa-circle-exclamation' : 'fa-circle-info') + ' text-xl mt-0.5';
           box.querySelector('.toast-text').textContent = msg || '';
+
+          // Hiển thị
           toast.classList.remove('pointer-events-none','opacity-0','translate-x-full');
           toast.classList.add('opacity-100','translate-x-0');
+
+          // Tự ẩn sau 3.4s
           clearTimeout(window.__toastTimer);
           window.__toastTimer = setTimeout(()=>{
             toast.classList.add('opacity-0','translate-x-full');
           }, 3400);
         };
 
+        // === CART HELPER ===
         window.refreshCartBadge = async () => {
           try {
             const r = await fetch('@Url.Action("Summary", "Cart")', { headers: { 'Accept':'application/json' }});
@@ -253,29 +272,24 @@
           } catch {}
         };
 
-        // === Bắt click Thêm vào giỏ (bất kể nằm trong thẻ gì) ===
+        // Sự kiện thêm vào giỏ hàng
         document.addEventListener('click', async (e) => {
           const btn = e.target.closest('[data-add-to-cart]');
           if (!btn) return;
-          e.preventDefault();
-          e.stopPropagation();
+          e.preventDefault(); e.stopPropagation();
 
           const pid = Number(btn.getAttribute('data-id'));
           const qty = Number(btn.getAttribute('data-qty') || '1');
-
           const html = btn.innerHTML;
+
           btn.disabled = true;
           btn.classList.add('opacity-70');
-          btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span> Đang thêm...</span>';
+          btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>...</span>';
 
           try {
             const res = await fetch('@Url.Action("AddToCart", "Cart")', {
               method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'RequestVerificationToken': getCsrf()
-              },
+              headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'RequestVerificationToken': getCsrf() },
               body: JSON.stringify({ productId: pid, quantity: qty })
             });
 
@@ -284,27 +298,25 @@
             if (ct.includes('application/json')) j = await res.json();
 
             if (res.ok && j.success) {
-              showToast(j.message || 'Đã thêm vào giỏ', 'success');
-              refreshCartBadge();
+                showToast(j.message || 'Đã thêm vào giỏ', 'success');
+                refreshCartBadge();
             } else {
-              showToast(j.message || 'Không thể thêm vào giỏ', 'error');
+                showToast(j.message || 'Không thể thêm vào giỏ', 'error');
             }
           } catch {
-            showToast('Kết nối thất bại. Thử lại sau.', 'error');
+              showToast('Lỗi kết nối.', 'error');
           } finally {
-            btn.disabled = false;
-            btn.classList.remove('opacity-70');
-            btn.innerHTML = html;
+              btn.disabled = false;
+              btn.classList.remove('opacity-70');
+              btn.innerHTML = html;
           }
         });
 
+        // Init Cart Badge
         window.addEventListener('DOMContentLoaded', refreshCartBadge);
     </script>
-
-
 
     @await RenderSectionAsync("Scripts", required: false)
     @await Component.InvokeAsync("ChatWidget")
 </body>
 </html>
-

@@ -1,0 +1,293 @@
+﻿@model MotorShop.ViewModels.OrderSuccessViewModel
+@using MotorShop.Models.Enums
+
+@{
+    ViewData["Title"] = "Đặt hàng thành công";
+    var hasQr = !string.IsNullOrWhiteSpace(Model.QrPayload);
+
+    // Không dùng PaymentStatus.Cancelled nữa
+    var paymentStatusClass = Model.PaymentStatus switch
+    {
+        PaymentStatus.Paid => "bg-emerald-50 text-emerald-700 border-emerald-200",
+        PaymentStatus.Pending => "bg-amber-50 text-amber-700 border-amber-200",
+        _ => "bg-gray-50 text-gray-700 border-gray-200"
+    };
+    var paymentStatusText = Model.PaymentStatus switch
+    {
+        PaymentStatus.Paid => "Đã thanh toán",
+        PaymentStatus.Pending => "Chờ thanh toán",
+        _ => "Trạng thái khác"
+    };
+}
+
+@section Head {
+    <style>
+        .card-glass {
+            background: rgba(255,255,255,.96);
+            backdrop-filter: blur(10px) saturate(160%);
+            border: 1px solid rgba(15,23,42,.06)
+        }
+
+        .ring-3d {
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.6),0 10px 30px rgba(2,6,23,.08)
+        }
+
+        .badge-soft {
+            border-radius: 9999px;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            border-width: 1px
+        }
+    </style>
+}
+
+<section class="relative py-10">
+    <!-- background blur -->
+    <div aria-hidden="true" class="pointer-events-none absolute -top-10 -right-10 w-72 h-72 rounded-full blur-3xl bg-emerald-200/40"></div>
+    <div aria-hidden="true" class="pointer-events-none absolute -bottom-10 -left-10 w-80 h-80 rounded-full blur-3xl bg-sky-200/40"></div>
+
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-emerald-100 text-emerald-600 ring-3d mb-4">
+                <i class="fa-solid fa-circle-check text-3xl"></i>
+            </div>
+            <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-gray-900">
+                Đặt hàng thành công!
+            </h1>
+            <p class="mt-2 text-gray-600">
+                Cảm ơn <span class="font-semibold">@Model.ReceiverName</span> đã đặt xe tại MotorShop.
+            </p>
+            <p class="mt-1 text-sm text-gray-500">
+                Mã đơn hàng của bạn: <span class="font-mono font-semibold text-gray-900">#@Model.OrderId</span> —
+                <span>@Model.OrderDate.ToLocalTime().ToString("HH:mm dd/MM/yyyy")</span>
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- LEFT: order + shipping + payment -->
+            <div class="lg:col-span-2 space-y-4">
+                <!-- Trạng thái & liên hệ -->
+                <div class="card-glass rounded-2xl p-5 shadow-sm">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-3">
+                        <div>
+                            <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                                <i class="fa-solid fa-receipt text-blue-600"></i>
+                                Thông tin đơn hàng
+                            </h2>
+                            <p class="text-xs text-gray-500 mt-1">
+                                Vui lòng giữ lại mã đơn hàng để tiện tra cứu &amp; hỗ trợ.
+                            </p>
+                        </div>
+                        <div class="flex flex-wrap gap-2 justify-start md:justify-end">
+                            <span class="badge-soft @paymentStatusClass">
+                                <i class="fa-solid fa-circle-dot text-[10px]"></i>
+                                @paymentStatusText
+                            </span>
+                            <span class="badge-soft bg-blue-50 text-blue-700 border-blue-200">
+                                <i class="fa-solid fa-money-check-dollar"></i>
+                                @Model.PaymentMethodLabel
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="grid sm:grid-cols-2 gap-4 text-sm">
+                        <div class="space-y-1.5">
+                            <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Người nhận</div>
+                            <div class="text-gray-900 font-medium">@Model.ReceiverName</div>
+                            <div class="text-gray-600">
+                                <i class="fa-solid fa-phone text-xs mr-1"></i>@Model.ReceiverPhone
+                            </div>
+                            <div class="text-gray-600 break-words">
+                                <i class="fa-solid fa-envelope text-xs mr-1"></i>@Model.ReceiverEmail
+                            </div>
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Nhận xe</div>
+                            @if (Model.DeliveryMethod == DeliveryMethod.HomeDelivery)
+                            {
+                                <div class="text-gray-900 font-medium flex items-center gap-1.5">
+                                    <i class="fa-solid fa-truck-fast text-blue-600"></i>
+                                    Giao tận nơi
+                                </div>
+                                <div class="text-gray-600">
+                                    @Model.ShippingAddress
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-gray-900 font-medium flex items-center gap-1.5">
+                                    <i class="fa-solid fa-store text-blue-600"></i>
+                                    Nhận tại cửa hàng
+                                </div>
+                                <div class="text-gray-600">
+                                    @Model.BranchName
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Thanh toán & đặt cọc + QR -->
+                <div class="card-glass rounded-2xl p-5 shadow-sm">
+                    <div class="flex items-center justify-between mb-3">
+                        <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                            <i class="fa-solid fa-credit-card text-blue-600"></i>
+                            Thanh toán
+                        </h2>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <!-- Thông tin số tiền -->
+                        <div class="space-y-3 text-sm">
+                            <div class="rounded-xl bg-gray-50 border border-gray-100 p-3 space-y-1.5">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Tạm tính</span>
+                                    <span class="font-medium">@Model.Subtotal.ToString("#,0") ₫</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Phí vận chuyển</span>
+                                    <span class="font-medium">@Model.ShippingFee.ToString("#,0") ₫</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Giảm giá</span>
+                                    <span class="font-medium">-@Model.DiscountAmount.ToString("#,0") ₫</span>
+                                </div>
+                                <div class="border-t border-dashed border-gray-200 my-2"></div>
+                                <div class="flex justify-between text-base font-semibold">
+                                    <span>Tổng thanh toán</span>
+                                    <span class="text-gray-900">@Model.Total.ToString("#,0") ₫</span>
+                                </div>
+                            </div>
+
+                            @if (Model.RequiresDeposit && Model.DepositAmount > 0)
+                            {
+                                <div class="rounded-xl border border-blue-200 bg-blue-50/70 p-3 text-xs text-blue-900 space-y-1.5">
+                                    <div class="flex justify-between">
+                                        <span>Tiền đặt cọc cần thanh toán</span>
+                                        <span class="font-semibold">@Model.DepositAmount.ToString("#,0") ₫</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Số tiền còn lại khi nhận xe</span>
+                                        <span class="font-semibold">@Model.RemainingAmount.ToString("#,0") ₫</span>
+                                    </div>
+                                    <p class="mt-1 text-[11px] text-blue-900/80">
+                                        Vui lòng thanh toán khoản đặt cọc trong vòng 24 giờ để giữ xe.
+                                    </p>
+                                </div>
+                            }
+                            else
+                            {
+                                <p class="text-xs text-gray-500">
+                                    Phương thức thanh toán của bạn không yêu cầu đặt cọc trước.
+                                </p>
+                            }
+                        </div>
+
+                        <!-- QR thanh toán -->
+                        <div class="space-y-2 text-sm">
+                            @if (hasQr)
+                            {
+                                <div class="rounded-2xl border border-gray-100 bg-white/90 p-3 shadow-sm">
+                                    <p class="text-sm font-semibold text-gray-800 text-center mb-2">
+                                        Mã QR thanh toán
+                                    </p>
+                                    <div id="qrcode"
+                                         class="mx-auto w-[220px] h-[220px] grid place-items-center rounded-2xl bg-white border border-gray-200">
+                                        <!-- QR sẽ được render bằng JS -->
+                                    </div>
+                                    @if (!string.IsNullOrWhiteSpace(Model.QrDescription))
+                                    {
+                                        <p class="mt-2 text-xs text-gray-500 text-center leading-snug">
+                                            @Model.QrDescription
+                                        </p>
+                                    }
+                                    <p class="mt-2 text-[11px] text-gray-400 text-center">
+                                        Mã QR này cũng đã được gửi kèm trong email xác nhận đơn hàng.
+                                    </p>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="rounded-xl border border-dashed border-gray-200 bg-gray-50 p-3 text-xs text-gray-500">
+                                    Phương thức thanh toán hiện tại không sử dụng mã QR, hoặc dữ liệu QR chưa được thiết lập.
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: danh sách sản phẩm -->
+            <aside class="lg:col-span-1">
+                <div class="card-glass rounded-2xl border overflow-hidden shadow-sm">
+                    <div class="px-5 py-4 border-b bg-gradient-to-r from-blue-50 to-blue-100/60">
+                        <h3 class="text-base font-semibold flex items-center gap-2 text-gray-900">
+                            <i class="fa-solid fa-motorcycle text-blue-600"></i>
+                            Sản phẩm trong đơn
+                        </h3>
+                    </div>
+
+                    <div class="px-5 py-3 max-h-[360px] overflow-auto space-y-3">
+                        @foreach (var it in Model.Items)
+                        {
+                            @await Html.PartialAsync(
+                            "_CheckoutItemRow",
+                                                it,
+                                                new ViewDataDictionary(ViewData) { ["mode"] = "compact" })
+                                                }
+                    </div>
+
+                    <div class="px-5 py-4 border-t text-xs text-gray-500">
+                        <p>
+                            Bạn có thể xem lại lịch sử đơn hàng tại mục
+                            <a asp-controller="Order" asp-action="History" class="text-blue-600 hover:underline font-medium">
+                                Đơn mua
+                            </a>.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mt-4 grid gap-2 text-sm">
+                    <a asp-controller="Products" asp-action="Index"
+                       class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-gray-200 bg-white/80 hover:bg-gray-50 font-medium text-gray-700">
+                        <i class="fa-solid fa-shop"></i>
+                        Tiếp tục mua sắm
+                    </a>
+                    <a asp-controller="Order" asp-action="History"
+                       class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-blue-100 bg-blue-50/70 hover:bg-blue-100 font-medium text-blue-700">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                        Xem lịch sử đơn hàng
+                    </a>
+                </div>
+            </aside>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"
+            integrity="sha512-M0WZDH8ZJg14RbQH0bVkwNdDEjOiiMUWXHn3z44vj9CeyL6tvkq4gI6GkMt2rt7NmGvQ8rP+P0T4Jd7iGzK1NA=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var payload = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.QrPayload));
+            if (!payload) return;
+            var qrContainer = document.getElementById("qrcode");
+            if (!qrContainer) return;
+
+            new QRCode(qrContainer, {
+                text: payload,
+                width: 220,
+                height: 220,
+                correctLevel: QRCode.CorrectLevel.M
+            });
+        });
+    </script>
+}
