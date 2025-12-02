@@ -1,10 +1,18 @@
 ﻿@using MotorShop.Utilities
 @{
-    // 1. Helper xác định menu active
+    // Lấy cả Controller và Action
     var ctrl = (ViewContext.RouteData.Values["controller"]?.ToString() ?? "").ToLowerInvariant();
-    bool Active(string name) => ctrl == name.ToLowerInvariant();
+    var act = (ViewContext.RouteData.Values["action"]?.ToString() ?? "").ToLowerInvariant();
 
-    // Thêm whitespace-nowrap để text menu không bao giờ bị xuống dòng
+    // Hàm kiểm tra Active nâng cao
+    bool Active(string name)
+    {
+        name = name.ToLowerInvariant();
+        if (name == "parts") return ctrl == "products" && act == "parts"; // Riêng cho trang Phụ tùng
+        if (name == "products") return ctrl == "products" && act == "index"; // Riêng cho trang Sản phẩm
+        return ctrl == name; // Các trang khác (Home, Order...)
+    }
+
     string NavClass(string name) => (Active(name) ? "text-blue-600 font-bold" : "text-slate-600 hover:text-blue-600 font-medium")
                                     + " px-3 py-2 rounded-md text-sm transition whitespace-nowrap";
 
@@ -101,7 +109,7 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            padding: 6px 14px; /* Khoảng cách lề trong nút */
+            padding: 6px 10px; /* Khoảng cách lề trong nút */
         }
 
         /* 5. Chữ Gradient đẹp mắt */
@@ -151,7 +159,7 @@
                                    placeholder="Tìm xe, hãng, dòng…"
                                    class="w-full bg-transparent border-none py-1.5 px-3 text-sm text-slate-700 placeholder-slate-400 focus:ring-0 focus:outline-none" />
 
-                            <a href="@Url.Action("Index", "Ai")" class="ai-btn-wrapper mr-0.5" title="Hỏi trợ lý ảo AI">
+                            <a href="@Url.Action("Index", "Ai")" class="ai-btn-wrapper mr-0.5 shrink-0" title="Hỏi trợ lý ảo AI">
                                 <div class="ai-btn-inner">
                                     <i class="fa-solid fa-wand-magic-sparkles text-sm text-indigo-500"></i>
                                     <span class="text-xs ai-text-gradient whitespace-nowrap">Chế độ AI</span>
@@ -165,6 +173,9 @@
                         <div class="hidden lg:flex items-center space-x-1">
                             <a asp-controller="Home" asp-action="Index" class="@NavClass("home")">Trang chủ</a>
                             <a asp-controller="Products" asp-action="Index" class="@NavClass("products")">Sản phẩm</a>
+
+                            <a asp-controller="Products" asp-action="Parts" class="@NavClass("Parts")">Phụ tùng & phụ kiện</a>
+
                             <a asp-controller="Order" asp-action="History" class="@NavClass("order")">Đơn hàng</a>
                         </div>
 

@@ -1,15 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using MotorShop.Data;
-using MotorShop.Models;
-using MotorShop.Services.Ai;
-using MotorShop.ViewModels.Ai;
-using System;
+﻿using System;
 using System.Linq;
 using System.Security.Claims;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using MotorShop.Data;
+using MotorShop.Models;
+using MotorShop.Services.Ai;
+using MotorShop.ViewModels.Ai;
 
 namespace MotorShop.Controllers
 {
@@ -18,112 +19,167 @@ namespace MotorShop.Controllers
     {
         private readonly ApplicationDbContext _db;
         private readonly AiQueryParser _parser;
-        private readonly AiRecommendationService _ai;
+        private readonly AiRecommendationService _recommendation;
+        private readonly ILogger<AiController> _logger;
 
         public AiController(
             ApplicationDbContext db,
             AiQueryParser parser,
-            AiRecommendationService ai)
+            AiRecommendationService recommendation,
+            ILogger<AiController> logger)
         {
             _db = db;
             _parser = parser;
-            _ai = ai;
+            _recommendation = recommendation;
+            _logger = logger;
         }
 
         [HttpGet("")]
+        [HttpGet("index")]
         public IActionResult Index()
         {
             return View();
         }
 
         [HttpPost("chat")]
-        public async Task<IActionResult> Chat([FromBody] AiChatRequest req, CancellationToken ct)
+        public async Task<IActionResult> Chat([FromBody] AiChatRequest request, CancellationToken ct)
         {
-            if (req == null || string.IsNullOrWhiteSpace(req.Message))
-                return BadRequest(new { error = "Nội dung câu hỏi không được để trống." });
-
-            // 1. Phân tích câu hỏi
-            var parsed = _parser.Parse(req.Message);
-            var insight = parsed.BuildInsightSentence();
-
-            // 2. Gợi ý sản phẩm
-            var suggestions = await _ai.GetSuggestionsAsync(parsed, ct);
-
-            // 3. Lưu lịch sử chat (nếu có user hoặc anh vẫn muốn lưu cho khách)
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            AiConversation? convo = null;
-
-            if (req.ConversationId is int existingId && existingId > 0)
+            // 1. Kiểm tra đầu vào
+            if (request == null || string.IsNullOrWhiteSpace(request.Message))
             {
-                convo = await _db.AiConversations
-                    .Include(c => c.Messages)
-                    .FirstOrDefaultAsync(c => c.Id == existingId, ct);
+                return BadRequest("Nội dung câu hỏi không được để trống.");
             }
 
-            if (convo == null)
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            // 2. Xử lý hội thoại (Conversation)
+            AiConversation conversation;
+            if (request.ConversationId.HasValue)
             {
-                convo = new AiConversation
-                {
-                    UserId = userId,
-                    CreatedAtUtc = DateTime.UtcNow,
-                    LastUpdatedUtc = DateTime.UtcNow,
-                    Title = req.Message.Length > 60 ? req.Message[..60] + "…" : req.Message,
-                    LastUserMessage = req.Message
-                };
-                _db.AiConversations.Add(convo);
+                conversation = await _db.AiConversations
+                    .Include(c => c.Messages)
+                    .FirstOrDefaultAsync(c => c.Id == request.ConversationId.Value, ct)
+                    ?? new AiConversation
+                    {
+                        UserId = userId,
+                        CreatedAtUtc = DateTime.UtcNow,
+                        LastUpdatedUtc = DateTime.UtcNow
+                    };
+
+                if (conversation.Id == 0) _db.AiConversations.Add(conversation);
             }
             else
             {
-                convo.LastUpdatedUtc = DateTime.UtcNow;
-                convo.LastUserMessage = req.Message;
+                conversation = new AiConversation
+                {
+                    UserId = userId,
+                    CreatedAtUtc = DateTime.UtcNow,
+                    LastUpdatedUtc = DateTime.UtcNow
+                };
+                _db.AiConversations.Add(conversation);
             }
 
-            // message của user
+            // 3. Lưu tin nhắn người dùng
             var userMsg = new AiMessage
             {
-                Conversation = convo,
+                Conversation = conversation,
                 IsUser = true,
-                Content = req.Message,
-                ParsedInsight = insight,
+                Content = request.Message,
                 CreatedAtUtc = DateTime.UtcNow
             };
-            _db.AiMessages.Add(userMsg);
+            conversation.Messages.Add(userMsg);
 
-            // message “bot” – tóm tắt lại + lưu JSON gợi ý
-            var botSummary = suggestions.Any()
-                ? $"Mình đã chọn ra {suggestions.Count} mẫu xe phù hợp nhất với tiêu chí của bạn."
-                : "Hiện mình chưa tìm được mẫu xe nào thật sự khớp 100%. Bạn có thể điều chỉnh lại tiêu chí và thử lần nữa nhé.";
+            conversation.LastUserMessage = request.Message;
+            conversation.LastUpdatedUtc = DateTime.UtcNow;
 
-            var botMsg = new AiMessage
+            if (string.IsNullOrWhiteSpace(conversation.Title))
             {
-                Conversation = convo,
-                IsUser = false,
-                Content = botSummary,
-                ParsedInsight = insight,
-                SuggestionsJson = JsonSerializer.Serialize(suggestions),
-                CreatedAtUtc = DateTime.UtcNow
-            };
-            _db.AiMessages.Add(botMsg);
+                var title = request.Message.Trim();
+                if (title.Length > 60) title = title.Substring(0, 60) + "...";
+                conversation.Title = title;
+            }
 
             await _db.SaveChangesAsync(ct);
 
-            var response = new AiChatResponse
+            // 4. Xử lý AI Logic
+            var parsed = _parser.Parse(request.Message);
+
+            // Lấy danh sách gợi ý cơ bản từ Service (thường chỉ có ID, Name, Price, Reason)
+            var suggestions = await _recommendation.GetSuggestionsAsync(parsed, userId, ct);
+
+            // --- [QUAN TRỌNG] ENRICH DATA: Lấy thêm thông tin chi tiết từ DB ---
+            // Bước này đảm bảo Sidebar ở Frontend có đủ dữ liệu (SKU, Brand, Description, Stock...)
+            // mà không cần sửa đổi Service hay ViewModel cũ.
+
+            var productIds = suggestions.Select(s => s.ProductId).ToList();
+
+            var fullProducts = await _db.Products
+                .Include(p => p.Brand)
+                .Include(p => p.Category)
+                .Where(p => productIds.Contains(p.Id))
+                .ToDictionaryAsync(p => p.Id, ct);
+
+            // Map lại dữ liệu đầy đủ cho JSON response
+            var enrichedItems = suggestions.Select(s => {
+                if (fullProducts.TryGetValue(s.ProductId, out var p))
+                {
+                    return new
+                    {
+                        productId = p.Id,
+                        name = p.Name,
+                        price = p.Price,
+                        imageUrl = p.ImageUrl,
+
+                        // Các trường bổ sung cho Sidebar
+                        sku = p.SKU,
+                        year = p.Year,
+                        stockQuantity = p.StockQuantity,
+                        brandName = p.Brand?.Name ?? "Khác",
+                        categoryName = p.Category?.Name ?? "Xe máy",
+                        description = p.Description, // HTML Description từ Seeder
+
+                        reason = s.Reason
+                    };
+                }
+                return null;
+            }).Where(x => x != null).ToList();
+            // ------------------------------------------------------------------
+
+            var insight = parsed.BuildInsightSentence()
+                          ?? "AI đã phân tích nhu cầu của bạn và gợi ý một số mẫu xe phù hợp bên dưới.";
+
+            // 5. Lưu tin nhắn Bot
+            var botMsg = new AiMessage
             {
-                ConversationId = convo.Id,
-                Insight = insight,
-                Items = suggestions
+                ConversationId = conversation.Id,
+                IsUser = false,
+                Content = insight,
+                ParsedInsight = insight,
+                // Lưu object gốc vào DB để nhẹ database
+                SuggestionsJson = JsonSerializer.Serialize(suggestions),
+                CreatedAtUtc = DateTime.UtcNow
             };
 
-            return Json(response);
+            _db.AiMessages.Add(botMsg);
+            await _db.SaveChangesAsync(ct);
+
+            // 6. Trả về JSON (Sử dụng anonymous object để linh hoạt cấu trúc)
+            return Json(new
+            {
+                conversationId = conversation.Id,
+                insight = insight,
+                items = enrichedItems // Trả về danh sách đã có đầy đủ thông tin
+            });
         }
 
-        /// <summary>Lịch sử những phiên AI gần đây của user (để sau dùng build UI “Lịch sử trò chuyện”).</summary>
         [HttpGet("history")]
         public async Task<IActionResult> History(CancellationToken ct)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null)
+            {
                 return Json(Array.Empty<object>());
+            }
 
             var list = await _db.AiConversations
                 .Where(c => c.UserId == userId)

@@ -43,7 +43,13 @@ namespace MotorShop.Data.Seeders
                     new Category { Name = "Adventure", Description = "Dòng xe đa dụng, phù hợp cho những chuyến đi đường dài." },
                     new Category { Name = "Cruiser", Description = "Thiết kế cổ điển, tư thế ngồi thoải mái cho đường trường." },
                     new Category { Name = "Classic", Description = "Thiết kế hoài cổ, vượt thời gian." },
-                    new Category { Name = "Xe Điện", Description = "Phương tiện di chuyển xanh, sử dụng động cơ điện thân thiện môi trường." }
+                    new Category { Name = "Xe Điện", Description = "Phương tiện di chuyển xanh, sử dụng động cơ điện thân thiện môi trường." },
+                    new Category
+                    {
+                        Name = "Phụ tùng & Linh kiện",
+                        Description = "Phụ tùng, linh kiện, dầu nhớt và vật tư bảo dưỡng chính hãng cho các dòng xe máy, xe tay ga, xe điện."
+                    }
+
                 );
             }
 

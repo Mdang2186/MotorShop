@@ -10,10 +10,6 @@ using MotorShop.ViewModels.Ai;
 
 namespace MotorShop.Services.Ai
 {
-    /// <summary>
-    /// Core "mô hình" chấm điểm sản phẩm dựa trên Tag + Brand + Price.
-    /// Không dùng thuộc tính đặc biệt nên an toàn với model hiện tại.
-    /// </summary>
     public class AiRecommendationService
     {
         private readonly ApplicationDbContext _db;
@@ -23,9 +19,10 @@ namespace MotorShop.Services.Ai
             _db = db;
         }
 
-        public async Task<List<AiSuggestionItem>> SuggestAsync(AiParsedQuery query, CancellationToken ct = default)
+        public async Task<IReadOnlyList<AiSuggestionItem>> GetSuggestionsAsync(
+            AiParsedQuery query, string? userId = null, CancellationToken ct = default)
         {
-            // 1. Query cơ bản
+            // 1. QUERY CƠ BẢN
             var q = _db.Products
                 .AsNoTracking()
                 .Include(p => p.Brand)
@@ -33,139 +30,61 @@ namespace MotorShop.Services.Ai
                 .Include(p => p.ProductTags).ThenInclude(pt => pt.Tag)
                 .Where(p => p.IsActive && p.IsPublished);
 
-            // Lọc sơ theo ngân sách
+            // 2. LỌC CỨNG (Hard Filters) - Bắt buộc phải thỏa mãn
+
+            // Fix lỗi giá: Tuyệt đối không dùng logic cộng trừ biên độ ở đây nếu User đã nói rõ "Dưới/Trên"
             if (query.BudgetMin.HasValue)
                 q = q.Where(p => p.Price >= query.BudgetMin.Value);
+
             if (query.BudgetMax.HasValue)
                 q = q.Where(p => p.Price <= query.BudgetMax.Value);
 
-            // Lọc sơ theo brand yêu cầu
+            // Lọc theo Brand (nếu có)
             if (query.PreferredBrands.Any())
             {
                 var brands = query.PreferredBrands.Select(b => b.ToLower()).ToList();
                 q = q.Where(p => p.Brand != null && brands.Contains(p.Brand.Name.ToLower()));
             }
 
-            var products = await q.ToListAsync(ct);
-            if (!products.Any())
-                return new List<AiSuggestionItem>();
+            var candidates = await q.ToListAsync(ct);
 
-            string[] desiredTagSlugs = query.PreferredTags
-                .Where(s => !string.IsNullOrWhiteSpace(s))
-                .Distinct()
-                .ToArray();
-
-            // 2. Hàm tính điểm cho từng sản phẩm
-            decimal Score(Product p)
+            // 3. IN-MEMORY FILTER (Lọc tên xe cụ thể)
+            // Logic này xử lý sau khi lấy DB về để linh hoạt hơn
+            var specificModelTag = query.PreferredTags.FirstOrDefault(t => t.StartsWith("model-"));
+            if (!string.IsNullOrEmpty(specificModelTag))
             {
-                decimal s = 0m;
-                var tagSlugs = p.ProductTags
-                                .Where(pt => pt.Tag != null && !string.IsNullOrEmpty(pt.Tag.Slug))
-                                .Select(pt => pt.Tag.Slug!)
-                                .ToArray();
-
-                // 2.1. Trùng tag ưu tiên (fuel-saving, lightweight...)
-                foreach (var t in desiredTagSlugs)
-                    if (tagSlugs.Contains(t))
-                        s += 3m;
-
-                // 2.2. Mục đích -> usage-*
-                if (query.Purpose == "city" && tagSlugs.Contains("usage-city"))
-                    s += 4m;
-                if (query.Purpose == "delivery" && tagSlugs.Contains("usage-delivery"))
-                    s += 4m;
-                if (query.Purpose == "touring" && tagSlugs.Contains("usage-touring"))
-                    s += 4m;
-
-                // 2.3. Chiều cao dùng tag height-*
-                if (query.HeightCm.HasValue)
-                {
-                    if (query.HeightCm <= 155 && tagSlugs.Contains("height-short")) s += 4m;
-                    if (query.HeightCm > 155 && query.HeightCm <= 165 && tagSlugs.Contains("height-155-165")) s += 4m;
-                    if (query.HeightCm > 165 && query.HeightCm <= 175 && tagSlugs.Contains("height-165-175")) s += 4m;
-                    if (query.HeightCm >= 175 && tagSlugs.Contains("height-tall")) s += 4m;
-                }
-
-                // 2.4. Beginner / experienced
-                if (query.IsBeginner == true && tagSlugs.Contains("exp-beginner"))
-                    s += 3m;
-                if (query.IsBeginner == true && tagSlugs.Contains("feature-sporty"))
-                    s -= 2m; // xe sport không hợp người mới
-
-                if (query.IsBeginner == false && tagSlugs.Contains("exp-experienced"))
-                    s += 3m;
-
-                // 2.5. Ngân sách: gần midpoint được cộng điểm
-                if (query.BudgetMin.HasValue && query.BudgetMax.HasValue)
-                {
-                    var mid = (query.BudgetMin.Value + query.BudgetMax.Value) / 2m;
-                    var half = (query.BudgetMax.Value - query.BudgetMin.Value) / 2m;
-                    if (half > 0)
-                    {
-                        var diff = Math.Abs(p.Price - mid);
-                        var norm = 1m - Math.Min(diff / half, 1m); // 0..1
-                        s += norm * 4m;
-                    }
-                }
-
-                // 2.6. Thêm chút ưu tiên cho xe giá hợp lý (không quá cao)
-                if (!query.BudgetMax.HasValue && p.Price <= 40_000_000) s += 1.5m;
-
-                return s;
+                string modelName = specificModelTag.Replace("model-", ""); // vd: "vision"
+                // Chỉ giữ lại xe có tên chứa modelName
+                candidates = candidates.Where(p => p.Name.ToLower().Contains(modelName)).ToList();
             }
 
-            // 3. Lý do tóm tắt cho UI
-            string BuildReason(Product p, string[] tagSlugs)
+            if (!candidates.Any()) return Array.Empty<AiSuggestionItem>();
+
+            // 4. SCORING (CHẤM ĐIỂM ĐỂ SẮP XẾP)
+            var ranked = candidates.Select(p =>
             {
-                var rs = new List<string>();
+                decimal score = 0;
+                var tags = p.ProductTags?.Select(pt => pt.Tag?.Slug).ToList() ?? new List<string?>();
 
-                if (query.Purpose == "city" && tagSlugs.Contains("usage-city"))
-                    rs.Add("phù hợp đi phố / đi làm hằng ngày");
-                if (query.Purpose == "delivery" && tagSlugs.Contains("usage-delivery"))
-                    rs.Add("hợp chạy đơn, giao hàng");
-                if (query.Purpose == "touring" && tagSlugs.Contains("usage-touring"))
-                    rs.Add("hợp đi xa / đi tour");
+                // Cộng điểm nếu trùng tag
+                foreach (var t in query.PreferredTags) if (tags.Contains(t)) score += 3;
 
-                if (tagSlugs.Contains("feature-fuel-saving"))
-                    rs.Add("tiết kiệm xăng");
-                if (tagSlugs.Contains("feature-lightweight"))
-                    rs.Add("trọng lượng nhẹ, dễ dắt xe");
-                if (tagSlugs.Contains("feature-low-seat"))
-                    rs.Add("yên thấp, dễ chống chân");
-                if (tagSlugs.Contains("feature-sporty"))
-                    rs.Add("cảm giác lái thể thao");
-                if (tagSlugs.Contains("feature-premium"))
-                    rs.Add("ngoại hình sang, nhiều trang bị");
-                if (tagSlugs.Contains("feature-cheap-maintenance"))
-                    rs.Add("chi phí bảo dưỡng rẻ");
+                // Ưu tiên Tag mục đích
+                if (query.Purpose == "city" && tags.Contains("usage-city")) score += 2;
+                if (query.Purpose == "touring" && tags.Contains("usage-touring")) score += 2;
 
-                if (!rs.Any())
-                    rs.Add("cân đối tốt giữa nhu cầu và tầm giá bạn đưa ra");
+                // Cộng điểm nếu giá RẺ HƠN ngân sách tối đa một chút (Tiết kiệm cho khách)
+                if (query.BudgetMax.HasValue && p.Price <= query.BudgetMax.Value * 0.9m) score += 1;
 
-                return string.Join(", ", rs) + ".";
-            }
+                return new { Product = p, Score = score };
+            })
+            .OrderByDescending(x => x.Score) // Điểm cao xếp trước
+            .ThenBy(x => x.Product.Price)    // Giá rẻ xếp trước (nếu cùng điểm)
+            .Take(6)
+            .ToList();
 
-            // 4. Xếp hạng & map sang DTO
-            var ranked = products
-                .Select(p =>
-                {
-                    var slugs = p.ProductTags
-                                 .Where(pt => pt.Tag != null && !string.IsNullOrEmpty(pt.Tag.Slug))
-                                 .Select(pt => pt.Tag.Slug!)
-                                 .ToArray();
-                    return new
-                    {
-                        Product = p,
-                        TagSlugs = slugs,
-                        Score = Score(p)
-                    };
-                })
-                .OrderByDescending(x => x.Score)
-                .ThenBy(x => x.Product.Price)
-                .Take(5) // lấy top 5
-                .ToList();
-
-            var result = ranked.Select(x => new AiSuggestionItem
+            // 5. Map kết quả
+            return ranked.Select(x => new AiSuggestionItem
             {
                 ProductId = x.Product.Id,
                 Name = x.Product.Name,
@@ -173,19 +92,23 @@ namespace MotorShop.Services.Ai
                 Price = x.Product.Price,
                 Brand = x.Product.Brand?.Name,
                 Category = x.Product.Category?.Name,
-                Reason = BuildReason(x.Product, x.TagSlugs)
+                Reason = BuildReason(x.Product, query)
             }).ToList();
-
-            return result;
         }
-        // Cho controller dùng: cùng logic với SuggestAsync nhưng trả về IReadOnlyList
-        public async Task<IReadOnlyList<AiSuggestionItem>> GetSuggestionsAsync(
-            AiParsedQuery query,
-            CancellationToken ct = default)
+
+        private string BuildReason(Product p, AiParsedQuery query)
         {
-            var list = await SuggestAsync(query, ct);
-            return list;
-        }
+            var tags = p.ProductTags?.Select(pt => pt.Tag?.Slug).ToList() ?? new List<string?>();
 
+            if (p.Brand != null && query.PreferredBrands.Contains(p.Brand.Name.ToLower()))
+                return $"Đúng hãng {p.Brand.Name} bạn yêu cầu.";
+
+            if (tags.Contains("feature-fuel-saving")) return "Tiết kiệm nhiên liệu vượt trội.";
+            if (tags.Contains("feature-lightweight")) return "Xe nhẹ, dễ điều khiển.";
+            if (tags.Contains("feature-sporty")) return "Kiểu dáng thể thao, động cơ mạnh.";
+            if (tags.Contains("usage-city")) return "Linh hoạt di chuyển trong phố.";
+
+            return "Phù hợp với tiêu chí và ngân sách của bạn.";
+        }
     }
 }

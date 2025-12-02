@@ -7,12 +7,8 @@ using MotorShop.Models;
 using MotorShop.Services;
 using MotorShop.Services.Ai;
 using MotorShop.Utilities;
-using MotorShop.Services.Ai;
+
 var builder = WebApplication.CreateBuilder(args);
-
-
-builder.Services.AddScoped<AiQueryParser>();
-builder.Services.AddScoped<AiRecommendationService>();
 
 // =============================
 // 1) REGISTER SERVICES
@@ -22,6 +18,10 @@ builder.Services.AddScoped<AiRecommendationService>();
 builder.Services.Configure<MailSettings>(
     builder.Configuration.GetSection("MailSettings"));
 builder.Services.AddTransient<IEmailSender, EmailSender>();
+
+// Cấu hình thanh toán
+builder.Services.Configure<PaymentSettings>(
+    builder.Configuration.GetSection("PaymentSettings"));
 
 // DbContext
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
@@ -35,13 +35,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(opt =>
 #endif
 });
 builder.Services.AddAntiforgery(o => { o.HeaderName = "RequestVerificationToken"; });
-
-builder.Services.Configure<MailSettings>(
-    builder.Configuration.GetSection("MailSettings"));
-
-// THÊM:
-builder.Services.Configure<PaymentSettings>(
-    builder.Configuration.GetSection("PaymentSettings"));
 
 // Identity
 builder.Services
@@ -94,6 +87,25 @@ builder.Services.AddSession(opt =>
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<CartService>();
 builder.Services.AddScoped<DbInitializer>();
+
+// =============================
+// AI & ML SERVICES
+// =============================
+
+// Parser phân tích câu hỏi tiếng Việt
+builder.Services.AddScoped<AiQueryParser>();
+
+// Dịch vụ gợi ý sản phẩm (kết hợp rule-based + ML)
+builder.Services.AddScoped<AiRecommendationService>();
+
+// Dịch vụ chuẩn bị dữ liệu training (stub hoặc dùng trong console)
+builder.Services.AddScoped<MlTrainingService>();
+
+// Trainer dùng ML.NET để train model từ Orders + OrderItems
+builder.Services.AddScoped<AiModelTrainer>();
+
+// Recommender load file MlModels/product_recommender.zip (dùng singleton)
+builder.Services.AddSingleton<MlProductRecommender>();
 
 // =============================
 // 2) HTTP PIPELINE

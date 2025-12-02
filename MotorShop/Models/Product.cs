@@ -15,8 +15,7 @@ namespace MotorShop.Models
 
         [StringLength(50, ErrorMessage = "Mã SKU tối đa 50 ký tự")]
         public string? SKU { get; set; } // <--- ĐÃ THÊM ĐỂ SỬA LỖI
-
-        [StringLength(4000)]
+         
         public string? Description { get; set; }
 
         [Column(TypeName = "decimal(18, 2)")]

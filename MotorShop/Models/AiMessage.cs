@@ -2,34 +2,26 @@
 
 namespace MotorShop.Models
 {
-    /// <summary>
-    /// Một message trong phiên AI (của user hoặc “bot” AI).
-    /// </summary>
+    /// <summary>Một message trong cuộc hội thoại AI.</summary>
     public class AiMessage
     {
         public int Id { get; set; }
 
         public int ConversationId { get; set; }
-
         public AiConversation Conversation { get; set; } = null!;
 
-        /// <summary>true = user, false = AI.</summary>
+        /// <summary>true = tin của user, false = tin “bot” AI.</summary>
         public bool IsUser { get; set; }
 
-        /// <summary>Nội dung chat hiển thị cho người dùng.</summary>
+        /// <summary>Nội dung hiển thị cho user.</summary>
         public string Content { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Chuỗi mô tả insight mà parser hiểu được (ví dụ: “AI hiểu: chiều cao ~160cm, ngân sách 40–50 triệu …”).
-        /// </summary>
+        /// <summary>Insight đã phân tích (chiều cao, ngân sách…)</summary>
         public string? ParsedInsight { get; set; }
 
-        /// <summary>
-        /// JSON lưu danh sách gợi ý (chỉ dùng cho message của AI, để sau này có thể load lại nhanh).
-        /// </summary>
+        /// <summary>JSON danh sách gợi ý cho message AI (nếu là bot message).</summary>
         public string? SuggestionsJson { get; set; }
 
-        /// <summary>Thời điểm gửi message (UTC).</summary>
-        public DateTime CreatedAtUtc { get; set; }
+        public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     }
 }

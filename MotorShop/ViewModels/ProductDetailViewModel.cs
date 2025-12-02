@@ -7,8 +7,8 @@ namespace MotorShop.ViewModels
     {
         public Product Product { get; set; } = null!;
         public List<Product> RelatedProducts { get; set; } = new();
+        public List<Branch> Branches { get; set; } = new(); // Thêm dòng này
 
-        // Tuỳ chọn
         public bool InStock => Product?.StockQuantity > 0;
     }
 }

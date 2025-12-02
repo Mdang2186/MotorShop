@@ -1,86 +1,95 @@
-﻿namespace MotorShop.ViewModels.Ai
+﻿using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+
+namespace MotorShop.ViewModels.Ai
 {
     /// <summary>
     /// Kết quả phân tích câu hỏi người dùng.
     /// </summary>
     public class AiParsedQuery
     {
-        /// <summary>Chiều cao người lái (cm), nếu trích được.</summary>
         public int? HeightCm { get; set; }
-
-        /// <summary>Ngân sách tối thiểu (VNĐ).</summary>
         public decimal? BudgetMin { get; set; }
-
-        /// <summary>Ngân sách tối đa (VNĐ).</summary>
         public decimal? BudgetMax { get; set; }
-
-        /// <summary>
-        /// Mục đích: "city" (đi phố), "delivery" (chạy đơn),
-        /// "touring" (đi tour xa) hoặc null.
-        /// </summary>
-        public string? Purpose { get; set; }
-
-        /// <summary>Người mới đi xe hay đã có kinh nghiệm.</summary>
+        public string? Purpose { get; set; } // city, touring, delivery
         public bool? IsBeginner { get; set; }
 
-        /// <summary>Các tag ưu tiên (slug Tag), ví dụ: feature-fuel-saving, usage-city…</summary>
         public List<string> PreferredTags { get; set; } = new();
-
-        /// <summary>Brand yêu thích: "honda", "yamaha"… (chữ thường).</summary>
         public List<string> PreferredBrands { get; set; } = new();
+
         /// <summary>
-        /// Sinh câu mô tả ngắn gọn “AI hiểu gì về bạn” để hiển thị cho user.
+        /// Cộng dồn thông tin từ một query khác vào query hiện tại (Context Learning).
+        /// Dữ liệu mới sẽ ghi đè hoặc bổ sung cho dữ liệu cũ.
+        /// </summary>
+        public void Merge(AiParsedQuery newQuery)
+        {
+            if (newQuery == null) return;
+
+            // 1. Các trường đơn lẻ: Nếu tin nhắn mới có nhắc tới thì ghi đè
+            if (newQuery.HeightCm.HasValue) this.HeightCm = newQuery.HeightCm;
+            if (newQuery.BudgetMin.HasValue) this.BudgetMin = newQuery.BudgetMin;
+            if (newQuery.BudgetMax.HasValue) this.BudgetMax = newQuery.BudgetMax;
+            if (!string.IsNullOrEmpty(newQuery.Purpose)) this.Purpose = newQuery.Purpose;
+            if (newQuery.IsBeginner.HasValue) this.IsBeginner = newQuery.IsBeginner;
+
+            // 2. Danh sách (List): Cộng dồn và xóa trùng
+            if (newQuery.PreferredBrands.Any())
+            {
+                foreach (var b in newQuery.PreferredBrands)
+                {
+                    if (!this.PreferredBrands.Contains(b))
+                        this.PreferredBrands.Add(b);
+                }
+            }
+
+            if (newQuery.PreferredTags.Any())
+            {
+                foreach (var t in newQuery.PreferredTags)
+                {
+                    if (!this.PreferredTags.Contains(t))
+                        this.PreferredTags.Add(t);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Tạo câu tóm tắt để hiển thị "AI Hiểu: ..."
         /// </summary>
         public string? BuildInsightSentence()
         {
             var parts = new List<string>();
+            var culture = CultureInfo.GetCultureInfo("vi-VN");
 
-            if (HeightCm is int h)
-            {
-                parts.Add($"chiều cao khoảng ~{h}cm");
-            }
+            // Brand
+            if (PreferredBrands.Any())
+                parts.Add($"hãng {string.Join(", ", PreferredBrands.Select(b => char.ToUpper(b[0]) + b.Substring(1)))}");
 
-            if (BudgetMin is decimal bMin && BudgetMax is decimal bMax)
-            {
-                parts.Add($"ngân sách tầm {bMin / 1_000_000:0.#}–{bMax / 1_000_000:0.#} triệu");
-            }
-            else if (BudgetMin is decimal onlyMin)
-            {
-                parts.Add($"ngân sách khoảng {onlyMin / 1_000_000:0.#} triệu");
-            }
+            // Model cụ thể (Vision, Airblade...)
+            var models = PreferredTags
+                .Where(t => t.StartsWith("model-"))
+                .Select(t => char.ToUpper(t[6]) + t.Substring(7))
+                .ToList();
+            if (models.Any()) parts.Add($"dòng {string.Join(", ", models)}");
 
-            if (!string.IsNullOrWhiteSpace(Purpose))
-            {
-                parts.Add(Purpose switch
-                {
-                    "city" => "ưu tiên đi phố / đi làm hằng ngày",
-                    "delivery" => "chạy đơn / giao hàng",
-                    "touring" => "đi tour xa / đi phượt",
-                    _ => null
-                } ?? string.Empty);
-            }
+            // Ngân sách
+            if (BudgetMin.HasValue && BudgetMax.HasValue)
+                parts.Add($"giá {BudgetMin.Value:N0}-{BudgetMax.Value:N0}đ");
+            else if (BudgetMax.HasValue)
+                parts.Add($"giá dưới {BudgetMax.Value:N0}đ");
+            else if (BudgetMin.HasValue)
+                parts.Add($"giá trên {BudgetMin.Value:N0}đ");
 
-            if (IsBeginner == true)
-            {
-                parts.Add("mới đi xe, cần xe dễ lái");
-            }
+            // Chiều cao
+            if (HeightCm.HasValue) parts.Add($"cao ~{HeightCm}cm");
 
-            if (PreferredBrands is { Count: > 0 })
-            {
-                var brands = string.Join(", ", PreferredBrands.Select(x => x.ToUpperInvariant()));
-                parts.Add($"thích các hãng: {brands}");
-            }
+            // Mục đích
+            if (Purpose == "city") parts.Add("đi phố");
+            else if (Purpose == "touring") parts.Add("đi phượt");
+            else if (Purpose == "delivery") parts.Add("chạy grab/ship");
 
-            if (PreferredTags.Contains("feature-fuel-saving"))
-                parts.Add("ưu tiên tiết kiệm xăng");
-
-            if (PreferredTags.Contains("feature-comfort"))
-                parts.Add("ưu tiên êm ái, dễ ngồi");
-
-            var clean = parts.Where(p => !string.IsNullOrWhiteSpace(p)).ToList();
-            if (!clean.Any()) return null;
-
-            return "AI hiểu: " + string.Join(", ", clean) + ".";
+            if (!parts.Any()) return null;
+            return "AI hiểu: " + string.Join(", ", parts) + ".";
         }
     }
 }

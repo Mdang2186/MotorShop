@@ -1,0 +1,448 @@
+﻿@model MotorShop.ViewModels.ProductDetailViewModel
+@using System.Globalization
+
+@{
+    ViewData["Title"] = Model.Product?.Name ?? "Chi tiết phụ tùng";
+    var p = Model.Product!;
+
+    // --- FORMATTERS ---
+    string FormatPrice(decimal x) => string.Format(CultureInfo.GetCultureInfo("vi-VN"), "{0:N0} ₫", x);
+
+    // --- LOGIC GIÁ & KHUYẾN MÃI ---
+    decimal price = p.Price;
+    decimal? original = p.OriginalPrice;
+    bool hasSale = original.HasValue && original.Value > price;
+    int discountPercent = hasSale ? (int)Math.Round((1 - (price / original!.Value)) * 100) : 0;
+    bool inStock = p.StockQuantity > 0;
+
+    // --- HÌNH ẢNH ---
+    var imgs = p.Images?.OrderBy(i => i.SortOrder).ToList() ?? new List<MotorShop.Models.ProductImage>();
+    var mainImgUrl = !string.IsNullOrWhiteSpace(p.ImageUrl) ? p.ImageUrl : (imgs.FirstOrDefault()?.ImageUrl ?? "/images/placeholders/product.webp");
+
+    // --- LOGO THƯƠNG HIỆU ---
+    string brandSlug = p.Brand?.Name.ToLower().Replace(" ", "-") ?? "default";
+    string brandLogoUrl = $"/images/brands/{brandSlug}.png";
+
+    // --- CHI NHÁNH ---
+    var allBranches = Model.Branches ?? new List<MotorShop.Models.Branch>();
+    var hnBranches = allBranches.Where(b => b.Address.Contains("Hà Nội") || b.Address.Contains("Bắc")).ToList();
+    var hcmBranches = allBranches.Where(b => b.Address.Contains("Hồ Chí Minh") || b.Address.Contains("HCM") || b.Address.Contains("Nam")).ToList();
+
+    // =================================================================================
+    // --- LOGIC XỬ LÝ DỮ LIỆU NGẮN GỌN CHO PHỤ TÙNG (Dùng chung) ---
+    // =================================================================================
+
+    // 1. Xuất xứ (Origin)
+    string spec_Origin = "Chính hãng";
+    var findOrigin = p.Specifications.FirstOrDefault(s => s.Name.Contains("Xuất xứ", StringComparison.OrdinalIgnoreCase));
+    if (findOrigin != null) spec_Origin = findOrigin.Value ?? "Chính hãng";
+
+    // 2. Dòng xe tương thích (Compatibility) hoặc Loại
+    string spec_Compat = "Đa năng";
+    var findCompat = p.Specifications.FirstOrDefault(s => s.Name.Contains("Dòng xe", StringComparison.OrdinalIgnoreCase) || s.Name.Contains("Sử dụng", StringComparison.OrdinalIgnoreCase));
+    var findType = p.Specifications.FirstOrDefault(s => s.Name.Contains("Loại", StringComparison.OrdinalIgnoreCase));
+
+    if (findCompat != null) spec_Compat = findCompat.Value ?? "-";
+    else if (findType != null) spec_Compat = findType.Value ?? "-";
+}
+
+<link rel="stylesheet" href="~/css/productdetails.css" />
+@Html.AntiForgeryToken()
+
+<div id="sticky-nav" class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-100 transform -translate-y-full transition-transform duration-300 shadow-sm">
+    <div class="max-w-[1200px] mx-auto px-4 h-16 flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <img src="@Url.Content(mainImgUrl)" class="w-10 h-10 object-contain rounded border border-slate-100 bg-white" />
+            <div>
+                <h2 class="text-sm font-bold text-slate-800 line-clamp-1 max-w-[250px]">@p.Name</h2>
+                <div class="text-xs text-[#FD4057] font-bold">@FormatPrice(price)</div>
+            </div>
+            <div class="hidden md:flex gap-1 ml-4 border-l border-slate-200 pl-4">
+                <a href="#thong-tin" class="px-3 py-1 text-xs font-semibold text-slate-500 hover:text-[#00D1E4] hover:bg-cyan-50 rounded-full transition">Thông tin</a>
+                <a href="#bai-viet" class="px-3 py-1 text-xs font-semibold text-slate-500 hover:text-[#00D1E4] hover:bg-cyan-50 rounded-full transition">Mô tả</a>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            @if (inStock)
+            {
+                <button onclick="handleBuyAction('@p.Id', true)" class="bg-[#00D1E4] hover:bg-[#00b8c9] text-white text-xs font-bold px-6 py-2.5 rounded-lg transition shadow-sm shadow-cyan-200">
+                    Mua ngay
+                </button>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="bg-white min-h-screen font-sans text-slate-800 pb-20 pt-4">
+
+    <div class="max-w-[1200px] mx-auto px-4 mb-6">
+        <div class="flex flex-wrap items-center gap-2 mb-4 text-xs font-medium text-slate-500">
+            <a href="/" class="hover:text-[#00D1E4] transition">Trang chủ</a>
+            <span class="text-slate-300">/</span>
+            <a href="/parts" class="hover:text-[#00D1E4] transition">Phụ tùng</a>
+            @if (p.Category != null)
+            {
+                <span class="text-slate-300">/</span>
+                <a href="/parts?cat=@p.CategoryId" class="hover:text-[#00D1E4] transition">@p.Category.Name</a>
+            }
+            <span class="text-slate-300">/</span>
+            <span class="text-slate-900 truncate max-w-[200px]">@p.Name</span>
+        </div>
+    </div>
+
+    <div class="max-w-[1200px] mx-auto px-4 mt-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+
+            <div class="lg:col-span-8 space-y-12">
+
+                <div class="relative group">
+                    <div class="aspect-[16/10] bg-[#F9FAFB] rounded-2xl flex items-center justify-center p-6 relative overflow-hidden cursor-zoom-in border border-slate-100 shadow-sm">
+                        <img id="mainImg" src="@Url.Content(mainImgUrl)" class="max-w-full max-h-full object-contain transition-transform duration-500 group-hover:scale-105" alt="@p.Name" />
+                        @if (hasSale)
+                        {
+                            <span class="absolute top-4 left-4 bg-[#FD4057] text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm">-@discountPercent%</span>
+                        }
+                    </div>
+
+                    @if (imgs.Count > 0)
+                    {
+                        <div class="flex gap-3 mt-4 overflow-x-auto scrollbar-hide py-1">
+                            <div class="pd-thumb-btn active w-20 h-20 rounded-xl border-2 border-transparent bg-[#F9FAFB] p-1 cursor-pointer hover:border-[#00D1E4] transition shrink-0"
+                                 data-img="@Url.Content(!string.IsNullOrEmpty(p.ImageUrl) ? p.ImageUrl : "/images/placeholders/product.webp")">
+                                <img src="@Url.Content(!string.IsNullOrEmpty(p.ImageUrl) ? p.ImageUrl : "/images/placeholders/product.webp")" class="w-full h-full object-contain" />
+                            </div>
+                            @foreach (var img in imgs)
+                            {
+                                <div class="pd-thumb-btn w-20 h-20 rounded-xl border-2 border-transparent bg-[#F9FAFB] p-1 cursor-pointer hover:border-[#00D1E4] transition shrink-0"
+                                     data-img="@Url.Content(img.ImageUrl)">
+                                    <img src="@Url.Content(img.ImageUrl)" class="w-full h-full object-contain" />
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <div class="flex gap-4 overflow-x-auto scrollbar-hide py-3 border-b border-slate-100">
+                    <div class="flex items-center gap-2 px-5 py-2.5 bg-blue-50/50 rounded-full border border-blue-100 shrink-0">
+                        <i class="fa-solid fa-check-shield text-blue-600"></i>
+                        <span class="text-xs font-bold text-slate-700">Chính hãng 100%</span>
+                    </div>
+                    <div class="flex items-center gap-2 px-5 py-2.5 bg-blue-50/50 rounded-full border border-blue-100 shrink-0">
+                        <i class="fa-solid fa-rotate text-blue-600"></i>
+                        <span class="text-xs font-bold text-slate-700">Đổi trả dễ dàng</span>
+                    </div>
+                    <div class="flex items-center gap-2 px-5 py-2.5 bg-blue-50/50 rounded-full border border-blue-100 shrink-0">
+                        <i class="fa-solid fa-truck-fast text-blue-600"></i>
+                        <span class="text-xs font-bold text-slate-700">Giao hàng toàn quốc</span>
+                    </div>
+                </div>
+
+                <div id="thong-tin" class="scroll-mt-24">
+                    <div class="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100">
+                        <span class="w-1.5 h-6 bg-[#00D1E4] rounded-r-full"></span>
+                        <h2 class="text-xl font-extrabold text-slate-900 uppercase tracking-tight flex items-center gap-2">
+                            <i class="fa-solid fa-layer-group text-slate-400 text-lg"></i> Tổng quan phụ tùng
+                        </h2>
+                    </div>
+
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                        <div class="bg-slate-50 border border-slate-100 rounded-2xl p-4 flex flex-col items-center justify-center text-center h-28 hover:border-[#00D1E4] hover:bg-white hover:shadow-md transition-all duration-300 group">
+                            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1 group-hover:text-[#00D1E4] transition-colors">Thương hiệu</span>
+                            <span class="text-lg font-extrabold text-slate-900 truncate w-full px-1">@(p.Brand?.Name ?? "OEM")</span>
+                        </div>
+
+                        <div class="bg-slate-50 border border-slate-100 rounded-2xl p-4 flex flex-col items-center justify-center text-center h-28 hover:border-[#00D1E4] hover:bg-white hover:shadow-md transition-all duration-300 group">
+                            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1 group-hover:text-[#00D1E4] transition-colors">Xuất xứ</span>
+                            <span class="text-lg font-extrabold text-slate-900 truncate w-full px-1">@spec_Origin</span>
+                        </div>
+
+                        <div class="bg-slate-50 border border-slate-100 rounded-2xl p-4 flex flex-col items-center justify-center text-center h-28 hover:border-[#00D1E4] hover:bg-white hover:shadow-md transition-all duration-300 group">
+                            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1 group-hover:text-[#00D1E4] transition-colors">Tương thích</span>
+                            <span class="text-sm font-bold text-slate-900 line-clamp-2 leading-tight w-full px-1" title="@spec_Compat">@spec_Compat</span>
+                        </div>
+
+                        <div class="bg-slate-50 border border-slate-100 rounded-2xl p-4 flex flex-col items-center justify-center text-center h-28 hover:border-[#00D1E4] hover:bg-white hover:shadow-md transition-all duration-300 group">
+                            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1 group-hover:text-[#00D1E4] transition-colors">Loại SP</span>
+                            <span class="text-sm font-bold text-slate-900 truncate w-full px-1">@(p.Category?.Name ?? "Phụ tùng")</span>
+                        </div>
+                    </div>
+
+                    @if (p.Specifications != null && p.Specifications.Any())
+                    {
+                        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden mb-4 shadow-sm">
+                            <div class="px-6 py-3 bg-slate-50 border-b border-slate-100 font-bold text-sm text-slate-700">Thông số kỹ thuật chi tiết</div>
+                            <table class="w-full text-sm text-left">
+                                <tbody class="divide-y divide-slate-100">
+                                    @foreach (var s in p.Specifications.OrderBy(x => x.SortOrder))
+                                    {
+                                        <tr class="hover:bg-slate-50 transition">
+                                            <td class="px-6 py-4 text-slate-500 font-medium w-1/3 bg-slate-50/40">@s.Name</td>
+                                            <td class="px-6 py-4 text-slate-900 font-semibold">@s.Value</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+
+                <div id="bai-viet" class="scroll-mt-24 pt-8 border-t border-slate-100">
+                    <div class="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100">
+                        <span class="w-1.5 h-6 bg-[#00D1E4] rounded-r-full"></span>
+                        <h2 class="text-xl font-extrabold text-slate-900 uppercase tracking-tight flex items-center gap-2">
+                            <i class="fa-regular fa-newspaper text-slate-400 text-lg"></i> Mô tả chi tiết
+                        </h2>
+                    </div>
+
+                    <div id="descriptionContent" class="group/desc relative overflow-hidden transition-all duration-700 ease-in-out" style="max-height: 600px;">
+                        <div class="prose prose-slate max-w-none prose-lg prose-p:text-justify prose-p:text-slate-600 prose-headings:font-bold prose-headings:text-slate-900 prose-a:text-[#00D1E4]">
+                            @{
+                                var rawDesc = p.Description ?? "";
+                                var gallery = p.Images?.Where(i => !i.IsPrimary).OrderBy(i => i.SortOrder).ToList() ?? new List<MotorShop.Models.ProductImage>();
+                                var paragraphs = rawDesc.Split(new[] { "</p>" }, StringSplitOptions.RemoveEmptyEntries);
+                                int imgIdx = 0;
+                            }
+
+                            @if (paragraphs.Length > 0)
+                            {
+                                for (int i = 0; i < paragraphs.Length; i++)
+                                {
+                                    @Html.Raw(paragraphs[i] + "</p>")
+                                    if ((i + 1) % 2 == 0 && imgIdx < gallery.Count)
+                                    {
+                                        var img = gallery[imgIdx];
+                                        <figure class="my-10 w-full">
+                                            <img src="@Url.Content(img.ImageUrl)" alt="@p.Name" class="w-full h-auto object-cover rounded-2xl shadow-lg border border-slate-100" loading="lazy" />
+                                            <figcaption class="text-center text-sm text-slate-500 italic mt-3">
+                                                <i class="fa-solid fa-camera text-slate-300 mr-1"></i>
+                                                @(string.IsNullOrEmpty(img.Caption) ? $"Chi tiết {p.Name}" : img.Caption)
+                                            </figcaption>
+                                        </figure>
+                                        imgIdx++;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                @Html.Raw(rawDesc)
+                            }
+
+                            @if (string.IsNullOrWhiteSpace(rawDesc))
+                            {
+                                <div class="py-12 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                                    <i class="fa-solid fa-pen-nib text-3xl text-slate-300 mb-3"></i>
+                                    <p class="text-slate-500 italic">Nội dung bài viết đang được biên tập...</p>
+                                </div>
+                            }
+                        </div>
+                        <div id="desc-gradient" class="absolute bottom-0 left-0 w-full h-40 bg-gradient-to-t from-white via-white/95 to-transparent pointer-events-none transition-opacity duration-300"></div>
+                    </div>
+
+                    <div class="flex justify-center mt-6">
+                        <button id="toggleContentBtn" class="group flex items-center gap-2 px-10 py-3 bg-white border border-slate-200 hover:border-[#00D1E4] hover:text-[#00D1E4] text-slate-700 font-bold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 relative z-10">
+                            <span>Xem toàn bộ</span>
+                            <i class="fa-solid fa-chevron-down text-xs group-hover:translate-y-0.5 transition-transform"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="lg:col-span-4 relative z-10">
+                <div class="sticky top-24 space-y-5">
+
+                    @if (p.Brand != null)
+                    {
+                        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden hover:shadow-md hover:border-[#00D1E4] transition-all duration-300 group">
+                            <div class="bg-slate-50 px-4 py-2 border-b border-slate-100 flex items-center gap-2">
+                                <i class="fa-solid fa-shield-halved text-[#00D1E4] text-sm"></i>
+                                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Phụ tùng chính hãng</span>
+                            </div>
+                            <a href="@Url.Action("Parts", "Products", new { brand = p.Brand.Name })" class="p-4 flex items-center gap-4">
+                                <div class="w-16 h-16 rounded-full border border-slate-100 p-1 flex items-center justify-center bg-white shrink-0 group-hover:scale-105 transition-transform overflow-hidden relative">
+                                    <img src="@brandLogoUrl" alt="@p.Brand.Name" class="w-full h-full object-contain rounded-full relative z-10"
+                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                                    <div class="absolute inset-0 flex items-center justify-center bg-slate-50 text-slate-300" style="display:none">
+                                        <i class="fa-solid fa-store text-2xl"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="font-extrabold text-xl text-slate-900 leading-none mb-1 group-hover:text-[#00D1E4] transition-colors">@p.Brand.Name</h3>
+                                    <div class="flex items-center gap-1 text-xs font-medium text-slate-400 group-hover:text-[#00D1E4] transition-colors">
+                                        Xem tất cả phụ tùng <i class="fa-solid fa-arrow-right-long"></i>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    }
+
+                    <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
+                        <h1 class="text-2xl font-extrabold text-slate-900 leading-tight mb-3">@p.Name</h1>
+                        <div class="flex flex-wrap items-center gap-2 mb-6">
+                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-slate-100 text-slate-600 text-[10px] font-bold font-mono">SKU: @(p.SKU ?? "N/A")</span>
+                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-green-50 text-green-700 text-[10px] font-bold border border-green-100">Sẵn hàng</span>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2.5 mb-6">
+                            <div class="bg-slate-50 border border-slate-100 rounded-lg p-2 flex flex-col items-center justify-center text-center h-[60px]">
+                                <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Thương hiệu</span>
+                                <span class="text-sm font-bold text-slate-900">@(p.Brand?.Name ?? "-")</span>
+                            </div>
+                            <div class="bg-slate-50 border border-slate-100 rounded-lg p-2 flex flex-col items-center justify-center text-center h-[60px]">
+                                <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Loại</span>
+                                <span class="text-xs font-bold text-slate-900 truncate w-full px-1">@(p.Category?.Name ?? "-")</span>
+                            </div>
+                            <div class="bg-slate-50 border border-slate-100 rounded-lg p-2 flex flex-col items-center justify-center text-center h-[60px]">
+                                <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Xuất xứ</span>
+                                <span class="text-xs font-bold text-slate-900 truncate w-full px-1">@spec_Origin</span>
+                            </div>
+                            <div class="bg-slate-50 border border-slate-100 rounded-lg p-2 flex flex-col items-center justify-center text-center h-[60px]">
+                                <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Bảo hành</span>
+                                <span class="text-xs font-bold text-slate-900">12 Tháng</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200">
+                            <div class="flex items-baseline gap-3 mb-5">
+                                <span class="text-3xl font-extrabold text-[#FD4057]">@FormatPrice(price)</span>
+                                @if (hasSale)
+                                {
+                                    <span class="text-sm text-slate-400 line-through">@FormatPrice(original!.Value)</span>
+                                    <span class="text-[10px] font-bold text-white bg-[#FD4057] px-1.5 py-0.5 rounded shadow-sm">-@discountPercent%</span>
+                                }
+                            </div>
+
+                            <div class="flex flex-col gap-3">
+                                @if (inStock)
+                                {
+                                    <button onclick="handleBuyAction('@p.Id', true)" class="w-full bg-gradient-to-r from-[#00D1E4] to-[#00b8c9] hover:shadow-lg hover:shadow-cyan-200/50 text-white font-bold py-4 rounded-xl text-base uppercase tracking-wide transition-all transform active:scale-[0.98] flex items-center justify-center gap-2">
+                                        Mua Ngay <i class="fa-solid fa-bolt text-yellow-300"></i>
+                                    </button>
+                                    <button onclick="handleBuyAction('@p.Id', false)" class="w-full bg-white border-2 border-slate-200 hover:border-[#00D1E4] hover:text-[#00D1E4] text-slate-700 font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 text-sm">
+                                        <i class="fa-solid fa-cart-plus"></i> Thêm vào giỏ
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="w-full bg-slate-200 text-slate-400 font-bold py-4 rounded-xl cursor-not-allowed flex flex-col items-center justify-center">
+                                        <span class="flex items-center gap-2 text-sm"><i class="fa-regular fa-bell-slash"></i> Tạm hết hàng</span>
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="p-4 border-b border-slate-100 bg-slate-50">
+                            <h3 class="font-bold text-xs text-slate-800 uppercase tracking-wide mb-3">Kiểm tra tồn kho</h3>
+                            <div class="flex p-1 bg-slate-200 rounded-xl">
+                                <button class="loc-tab-btn flex-1 py-2 rounded-lg text-[11px] font-bold transition-all duration-200 active text-slate-900 bg-white shadow-sm" data-target="hcm">Hồ Chí Minh</button>
+                                <button class="loc-tab-btn flex-1 py-2 rounded-lg text-[11px] font-bold transition-all duration-200 text-slate-500 hover:text-slate-700 hover:bg-slate-200/50" data-target="hn">Hà Nội</button>
+                            </div>
+                        </div>
+                        <div class="max-h-[250px] overflow-y-auto scrollbar-thin p-3">
+                            <div id="list-hcm" class="loc-list block space-y-2">
+                                @if (hcmBranches.Any())
+                                {
+                                    foreach (var b in hcmBranches)
+                                    {
+                                        <div class="p-3 border border-slate-100 rounded-xl bg-white hover:border-[#00D1E4] hover:shadow-md transition-all group relative">
+                                            <div class="text-xs font-bold text-slate-800 mb-1 pr-12">@b.Address</div>
+                                            <div class="flex justify-between items-center mt-2">
+                                                <span class="text-[10px] text-[#00AA45] bg-[#E6F9EE] px-2 py-0.5 rounded-md font-bold flex items-center gap-1 border border-[#B8EBD0]"><i class="fa-solid fa-check text-[8px]"></i> Sẵn hàng</span>
+                                                <a href="tel:@b.Phone" class="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 text-slate-500 border border-slate-200 hover:bg-[#00D1E4] hover:text-white hover:border-[#00D1E4] transition"><i class="fa-solid fa-phone text-xs"></i></a>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+
+                                    <div class="text-center py-6 text-slate-400 text-xs italic">Hết hàng tại TP.HCM</div>
+                                }
+                            </div>
+                            <div id="list-hn" class="loc-list hidden space-y-2">
+                                @if (hnBranches.Any())
+                                {
+                                    foreach (var b in hnBranches)
+                                    {
+                                        <div class="p-3 border border-slate-100 rounded-xl bg-white hover:border-[#00D1E4] hover:shadow-md transition-all group relative">
+                                            <div class="text-xs font-bold text-slate-800 mb-1 pr-12">@b.Address</div>
+                                            <div class="flex justify-between items-center mt-2">
+                                                <span class="text-[10px] text-[#00AA45] bg-[#E6F9EE] px-2 py-0.5 rounded-md font-bold flex items-center gap-1 border border-[#B8EBD0]"><i class="fa-solid fa-check text-[8px]"></i> Sẵn hàng</span>
+                                                <a href="tel:@b.Phone" class="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 text-slate-500 border border-slate-200 hover:bg-[#00D1E4] hover:text-white hover:border-[#00D1E4] transition"><i class="fa-solid fa-phone text-xs"></i></a>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+
+                                    <div class="text-center py-6 text-slate-400 text-xs italic">Hết hàng tại Hà Nội</div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        @if (Model.RelatedProducts != null && Model.RelatedProducts.Any())
+        {
+            <div class="mt-16 pt-10 border-t border-slate-200">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-slate-900">Phụ tùng tương tự</h2>
+                    <a href="@Url.Action("Index", "Products", new { categoryFilter = p.CategoryId })" class="text-sm font-bold text-[#00D1E4] hover:underline">Xem tất cả</a>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
+                    @foreach (var item in Model.RelatedProducts.Take(5))
+                    {
+                        <div class="bg-white border border-slate-200 rounded-2xl p-4 hover:shadow-lg transition group relative">
+                            <a href="@Url.Action("Details", "Products", new { id = item.Id })" class="block">
+                                <div class="aspect-square mb-4 flex items-center justify-center bg-[#F9FAFB] rounded-xl">
+                                    <img src="@Url.Content(item.PrimaryImageUrl ?? "/images/placeholders/product.webp")"
+                                         class="w-full h-full object-contain p-2 group-hover:scale-110 transition duration-500" />
+                                </div>
+                                <h3 class="text-sm font-bold text-slate-800 line-clamp-2 h-10 mb-2 group-hover:text-[#00D1E4] transition">@item.Name</h3>
+                                <div class="text-[#FD4057] font-bold">@FormatPrice(item.Price)</div>
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<div id="specModal" class="fixed inset-0 z-[100] hidden" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" id="closeSpecModalBackdrop"></div>
+    <div class="fixed inset-0 z-10 overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="relative w-full max-w-3xl bg-white rounded-2xl shadow-2xl overflow-hidden transform transition-all">
+                <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                    <h3 class="font-bold text-slate-900">Thông số kỹ thuật: @p.Name</h3>
+                    <button id="closeSpecModalBtn" class="text-slate-400 hover:text-red-500 transition"><i class="fa-solid fa-xmark text-xl"></i></button>
+                </div>
+                <div class="p-6 max-h-[70vh] overflow-y-auto">
+                    @if (p.Specifications != null)
+                    {
+                        <table class="w-full text-sm text-left border-collapse">
+                            <tbody class="divide-y divide-slate-100">
+                                @foreach (var s in p.Specifications.OrderBy(x => x.SortOrder))
+                                {
+                                    <tr class="hover:bg-slate-50">
+                                        <td class="py-3 px-4 text-slate-500 font-medium w-1/3 bg-slate-50/50">@s.Name</td>
+                                        <td class="py-3 px-4 text-slate-900 font-semibold">@s.Value</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/js/productdetails.js"></script>

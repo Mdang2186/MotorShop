@@ -28,6 +28,8 @@
   <ItemGroup>
     <Compile Include="Models\AiConversation.cs" />
     <Compile Include="Models\AiMessage.cs" />
+    <Compile Include="Models\Ai\AiDtos.cs" />
+    <Compile Include="Models\Ai\AiModelData.cs" />
     <Compile Include="Models\ApplicationUser.cs" />
     <Compile Include="Models\Bank.cs" />
     <Compile Include="Models\Branch.cs" />

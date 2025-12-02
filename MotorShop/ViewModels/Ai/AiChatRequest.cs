@@ -4,7 +4,7 @@
     {
         public string Message { get; set; } = string.Empty;
 
-        // Các thông tin client (nếu anh có), có thể để nguyên
+        // Các thông tin client (tùy, có thể bỏ qua)
         public int? ClientHeightCm { get; set; }
         public decimal? ClientBudgetMin { get; set; }
         public decimal? ClientBudgetMax { get; set; }

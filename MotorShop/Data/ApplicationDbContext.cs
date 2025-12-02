@@ -18,6 +18,8 @@ namespace MotorShop.Data
         public DbSet<Category> Categories => Set<Category>();
         public DbSet<Order> Orders => Set<Order>();
         public DbSet<OrderItem> OrderItems => Set<OrderItem>();
+        public DbSet<AiConversation> AiConversations { get; set; } = null!;
+        public DbSet<AiMessage> AiMessages { get; set; } = null!;
 
         public DbSet<ProductImage> ProductImages => Set<ProductImage>();
         public DbSet<ProductSpecification> ProductSpecifications => Set<ProductSpecification>();
@@ -29,9 +31,7 @@ namespace MotorShop.Data
 
         public DbSet<Branch> Branches => Set<Branch>();
         public DbSet<Bank> Banks => Set<Bank>();      // ⚠️ Đảm bảo Models/Bank.cs có namespace MotorShop.Models
-        public DbSet<Shipper> Shippers => Set<Shipper>();
-        public DbSet<AiConversation> AiConversations { get; set; } = null!;
-        public DbSet<AiMessage> AiMessages { get; set; } = null!;
+        public DbSet<Shipper> Shippers => Set<Shipper>(); 
 
         protected override void OnModelCreating(ModelBuilder b)
         {
@@ -46,6 +46,7 @@ namespace MotorShop.Data
             b.Entity<OrderItem>().Property(i => i.UnitPrice).HasPrecision(18, 2);
 
             // ===== Product =====
+            // ===== Product =====
             b.Entity<Product>(e =>
             {
                 e.HasIndex(x => new { x.Name, x.BrandId, x.CategoryId });
@@ -55,9 +56,15 @@ namespace MotorShop.Data
                 e.Property(x => x.IsPublished).HasDefaultValue(true);
                 e.Property(x => x.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
 
+                // 🔹 Mô tả sản phẩm: full blog HTML, không giới hạn độ dài
+                e.Property(x => x.Description)
+                 .HasColumnType("nvarchar(max)")
+                 .IsRequired(false);
+
                 // Concurrency token
                 e.Property(x => x.RowVersion).IsRowVersion();
             });
+
 
             // ===== Brand / Category =====
             b.Entity<Brand>(e =>
@@ -73,7 +80,25 @@ namespace MotorShop.Data
                 e.Property(x => x.Slug).HasMaxLength(120);
                 e.HasIndex(x => x.Slug).IsUnique(false);
             });
+            b.Entity<AiConversation>(b =>
+            {
+                b.Property(c => c.Title)
+                    .HasMaxLength(200);
 
+                b.Property(c => c.LastUserMessage)
+                    .HasMaxLength(1000);
+
+                b.HasMany(c => c.Messages)
+                    .WithOne(m => m.Conversation)
+                    .HasForeignKey(m => m.ConversationId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            b.Entity<AiMessage>(b =>
+            {
+                b.Property(m => m.Content)
+                    .HasMaxLength(4000);
+            });
             // ===== Tag & ProductTag =====
             b.Entity<Tag>(e =>
             {
