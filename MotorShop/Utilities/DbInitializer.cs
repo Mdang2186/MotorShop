@@ -23,9 +23,10 @@ namespace MotorShop.Utilities
             _context = context;
         }
 
+
         public async Task InitializeAsync()
         {
-            // 1. Auto Migrate (chỉ chạy khi còn migration pending)
+            // 1. Auto migrate
             try
             {
                 if ((await _context.Database.GetPendingMigrationsAsync()).Any())
@@ -38,24 +39,27 @@ namespace MotorShop.Utilities
                 Console.WriteLine($"Migrate Error: {ex.Message}");
             }
 
-            // 2. Dọn dữ liệu chat "mồ côi" nếu có
+            // 2. Cleanup chat
             await CleanupChatAsync();
 
-            // 3. Seed dữ liệu chuẩn cho hệ thống
+            // 3. Seed dữ liệu chuẩn
 
-            // 3.1. Tài khoản & vai trò (Admin, User, khách hàng mẫu)
+            // 3.1 Tài khoản & vai trò
             await IdentitySeeder.SeedAsync(_roleManager, _userManager);
 
-            // 3.2. Dữ liệu gốc: Chi nhánh, Thương hiệu, Danh mục, Ngân hàng...
+            // 3.2 Dữ liệu gốc: chi nhánh, brand, category,...
             await MasterDataSeeder.SeedAsync(_context);
 
-            // 3.3. Sản phẩm + hình ảnh
+            // 3.3 Sản phẩm + hình ảnh
             await ProductSeeder.SeedAsync(_context);
 
-            // 3.4. Tag + ProductTag cho AI (rất quan trọng cho gợi ý)
+            // 🔥 3.3b Phân bổ tồn kho theo chi nhánh (có hàng / hết hàng)
+            await BranchInventorySeeder.SeedAsync(_context);
+
+            // 3.4 Tag + ProductTag
             await TagSeeder.SeedAsync(_context);
 
-            // 3.5. Đơn hàng mẫu từ sản phẩm thật (cho báo cáo + ML.NET sau này)
+            // 3.5 Đơn hàng mẫu
             await OrderSeeder.SeedAsync(_context, _userManager);
         }
 

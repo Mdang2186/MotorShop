@@ -389,73 +389,88 @@
 </section>
 
 <!-- CONTACT / LIÊN HỆ ===================================================== -->
-<section class="py-16 bg-slate-900 text-white">
+<section class="py-16 bg-white border-t border-slate-100">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid lg:grid-cols-2 gap-10 items-center">
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+
             <div>
                 <div class="ms-line mb-3"></div>
-                <h2 class="text-3xl font-bold mb-4">Đặt lịch xem xe hoặc nhận báo giá</h2>
-                <p class="text-slate-100/80 mb-6">
-                    Điền thông tin, đội ngũ MotorShop sẽ gọi lại trong 15–30 phút (giờ hành chính).
+                <h2 class="text-3xl font-extrabold text-slate-900 mb-4">Đặt lịch xem xe hoặc nhận báo giá</h2>
+                <p class="text-slate-500 mb-8 leading-relaxed">
+                    Điền thông tin bên dưới, đội ngũ tư vấn viên của MotorShop sẽ liên hệ lại với bạn trong vòng <strong>15–30 phút</strong> (giờ hành chính).
                 </p>
-                <ul class="space-y-3 text-sm">
-                    <li class="flex gap-3 items-start">
-                        <span class="w-9 h-9 rounded-xl bg-white/5 border border-white/10 grid place-items-center text-cyan-200">
+
+                <ul class="space-y-6">
+                    <li class="flex gap-4 items-start">
+                        <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 text-xl shadow-sm border border-blue-100">
                             <i class="fa-solid fa-location-dot"></i>
-                        </span>
+                        </div>
                         <div>
-                            <p class="font-medium text-white">Showroom Hà Nội</p>
-                            <p class="text-slate-200/70 text-sm">123 ABC, Hoàn Kiếm</p>
+                            <p class="font-bold text-slate-900 text-lg">Showroom Hà Nội</p>
+                            <p class="text-slate-500 text-sm mt-1">123 ABC, Quận Hoàn Kiếm, Hà Nội</p>
                         </div>
                     </li>
-                    <li class="flex gap-3 items-start">
-                        <span class="w-9 h-9 rounded-xl bg-white/5 border border-white/10 grid place-items-center text-cyan-200">
-                            <i class="fa-solid fa-phone"></i>
-                        </span>
+                    <li class="flex gap-4 items-start">
+                        <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 text-xl shadow-sm border border-blue-100">
+                            <i class="fa-solid fa-phone-volume"></i>
+                        </div>
                         <div>
-                            <p class="font-medium text-white">Hotline</p>
-                            <p class="text-slate-200/70 text-sm">1900 1234 (08:30 – 20:30)</p>
+                            <p class="font-bold text-slate-900 text-lg">Tổng đài hỗ trợ</p>
+                            <p class="text-slate-500 text-sm mt-1">1900 1234 (08:30 – 20:30 hàng ngày)</p>
                         </div>
                     </li>
-                    <li class="flex gap-3 items-start">
-                        <span class="w-9 h-9 rounded-xl bg-white/5 border border-white/10 grid place-items-center text-cyan-200">
-                            <i class="fa-solid fa-envelope"></i>
-                        </span>
+                    <li class="flex gap-4 items-start">
+                        <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 text-xl shadow-sm border border-blue-100">
+                            <i class="fa-solid fa-envelope-open-text"></i>
+                        </div>
                         <div>
-                            <p class="font-medium text-white">Email</p>
-                            <p class="text-slate-200/70 text-sm">contact@motorshop.vn</p>
+                            <p class="font-bold text-slate-900 text-lg">Email liên hệ</p>
+                            <p class="text-slate-500 text-sm mt-1">contact@motorshop.vn</p>
                         </div>
                     </li>
                 </ul>
             </div>
+
             <div>
-                <form class="bg-slate-950/40 border border-white/10 rounded-2xl p-6 shadow-2xl space-y-4">
-                    <div class="grid md:grid-cols-2 gap-4">
+                <form class="bg-white border border-slate-200 rounded-3xl p-8 shadow-xl shadow-slate-200/50 space-y-5 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-blue-600/5 rounded-bl-full pointer-events-none"></div>
+
+                    <div class="grid md:grid-cols-2 gap-5">
                         <div>
-                            <label class="block text-sm mb-1">Họ và tên</label>
-                            <input type="text" class="w-full bg-slate-900/60 border border-slate-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-400" placeholder="Nguyễn Văn A" />
+                            <label class="block text-xs font-bold text-slate-900 uppercase mb-2">Họ và tên</label>
+                            <input type="text" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all text-sm" placeholder="Nguyễn Văn A" />
                         </div>
                         <div>
-                            <label class="block text-sm mb-1">Số điện thoại</label>
-                            <input type="tel" class="w-full bg-slate-900/60 border border-slate-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-400" placeholder="0912 xxx xxx" />
+                            <label class="block text-xs font-bold text-slate-900 uppercase mb-2">Số điện thoại</label>
+                            <input type="tel" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all text-sm" placeholder="0912 xxx xxx" />
                         </div>
                     </div>
+
                     <div>
-                        <label class="block text-sm mb-1">Dòng xe quan tâm</label>
-                        <select class="w-full bg-slate-900/60 border border-slate-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-400">
-                            <option>Tay ga</option>
-                            <option>Xe số</option>
-                            <option>Sport / Underbone</option>
-                            <option>Adventure / Touring</option>
-                        </select>
+                        <label class="block text-xs font-bold text-slate-900 uppercase mb-2">Dòng xe quan tâm</label>
+                        <div class="relative">
+                            <select class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all text-sm appearance-none cursor-pointer">
+                                <option>Xe Tay Ga</option>
+                                <option>Xe Số / Côn Tay</option>
+                                <option>Sportbike / Phân khối lớn</option>
+                                <option>Xe Máy Điện</option>
+                            </select>
+                            <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
+                        </div>
                     </div>
+
                     <div>
-                        <label class="block text-sm mb-1">Ghi chú</label>
-                        <textarea rows="3" class="w-full bg-slate-900/60 border border-slate-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-400" placeholder="Thời gian bạn rảnh, màu xe, phương án trả góp…"></textarea>
+                        <label class="block text-xs font-bold text-slate-900 uppercase mb-2">Ghi chú thêm</label>
+                        <textarea rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all text-sm resize-none" placeholder="VD: Thời gian bạn rảnh, màu xe yêu thích, cần tư vấn trả góp..."></textarea>
                     </div>
-                    <button type="submit" class="w-full inline-flex justify-center items-center gap-2 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-white font-semibold rounded-xl transition">
-                        <i class="fa-solid fa-paper-plane"></i> Gửi yêu cầu
+
+                    <button type="submit" class="w-full inline-flex justify-center items-center gap-2 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-200 transition-all transform active:scale-[0.98]">
+                        <i class="fa-solid fa-paper-plane"></i> Gửi yêu cầu tư vấn
                     </button>
+
+                    <p class="text-center text-[10px] text-slate-400 mt-2">
+                        Bằng cách gửi form, bạn đồng ý với <a href="#" class="underline hover:text-blue-600">chính sách bảo mật</a> của chúng tôi.
+                    </p>
                 </form>
             </div>
         </div>

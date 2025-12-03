@@ -20,11 +20,13 @@ namespace MotorShop.Data
         public DbSet<OrderItem> OrderItems => Set<OrderItem>();
         public DbSet<AiConversation> AiConversations { get; set; } = null!;
         public DbSet<AiMessage> AiMessages { get; set; } = null!;
+        public ICollection<BranchInventory> Inventories { get; set; } = new List<BranchInventory>();
 
         public DbSet<ProductImage> ProductImages => Set<ProductImage>();
         public DbSet<ProductSpecification> ProductSpecifications => Set<ProductSpecification>();
         public DbSet<ChatThread> ChatThreads { get; set; } = null!;
         public DbSet<ChatMessage> ChatMessages { get; set; } = null!;
+        public DbSet<BranchInventory> BranchInventories { get; set; } = null!;
 
         public DbSet<Tag> Tags => Set<Tag>();
         public DbSet<ProductTag> ProductTags => Set<ProductTag>();
@@ -64,7 +66,20 @@ namespace MotorShop.Data
                 // Concurrency token
                 e.Property(x => x.RowVersion).IsRowVersion();
             });
+            b.Entity<BranchInventory>(b =>
+            {
+                b.HasIndex(x => new { x.BranchId, x.ProductId }).IsUnique();
 
+                b.HasOne(x => x.Branch)
+                    .WithMany() // nếu bạn thêm ICollection<BranchInventory> vào Branch thì .WithMany(b => b.Inventories)
+                    .HasForeignKey(x => x.BranchId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                b.HasOne(x => x.Product)
+                    .WithMany() // sau này nếu muốn: .WithMany(p => p.BranchInventories)
+                    .HasForeignKey(x => x.ProductId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
 
             // ===== Brand / Category =====
             b.Entity<Brand>(e =>

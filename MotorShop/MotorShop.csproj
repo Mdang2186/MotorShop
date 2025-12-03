@@ -33,6 +33,7 @@
     <Compile Include="Models\ApplicationUser.cs" />
     <Compile Include="Models\Bank.cs" />
     <Compile Include="Models\Branch.cs" />
+    <Compile Include="Models\BranchInventory.cs" />
     <Compile Include="Models\Brand.cs" />
     <Compile Include="Models\CartItem.cs" />
     <Compile Include="Models\Category.cs" />
