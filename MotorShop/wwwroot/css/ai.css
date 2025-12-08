@@ -802,3 +802,23 @@ body {
     .description-box li {
         margin-bottom: 4px;
     }
+footer {
+    display: none !important;
+}
+
+/* 2. Cố định màn hình để không cuộn trang web (chỉ cuộn nội dung chat) */
+body {
+    overflow: hidden !important;
+    height: 100vh;
+}
+
+/* 3. Reset khoảng cách đệm của Layout chính */
+main {
+    padding-bottom: 0 !important;
+    height: 100vh; /* Main chiếm toàn bộ chiều cao */
+}
+
+/* 4. Ẩn thanh cuộn của trình duyệt */
+::-webkit-scrollbar {
+    display: none;
+}

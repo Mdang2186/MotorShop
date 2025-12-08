@@ -213,8 +213,11 @@
     <main role="main" class="relative">
         @RenderBody()
     </main>
-
-    <partial name="_FooterPartial" />
+    @* Chỉ hiển thị Footer nếu không có cờ 'HideFooter' *@
+    @if (ViewData["HideFooter"] == null || !(bool)ViewData["HideFooter"])
+    {
+        <partial name="_FooterPartial" />
+    }
 
     <div id="notification"
          class="fixed top-[84px] right-5 z-[1000] min-w-[280px] max-w-sm transition-all duration-500 ease-in-out

@@ -7,7 +7,8 @@
     var soldCounts = ViewBag.SoldCounts as Dictionary<int, int> ?? new Dictionary<int, int>();
     int GetSold(int pid) => soldCounts.ContainsKey(pid) ? soldCounts[pid] : 0;
 }
-
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 @Html.AntiForgeryToken()
 
 <style>
@@ -380,6 +381,16 @@
         width: 100%;
         height: 100%;
     }
+    /* Popup bản đồ đẹp hơn */
+    .leaflet-popup-content-wrapper { border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); padding: 0; overflow: hidden; }
+    .leaflet-popup-content { margin: 0; width: 260px !important; }
+    .map-popup-header { background: #0f172a; color: white; padding: 12px 16px; font-weight: 700; font-size: 13px; }
+    .map-popup-body { padding: 16px; font-size: 12px; color: #475569; line-height: 1.5; }
+    .map-btn-dir { display: block; margin-top: 10px; text-align: center; background: #2563eb; color: white; padding: 8px; border-radius: 8px; font-weight: 700; text-decoration: none; transition: 0.2s; }
+    .map-btn-dir:hover { background: #1d4ed8; color: white; }
+    
+    /* Hiệu ứng item danh sách */
+    .branch-item.active { border-color: #3b82f6; background-color: #eff6ff; }
 </style>
 
 <section class="relative overflow-hidden bg-slate-950 text-white">
@@ -846,65 +857,103 @@
     var branchesSouth = branches.Where(b => !branchesNorth.Contains(b) && !branchesCentral.Contains(b)).ToList();
 }
 
-<section class="py-16 bg-slate-50 border-t border-slate-200">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid lg:grid-cols-12 gap-8 items-start">
-            <div class="lg:col-span-4 flex flex-col gap-6">
-                <div>
-                    <h2 class="text-3xl font-extrabold text-slate-900">Hệ thống <span class="text-blue-600">Showroom</span></h2>
-                    <p class="text-slate-500 mt-2">Ghé thăm chi nhánh gần bạn để trải nghiệm thực tế.</p>
+<section class="py-16 bg-white border-t border-slate-100">
+    <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <div class="text-center mb-10">
+            <h2 class="text-3xl font-extrabold text-slate-900">Hệ thống <span class="text-blue-600">Showroom</span></h2>
+            <p class="text-slate-500 mt-2">Trải nghiệm thực tế tại 5 chi nhánh chính hãng trên toàn quốc.</p>
+        </div>
+
+        <div class="grid lg:grid-cols-12 gap-6 h-[650px]">
+            
+            <div class="lg:col-span-3 flex flex-col h-full gap-4">
+                <div class="bg-slate-100 p-1.5 rounded-xl flex gap-1">
+                    <button class="flex-1 py-2.5 rounded-lg text-[11px] font-bold uppercase transition-all bg-white shadow-sm text-blue-700" onclick="filterMap('north', this)">Miền Bắc</button>
+                    <button class="flex-1 py-2.5 rounded-lg text-[11px] font-bold uppercase transition-all text-slate-500 hover:bg-white/50" onclick="filterMap('central', this)">Miền Trung</button>
+                    <button class="flex-1 py-2.5 rounded-lg text-[11px] font-bold uppercase transition-all text-slate-500 hover:bg-white/50" onclick="filterMap('south', this)">Miền Nam</button>
                 </div>
-                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                    <div class="p-4 border-b border-slate-100 bg-slate-50">
-                        <div class="flex p-1 bg-slate-200 rounded-xl gap-1">
-                            <button class="loc-tab-btn flex-1 py-2 rounded-lg text-[10px] font-bold active uppercase" onclick="filterMap('north')" id="btn-north">Miền Bắc</button>
-                            <button class="loc-tab-btn flex-1 py-2 rounded-lg text-[10px] font-bold text-slate-500 uppercase" onclick="filterMap('central')" id="btn-central">Miền Trung</button>
-                            <button class="loc-tab-btn flex-1 py-2 rounded-lg text-[10px] font-bold text-slate-500 uppercase" onclick="filterMap('south')" id="btn-south">Miền Nam</button>
-                        </div>
-                    </div>
-                    <div class="max-h-[350px] overflow-y-auto scrollbar-thin p-3">
-                        <div id="list-north" class="loc-list block space-y-2">
-                            @foreach (var b in branchesNorth)
-                            {
-                                <div class="p-3 border border-slate-100 rounded-xl bg-white hover:border-blue-500 cursor-pointer" onclick="updateMap('@b.Address')"><div class="text-xs font-bold mb-1">@b.Name</div><div class="text-[10px] text-slate-500"><i class="fa-solid fa-map-pin"></i> @b.Address</div></div>
-                            }
-                        </div>
-                        <div id="list-central" class="loc-list hidden space-y-2">
-                            @foreach (var b in branchesCentral)
-                            {
-                                <div class="p-3 border border-slate-100 rounded-xl bg-white hover:border-blue-500 cursor-pointer" onclick="updateMap('@b.Address')"><div class="text-xs font-bold mb-1">@b.Name</div><div class="text-[10px] text-slate-500"><i class="fa-solid fa-map-pin"></i> @b.Address</div></div>
-                            }
-                        </div>
-                        <div id="list-south" class="loc-list hidden space-y-2">
-                            @foreach (var b in branchesSouth)
-                            {
-                                <div class="p-3 border border-slate-100 rounded-xl bg-white hover:border-blue-500 cursor-pointer" onclick="updateMap('@b.Address')"><div class="text-xs font-bold mb-1">@b.Name</div><div class="text-[10px] text-slate-500"><i class="fa-solid fa-map-pin"></i> @b.Address</div></div>
-                            }
-                        </div>
+
+                <div class="flex-1 bg-white rounded-2xl border border-slate-200 overflow-hidden relative">
+                    <div class="absolute inset-0 overflow-y-auto scrollbar-thin p-3 space-y-2">
+                        @{
+                            // Dữ liệu giả lập tọa độ chính xác cho từng địa chỉ
+                            var mapData = new List<dynamic> {
+                                new { Id=1, Region="north", Name="MotorShop Hà Nội 1", Addr="88 Phố Huế, Hai Bà Trưng, Hà Nội", Lat=21.017320, Lng=105.854610 },
+                                new { Id=2, Region="north", Name="MotorShop Hà Nội 2", Addr="368 Cầu Giấy, Q. Cầu Giấy, Hà Nội", Lat=21.035640, Lng=105.793780 },
+                                new { Id=3, Region="central", Name="MotorShop Đà Nẵng", Addr="255 Hùng Vương, Q. Hải Châu, Đà Nẵng", Lat=16.068630, Lng=108.221520 },
+                                new { Id=4, Region="south", Name="MotorShop Sài Gòn 1", Addr="15 Nguyễn Huệ, Quận 1, TP.HCM", Lat=10.774560, Lng=106.703600 },
+                                new { Id=5, Region="south", Name="MotorShop Sài Gòn 2", Addr="456 Cộng Hòa, Tân Bình, TP.HCM", Lat=10.803360, Lng=106.643380 }
+                            };
+                        }
+
+                        @foreach (var item in mapData)
+                        {
+                            <div class="branch-item loc-item @(item.Region == "north" ? "block" : "hidden") p-4 rounded-xl border border-slate-100 hover:border-blue-400 cursor-pointer transition-all bg-slate-50 hover:bg-white hover:shadow-md group"
+                                 data-region="@item.Region"
+                                 id="branch-@item.Id"
+                                 onclick="focusLocation(@item.Id, @item.Lat, @item.Lng)">
+                                <div class="flex items-center justify-between mb-1">
+                                    <h4 class="text-sm font-bold text-slate-800 group-hover:text-blue-600">@item.Name</h4>
+                                    <i class="fa-solid fa-location-dot text-slate-300 group-hover:text-blue-500"></i>
+                                </div>
+                                <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed">@item.Addr</p>
+                            </div>
+                        }
                     </div>
                 </div>
             </div>
-            <div class="lg:col-span-8 h-[500px] bg-slate-200 rounded-3xl overflow-hidden shadow-xl relative">
-                <iframe id="gmap-canvas" class="iframe-map" frameborder="0" src="" allowfullscreen></iframe>
-                <div id="map-placeholder" class="absolute inset-0 flex items-center justify-center bg-slate-100 text-slate-500 z-0" style="display:none"><span class="animate-pulse">Đang tải bản đồ...</span></div>
+
+            <div class="lg:col-span-9 h-full bg-slate-200 rounded-3xl overflow-hidden shadow-xl border border-slate-300 relative z-0">
+                <div id="leaflet-map" class="w-full h-full z-0"></div>
+                
+                <div class="absolute bottom-6 right-6 z-[500] flex flex-col gap-2">
+                    <button onclick="resetMap()" class="bg-white hover:bg-blue-600 hover:text-white text-slate-700 w-10 h-10 rounded-xl shadow-lg flex items-center justify-center transition-all border border-slate-200" title="Xem toàn quốc">
+                        <i class="fa-solid fa-earth-americas"></i>
+                    </button>
+                </div>
             </div>
+
         </div>
     </div>
 </section>
 
-<section class="py-16 bg-white border-t border-slate-100">
+<section id="contact-form" class="py-16 bg-white border-t border-slate-100">
     <div class="max-w-4xl mx-auto px-4 text-center">
         <h2 class="text-3xl font-extrabold text-slate-900 mb-4">Bạn chưa tìm thấy xe ưng ý?</h2>
         <p class="text-slate-500 mb-8">Đừng lo, để lại thông tin, chúng tôi sẽ tìm giúp bạn và báo giá tốt nhất.</p>
-        <form class="bg-slate-50 border border-slate-200 rounded-3xl p-8 shadow-lg text-left grid md:grid-cols-2 gap-6">
-            <div><label class="text-xs font-bold uppercase mb-2 block">Họ tên</label><input type="text" class="w-full rounded-xl border-slate-200 px-4 py-3" placeholder="VD: Anh Tuấn"></div>
-            <div><label class="text-xs font-bold uppercase mb-2 block">Số điện thoại</label><input type="tel" class="w-full rounded-xl border-slate-200 px-4 py-3" placeholder="VD: 0912..."></div>
-            <div class="col-span-2"><label class="text-xs font-bold uppercase mb-2 block">Nhu cầu</label><textarea rows="3" class="w-full rounded-xl border-slate-200 px-4 py-3" placeholder="VD: Tìm xe tay ga 40 triệu..."></textarea></div>
-            <div class="col-span-2 text-center"><button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition">Gửi yêu cầu</button></div>
+        
+        <form asp-controller="Home" asp-action="SendRequest" method="post" class="bg-slate-50 border border-slate-200 rounded-3xl p-8 shadow-lg text-left grid md:grid-cols-2 gap-6">
+            @Html.AntiForgeryToken()
+            
+            <div>
+                <label class="text-xs font-bold uppercase mb-2 block text-slate-700">Họ tên <span class="text-red-500">*</span></label>
+                <input type="text" name="FullName" required class="w-full rounded-xl border-slate-200 px-4 py-3 focus:border-blue-500 focus:ring-blue-500 transition" placeholder="VD: Anh Tuấn">
+            </div>
+
+            <div>
+                <label class="text-xs font-bold uppercase mb-2 block text-slate-700">Số điện thoại <span class="text-red-500">*</span></label>
+                <input type="tel" name="Phone" required class="w-full rounded-xl border-slate-200 px-4 py-3 focus:border-blue-500 focus:ring-blue-500 transition" placeholder="VD: 0912...">
+            </div>
+
+            <div class="col-span-2">
+                <label class="text-xs font-bold uppercase mb-2 block text-slate-700">Email liên hệ <span class="text-red-500">*</span></label>
+                <input type="email" name="Email" required class="w-full rounded-xl border-slate-200 px-4 py-3 focus:border-blue-500 focus:ring-blue-500 transition" placeholder="VD: anhtuan@gmail.com">
+            </div>
+
+            <div class="col-span-2">
+                <label class="text-xs font-bold uppercase mb-2 block text-slate-700">Nhu cầu chi tiết <span class="text-red-500">*</span></label>
+                <textarea name="RequestContent" required rows="3" class="w-full rounded-xl border-slate-200 px-4 py-3 focus:border-blue-500 focus:ring-blue-500 transition" placeholder="VD: Tìm xe tay ga khoảng 40 triệu, màu trắng..."></textarea>
+            </div>
+
+            <div class="col-span-2 text-center">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-10 rounded-xl shadow-lg transition transform active:scale-95">
+                    Gửi yêu cầu ngay
+                </button>
+            </div>
         </form>
     </div>
 </section>
-
 @section Scripts {
     <script>
         // === 1. MAP LOGIC ===
@@ -943,7 +992,126 @@
                 }
             }
         });
+        let map;
+        let markers = {}; // Lưu trữ marker để điều khiển popup
 
+        // Dữ liệu Showroom
+        const stores = [
+            { id: 1, lat: 21.017320, lng: 105.854610, name: "MotorShop Hà Nội 1", addr: "88 Phố Huế, Hai Bà Trưng, Hà Nội" },
+            { id: 2, lat: 21.035640, lng: 105.793780, name: "MotorShop Hà Nội 2", addr: "368 Cầu Giấy, Q. Cầu Giấy, Hà Nội" },
+            { id: 3, lat: 16.068630, lng: 108.221520, name: "MotorShop Đà Nẵng", addr: "255 Hùng Vương, Q. Hải Châu, Đà Nẵng" },
+            { id: 4, lat: 10.774560, lng: 106.703600, name: "MotorShop Sài Gòn 1", addr: "15 Nguyễn Huệ, Quận 1, TP.HCM" },
+            { id: 5, lat: 10.803360, lng: 106.643380, name: "MotorShop Sài Gòn 2", addr: "456 Cộng Hòa, Tân Bình, TP.HCM" }
+        ];
+
+        function initMap() {
+            // 1. Khởi tạo Map
+            map = L.map('leaflet-map', {
+                center: [16.047079, 108.206230], // Trung tâm VN
+                zoom: 6,
+                scrollWheelZoom: true,
+                zoomControl: false // Tắt nút zoom mặc định
+            });
+
+            L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+            // 2. Layer Bản đồ
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                attribution: '© OpenStreetMap © CARTO',
+                subdomains: 'abcd',
+                maxZoom: 20,
+                minZoom: 5
+            }).addTo(map);
+
+            // 3. Tạo Markers
+            stores.forEach(s => {
+                const popupHtml = `
+                    <div class="map-popup-header">${s.name}</div>
+                    <div class="map-popup-body">
+                        <p><i class="fa-solid fa-location-dot mr-1"></i> ${s.addr}</p>
+                        <a href="https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}" target="_blank" class="map-btn-dir">
+                            Chỉ đường qua Google Maps
+                        </a>
+                    </div>
+                `;
+
+                const marker = L.marker([s.lat, s.lng]).addTo(map);
+                marker.bindPopup(popupHtml);
+
+                // --- ĐỒNG BỘ HÓA: Click Marker cũng gọi hàm focusLocation y hệt click danh sách ---
+                marker.on('click', (e) => {
+                    // Ngăn popup mở ngay lập tức (để chờ bay xong mới mở)
+                    marker.closePopup();
+                    focusLocation(s.id, s.lat, s.lng);
+                });
+
+                markers[s.id] = marker;
+            });
+        }
+
+        // --- HÀM XỬ LÝ CHUNG CHO CẢ 2 TRƯỜNG HỢP ---
+        function focusLocation(id, lat, lng) {
+            if(!map) return;
+
+            // 1. Xử lý giao diện danh sách (Highlight item)
+            // Dù click ở ngoài hay click trên bản đồ, danh sách bên trái đều phải sáng lên
+            document.querySelectorAll('.branch-item').forEach(el => el.classList.remove('active'));
+            const activeItem = document.getElementById(`branch-${id}`);
+            if(activeItem) {
+                activeItem.classList.add('active');
+                // Tự động cuộn danh sách đến item đó nếu nó đang bị khuất
+                activeItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            // 2. Đóng tất cả popup đang mở để tránh rối
+            map.closePopup();
+
+            // 3. Hiệu ứng "Fly" nhẹ nhàng
+            // Dùng flyTo để tạo cảm giác lướt từ vị trí cũ sang vị trí mới
+            map.flyTo([lat, lng], 17, {
+                animate: true,
+                duration: 1.5, // 1.5 giây: Đủ mượt để nhìn thấy đường đi
+                easeLinearity: 0.25 // Độ cong quỹ đạo bay
+            });
+
+            // 4. Mở Popup SAU KHI bay xong (Đồng bộ thời gian với duration)
+            setTimeout(() => {
+                if(markers[id]) markers[id].openPopup();
+            }, 1500);
+        }
+
+        // Hàm Reset
+        function resetMap() {
+            map.closePopup();
+            map.flyTo([16.047079, 108.206230], 6, { duration: 1.5 });
+            document.querySelectorAll('.branch-item').forEach(el => el.classList.remove('active'));
+        }
+
+        // Hàm Lọc vùng miền
+        function filterMap(region, btn) {
+            const parent = btn.parentElement;
+            parent.querySelectorAll('button').forEach(b => {
+                b.className = "flex-1 py-2.5 rounded-lg text-[11px] font-bold uppercase transition-all text-slate-500 hover:bg-white/50";
+            });
+            btn.className = "flex-1 py-2.5 rounded-lg text-[11px] font-bold uppercase transition-all bg-white shadow-sm text-blue-700";
+
+            document.querySelectorAll('.loc-item').forEach(el => {
+                if(el.dataset.region === region) el.classList.remove('hidden');
+                else el.classList.add('hidden');
+            });
+
+            if(map) {
+                map.closePopup();
+                // Bay nhẹ về vùng miền
+                if(region === 'north') map.flyTo([21.02, 105.83], 10, { duration: 1.2 });
+                else if(region === 'central') map.flyTo([16.05, 108.20], 10, { duration: 1.2 });
+                else if(region === 'south') map.flyTo([10.82, 106.63], 10, { duration: 1.2 });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initMap();
+        });
         // === 2. CART AJAX ===
         async function addToCart(productId) {
             try {

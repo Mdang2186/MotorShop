@@ -12,16 +12,18 @@
                     <p class="text-xs text-slate-500 mt-0.5">Tin giảm giá, khuyến mãi, mẫu mới sẽ gửi vào mail.</p>
                 </div>
             </div>
-            <form asp-controller="Newsletter" asp-action="Subscribe" method="post" class="flex-1 w-full">
+            <form asp-controller="Home" asp-action="Subscribe" method="post" class="flex-1 w-full">
                 <div class="flex gap-3">
                     <input name="email" type="email" required
                            class="flex-1 bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
                            placeholder="Nhập email của bạn..." />
+
                     <button type="submit"
-                            class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold shadow-md shadow-blue-100 transition-all">
+                            class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold shadow-md shadow-blue-100 transition-all transform active:scale-95">
                         Đăng ký
                     </button>
                 </div>
+                @Html.AntiForgeryToken()
             </form>
         </div>
 

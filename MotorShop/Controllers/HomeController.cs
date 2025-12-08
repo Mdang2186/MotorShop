@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+﻿using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
@@ -6,8 +6,9 @@ using MotorShop.Data;
 using MotorShop.Models;
 using MotorShop.Models.Enums;
 using MotorShop.Utilities;
+using MotorShop.ViewModels;
 using MotorShop.ViewModels.Home;
-
+using System.Diagnostics;
 namespace MotorShop.Controllers
 {
     public class HomeController : Controller
@@ -15,7 +16,7 @@ namespace MotorShop.Controllers
         private readonly ApplicationDbContext _db;
         private readonly ILogger<HomeController> _logger;
         private readonly IMemoryCache _cache;
-
+        private readonly IEmailSender _emailSender;
         // --- KHAI BÁO KEY CACHE ---
         private const string CacheKey_Featured = "home:featured";
         private const string CacheKey_BestSeller = "home:bestseller";
@@ -28,11 +29,12 @@ namespace MotorShop.Controllers
         // Tên danh mục phụ tùng trong DB
         private const string CategoryName_Parts = "Phụ tùng & Linh kiện";
 
-        public HomeController(ApplicationDbContext context, ILogger<HomeController> logger, IMemoryCache cache)
+        public HomeController(ApplicationDbContext context, ILogger<HomeController> logger, IMemoryCache cache, IEmailSender emailSender)
         {
             _db = context;
             _logger = logger;
             _cache = cache;
+            _emailSender = emailSender;
         }
 
         // ==========================================
@@ -170,7 +172,158 @@ namespace MotorShop.Controllers
                 return View(new HomeViewModel());
             }
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SendRequest(ContactRequestViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    // Cập nhật tiêu đề thư: Thêm Icon chuông + Tên + SĐT để Admin dễ nhận biết
+                    string subject = $"🔔 Yêu cầu tư vấn";
 
+                    string body = $@"
+        <div style='font-family: Arial, sans-serif; line-height: 1.6; color: #333;'>
+            <h2 style='color: #1d4ed8;'>Yêu cầu tìm xe từ Website</h2>
+            <p>Xin chào Admin,</p>
+            <p>Hệ thống vừa nhận được yêu cầu tư vấn mới với thông tin chi tiết như sau:</p>
+            
+            <table style='width: 100%; border-collapse: collapse; margin: 20px 0;'>
+                <tr>
+                    <td style='padding: 8px; border: 1px solid #ddd; background: #f9f9f9; width: 150px; font-weight: bold;'>Họ tên:</td>
+                    <td style='padding: 8px; border: 1px solid #ddd;'>{model.FullName}</td>
+                </tr>
+                <tr>
+                    <td style='padding: 8px; border: 1px solid #ddd; background: #f9f9f9; font-weight: bold;'>Số điện thoại:</td>
+                    <td style='padding: 8px; border: 1px solid #ddd;'><a href='tel:{model.Phone}' style='color: #1d4ed8; font-weight: bold;'>{model.Phone}</a></td>
+                </tr>
+                <tr>
+                    <td style='padding: 8px; border: 1px solid #ddd; background: #f9f9f9; font-weight: bold;'>Email:</td>
+                    <td style='padding: 8px; border: 1px solid #ddd;'><a href='mailto:{model.Email}'>{model.Email}</a></td>
+                </tr>
+                <tr>
+                    <td style='padding: 8px; border: 1px solid #ddd; background: #f9f9f9; font-weight: bold;'>Nhu cầu chi tiết:</td>
+                    <td style='padding: 8px; border: 1px solid #ddd; background: #fff8e1; color: #b45309;'>{model.RequestContent}</td>
+                </tr>
+            </table>
+
+            <p><em>Vui lòng liên hệ lại khách hàng trong thời gian sớm nhất.</em></p>
+            <hr style='border: 0; border-top: 1px solid #eee; margin: 20px 0;'>
+            <small style='color: #888;'>Email này được gửi tự động từ hệ thống MotorShop.</small>
+        </div>
+    ";
+
+                    // Gửi email
+                    await _emailSender.SendEmailAsync("danghieu7bthcsnh@gmail.com", subject, body);
+
+                    TempData[SD.Temp_Success] = "Đã gửi yêu cầu thành công! Chúng tôi sẽ liên hệ lại sớm.";
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Lỗi gửi email liên hệ");
+                    TempData[SD.Temp_Error] = "Có lỗi xảy ra khi gửi yêu cầu. Vui lòng thử lại.";
+                }
+            }
+            else
+            {
+                TempData[SD.Temp_Error] = "Vui lòng điền đầy đủ thông tin.";
+            }
+
+            // Quay lại trang chủ và neo xuống phần form
+            return RedirectToAction(nameof(Index), new { fragment = "contact-form" });
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Subscribe(string email)
+        {
+            // 1. Validate Email
+            if (string.IsNullOrWhiteSpace(email) || !new System.ComponentModel.DataAnnotations.EmailAddressAttribute().IsValid(email))
+            {
+                TempData[SD.Temp_Error] = "Vui lòng nhập địa chỉ Email hợp lệ.";
+                return RedirectToAction(nameof(Index), new { fragment = "footer" });
+            }
+
+            try
+            {
+                // ========================================================================
+                // GỬI EMAIL 1: THÔNG BÁO CHO ADMIN (Để admin nắm thông tin)
+                // ========================================================================
+                string adminSubject = $"📬Khách hàng mới đăng ký nhận ưu đãi";
+                string adminBody = $@"
+            <div style='font-family: Arial, sans-serif; max-width: 600px; border: 1px solid #e2e8f0; padding: 20px; border-radius: 10px;'>
+                <h3 style='color: #2563eb; margin-top: 0;'>🔔 Thông báo Subscriber mới</h3>
+                <p>Xin chào Admin,</p>
+                <p>Website vừa ghi nhận một khách hàng đăng ký nhận bản tin (Newsletter):</p>
+                <div style='background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #2563eb;'>
+                    <p style='margin: 0;'><strong>Email:</strong> <a href='mailto:{email}' style='color: #0f172a; text-decoration: none;'>{email}</a></p>
+                    <p style='margin: 5px 0 0;'><strong>Thời gian:</strong> {DateTime.Now:dd/MM/yyyy HH:mm}</p>
+                </div>
+                <p style='color: #64748b; font-size: 12px; margin-top: 20px;'>Hệ thống MotorShop tự động gửi.</p>
+            </div>
+        ";
+
+                // Gửi cho Admin (Email của bạn)
+                await _emailSender.SendEmailAsync("danghieu7bthcsnh@gmail.com", adminSubject, adminBody);
+
+
+                // ========================================================================
+                // GỬI EMAIL 2: GỬI ƯU ĐÃI CHO KHÁCH HÀNG (Quan trọng)
+                // ========================================================================
+                string clientSubject = "🎉 Chào mừng bạn đến với MotorShop - Nhận ngay ưu đãi đặc biệt!";
+                string clientBody = $@"
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333; line-height: 1.6;'>
+                <div style='background: #0f172a; padding: 20px; text-align: center; border-radius: 10px 10px 0 0;'>
+                    <h2 style='color: #fff; margin: 0;'>MOTORSHOP VIETNAM</h2>
+                </div>
+
+                <div style='border: 1px solid #e2e8f0; border-top: none; padding: 30px; border-radius: 0 0 10px 10px;'>
+                    <h2 style='color: #2563eb; margin-top: 0;'>Cảm ơn bạn đã đăng ký!</h2>
+                    <p>Xin chào,</p>
+                    <p>Chúng tôi rất vui khi bạn đã quan tâm đến các mẫu xe và dịch vụ tại <strong>MotorShop</strong>.</p>
+                    
+                    <p>Để tri ân sự quan tâm này, MotorShop xin gửi tặng bạn voucher giảm giá cho lần bảo dưỡng hoặc mua phụ kiện đầu tiên:</p>
+                    
+                    <div style='text-align: center; margin: 30px 0;'>
+                        <span style='background: #fee2e2; color: #ef4444; font-size: 24px; font-weight: bold; padding: 15px 30px; border-radius: 8px; border: 2px dashed #ef4444; display: inline-block;'>
+                            WELCOME2025
+                        </span>
+                        <p style='color: #64748b; font-size: 13px; margin-top: 10px;'>Giảm <strong>10%</strong> tối đa 200k (Hạn dùng: 30 ngày)</p>
+                    </div>
+
+                    <p>Từ nay, bạn sẽ là người đầu tiên nhận được thông tin về:</p>
+                    <ul style='color: #475569;'>
+                        <li>Các mẫu xe mới về (SH 2025, Exciter, PKL...)</li>
+                        <li>Chương trình khuyến mãi & trả góp 0%</li>
+                        <li>Kinh nghiệm chăm sóc xe hữu ích</li>
+                    </ul>
+
+                    <div style='text-align: center; margin-top: 40px;'>
+                        <a href='https://localhost:7198/products' style='background: #2563eb; color: #fff; text-decoration: none; padding: 12px 25px; border-radius: 30px; font-weight: bold;'>Xem xe ngay</a>
+                    </div>
+                </div>
+
+                <div style='text-align: center; padding: 20px; color: #94a3b8; font-size: 12px;'>
+                    <p>© {DateTime.Now.Year} MotorShop Vietnam. All rights reserved.</p>
+                    <p>123 ABC, Hoàn Kiếm, Hà Nội | Hotline: 1900 1234</p>
+                </div>
+            </div>
+        ";
+
+                // Gửi cho Khách hàng (Email họ vừa nhập)
+                await _emailSender.SendEmailAsync(email, clientSubject, clientBody);
+
+                // Thông báo ra màn hình
+                TempData[SD.Temp_Success] = "Đăng ký thành công! Hãy kiểm tra Email để nhận mã ưu đãi.";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi gửi mail subscribe");
+                TempData[SD.Temp_Error] = "Hệ thống đang bận, vui lòng thử lại sau.";
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
         // ==========================================
         // ACTION: GỢI Ý TÌM KIẾM (AJAX)
         // ==========================================
