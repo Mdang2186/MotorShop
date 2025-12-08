@@ -9,6 +9,6 @@ namespace MotorShop.Services
         Task<ChatThread> GetOrCreateCustomerThreadWithMessagesAsync(string customerId);
         Task<ChatThread?> GetThreadWithMessagesAsync(int threadId);
         Task<IReadOnlyList<ChatThread>> GetOpenThreadsAsync();
-        Task<ChatMessage> AddMessageAsync(int threadId, string senderId, bool isFromStaff, string content);
+        Task<ChatMessage> AddMessageAsync(int threadId, string? senderId, bool isFromStaff, string content);
     }
 }

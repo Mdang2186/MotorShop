@@ -1,0 +1,282 @@
+﻿@model MotorShop.Models.Brand
+@{
+    ViewData["Title"] = $"Thương hiệu: {Model.Name}";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Head {
+    <style>
+        /* --- HERO BANNER --- */
+        .brand-hero-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            box-shadow: var(--shadow-card);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            md: flex-row;
+            align-items: center;
+            gap: 30px;
+        }
+
+            /* Decor Blob */
+            .brand-hero-card::before {
+                content: '';
+                position: absolute;
+                top: -80px;
+                right: -80px;
+                width: 250px;
+                height: 250px;
+                border-radius: 50%;
+                background: var(--grad-info);
+                opacity: 0.1;
+                filter: blur(50px);
+            }
+
+        /* Logo Box 3D */
+        .brand-logo-lg {
+            width: 140px;
+            height: 140px;
+            background: white;
+            border-radius: 24px;
+            padding: 15px;
+            box-shadow: 0 15px 40px -10px rgba(0,0,0,0.1);
+            border: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+            position: relative;
+            transition: transform 0.3s;
+        }
+
+            .brand-logo-lg:hover {
+                transform: scale(1.05) rotate(-2deg);
+            }
+
+            .brand-logo-lg img {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+            }
+
+        .brand-placeholder-lg {
+            font-size: 48px;
+            font-weight: 800;
+            color: #cbd5e1;
+        }
+
+        /* Content */
+        .hero-content {
+            flex: 1;
+            z-index: 1;
+            width: 100%;
+        }
+
+        .stat-pill {
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid white;
+            padding: 8px 16px;
+            border-radius: 14px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #475569;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        /* --- LINKED PRODUCTS TABLE --- */
+        .linked-table-container {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(15px);
+            border-radius: 24px;
+            border: 1px solid white;
+            box-shadow: var(--shadow-card);
+            overflow: hidden;
+            margin-top: 30px;
+        }
+
+        .product-thumb-sm {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            object-fit: cover;
+            background: #f8fafc;
+            border: 1px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        @@media (min-width: 768px) {
+            .brand-hero-card
+
+        {
+            flex-direction: row;
+            text-align: left;
+        }
+
+        .hero-content {
+            text-align: left;
+        }
+
+        }
+    </style>
+}
+
+<div class="container fade-in-up">
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <a asp-action="Index" class="btn btn-light rounded-circle shadow-sm d-grid place-items-center" style="width: 45px; height: 45px;">
+            <i class="bi bi-arrow-left text-dark fs-5"></i>
+        </a>
+        <span class="text-muted fw-bold text-uppercase small">Chi tiết thương hiệu</span>
+    </div>
+
+    <div class="brand-hero-card">
+        <div class="brand-logo-lg">
+            @if (!string.IsNullOrEmpty(Model.LogoUrl))
+            {
+                <img src="@(string.IsNullOrEmpty(Model.LogoUrl) ? $"/images/brands/{Model.Slug}.png" : Model.LogoUrl)" alt="@Model.Name" />
+            }
+            else
+            {
+                <span class="brand-placeholder-lg">@Model.Name.Substring(0, 1).ToUpper()</span>
+            }
+        </div>
+
+        <div class="hero-content">
+            <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+                <div>
+                    <h1 class="fw-bolder mb-1 text-dark h-value display-6">@Model.Name</h1>
+                    <div class="d-flex flex-wrap gap-2 mt-2">
+                        <span class="badge bg-light text-secondary border px-3 py-2 fw-normal font-monospace rounded-pill">/@Model.Slug</span>
+                        @if (Model.IsActive)
+                        {
+                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2 rounded-pill">
+                                <i class="bi bi-check-circle-fill me-1"></i> Đang kinh doanh
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-3 py-2 rounded-pill">
+                                <i class="bi bi-pause-circle-fill me-1"></i> Tạm ẩn
+                            </span>
+                        }
+                    </div>
+                </div>
+
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-white rounded-pill fw-bold shadow-sm px-4 text-primary border">
+                    <i class="bi bi-pencil-square me-2"></i> Chỉnh sửa
+                </a>
+            </div>
+
+            <div class="my-4 text-muted" style="max-width: 700px; line-height: 1.6;">
+                @(string.IsNullOrEmpty(Model.Description) ? "Chưa có mô tả chi tiết cho thương hiệu này." : Model.Description)
+            </div>
+
+            <div class="d-flex flex-wrap gap-3">
+                <div class="stat-pill">
+                    <i class="bi bi-box-seam-fill text-primary fs-5"></i>
+                    <div>
+                        <div class="small fw-bold text-uppercase text-muted" style="font-size: 10px;">Sản phẩm</div>
+                        <div class="fw-bolder text-dark">@(Model.Products?.Count ?? 0)</div>
+                    </div>
+                </div>
+                <div class="stat-pill">
+                    <i class="bi bi-calendar-event-fill text-warning fs-5"></i>
+                    <div>
+                        <div class="small fw-bold text-uppercase text-muted" style="font-size: 10px;">Ngày tạo</div>
+                        <div class="fw-bolder text-dark">@Model.CreatedAt.ToString("dd/MM/yyyy")</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="linked-table-container fade-in-up delay-1">
+        <div class="p-4 border-bottom d-flex flex-wrap justify-content-between align-items-center bg-light bg-opacity-50 gap-3">
+            <h5 class="fw-bold m-0 text-dark d-flex align-items-center">
+                <i class="bi bi-layers-fill text-secondary me-2"></i> Danh sách sản phẩm
+            </h5>
+
+            <a href="/Admin/Product/Index?q=&categoryId=&status=&page=1" class="btn btn-sm btn-light rounded-pill fw-bold text-primary shadow-sm border px-3">
+                Quản lý tại Product <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light text-muted small text-uppercase">
+                    <tr>
+                        <th class="ps-4 py-3">Sản phẩm</th>
+                        <th>SKU</th>
+                        <th>Giá bán</th>
+                        <th>Tồn kho</th>
+                        <th>Danh mục</th>
+                        <th class="text-end pe-4">Xem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Products != null && Model.Products.Any())
+                    {
+                        foreach (var p in Model.Products)
+                        {
+                            <tr>
+                                <td class="ps-4 py-3">
+                                    <div class="d-flex align-items-center gap-3">
+                                        @if (!string.IsNullOrEmpty(p.PrimaryImageUrl))
+                                        {
+                                            <img src="@p.PrimaryImageUrl" class="product-thumb-sm" />
+                                        }
+                                        else
+                                        {
+                                            <div class="product-thumb-sm d-grid place-items-center bg-white"><i class="bi bi-box text-muted"></i></div>
+                                        }
+                                        <div class="fw-bold text-dark">@p.Name</div>
+                                    </div>
+                                </td>
+                                <td class="text-muted small font-monospace">@(p.SKU ?? "---")</td>
+                                <td>
+                                    <span class="fw-bold text-primary">@p.Price.ToString("N0") ₫</span>
+                                </td>
+                                <td>
+                                    @if (p.StockQuantity > 0)
+                                    {
+                                        <span class="text-success fw-bold small"><i class="bi bi-check-circle me-1"></i> @p.StockQuantity</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-danger fw-bold small">Hết hàng</span>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border fw-normal">@(p.Category?.Name ?? "N/A")</span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <a asp-controller="Product" asp-action="Details" asp-route-id="@p.Id"
+                                       class="btn btn-sm btn-light rounded-circle shadow-sm text-info" title="Xem chi tiết">
+                                        <i class="bi bi-eye-fill"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <div class="mb-2"><i class="bi bi-box-seam fs-1 opacity-25"></i></div>
+                                <div>Thương hiệu này chưa có sản phẩm nào.</div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

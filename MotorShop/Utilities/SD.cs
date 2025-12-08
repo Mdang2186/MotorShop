@@ -22,6 +22,7 @@ namespace MotorShop.Utilities
         public const string Temp_Error = "Temp_Error";
         public const string Temp_Warning = "Temp_Warning";
         public const string Temp_Info = "Temp_Info";
+        public const string Category_PartsName = "Phụ tùng & Linh kiện";
 
         // ===== Cookies =====
         public const string CookieCart = "cart";

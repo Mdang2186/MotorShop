@@ -15,7 +15,7 @@ namespace MotorShop.Models
 
         [StringLength(50, ErrorMessage = "Mã SKU tối đa 50 ký tự")]
         public string? SKU { get; set; } // <--- ĐÃ THÊM ĐỂ SỬA LỖI
-         
+
         public string? Description { get; set; }
 
         [Column(TypeName = "decimal(18, 2)")]
@@ -51,6 +51,7 @@ namespace MotorShop.Models
         public Brand? Brand { get; set; }
         public int CategoryId { get; set; }
         public Category? Category { get; set; }
+        public ICollection<BranchInventory> BranchInventories { get; set; } = new List<BranchInventory>();
 
         // Navigations
         public ICollection<ProductImage> Images { get; set; } = new List<ProductImage>();

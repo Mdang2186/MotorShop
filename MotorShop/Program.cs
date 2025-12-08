@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using MotorShop.Data;
+using MotorShop.Data.Seeders;
 using MotorShop.Hubs;
 using MotorShop.Models;
 using MotorShop.Services;
@@ -149,6 +150,17 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     var initializer = services.GetRequiredService<DbInitializer>();
     await initializer.InitializeAsync();
+
+}
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var db = services.GetRequiredService<ApplicationDbContext>();
+
+    await db.Database.MigrateAsync();
+    await ShipperSeeder.SeedAsync(db);
+    await BankSeeder.SeedAsync(db);     // <<< thêm
+    // IdentitySeeder dùng RoleManager/UserManager thì bạn gọi riêng
 }
 
 app.Run();

@@ -1,0 +1,227 @@
+﻿@model MotorShop.Models.ShopBankAccount
+@using MotorShop.Models
+
+@{
+    ViewData["Title"] = "Cập nhật tài khoản";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var banks = ViewBag.Banks as IEnumerable<Bank>;
+}
+
+@section Head {
+    @* Tái sử dụng CSS của trang Create để đồng bộ *@
+    <style>
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(15px);
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+            border: 1px solid rgba(255,255,255,0.6);
+        }
+
+        .bank-card-preview {
+            width: 100%;
+            max-width: 380px;
+            height: 240px;
+            border-radius: 20px;
+            padding: 25px;
+            color: white;
+            position: relative;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            transition: all 0.5s ease;
+            margin: 0 auto;
+        }
+
+        .card-chip {
+            width: 50px;
+            height: 35px;
+            background: linear-gradient(135deg, #fceabb 0%, #f8b500 100%);
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .preview-number {
+            font-family: 'Courier New', monospace;
+            font-size: 26px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            margin-bottom: 15px;
+            word-break: break-all;
+        }
+
+        .preview-name {
+            text-transform: uppercase;
+            font-weight: 600;
+            font-size: 16px;
+            letter-spacing: 1px;
+        }
+
+        .preview-bank {
+            text-align: right;
+            font-style: italic;
+            font-weight: 800;
+            font-size: 20px;
+        }
+
+        .form-label-custom {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+    </style>
+}
+
+<div class="container py-4 fade-in-up">
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <a asp-action="Index" class="btn btn-light rounded-circle shadow-sm" style="width:45px; height:45px; display:grid; place-items:center;">
+            <i class="fa-solid fa-arrow-left"></i>
+        </a>
+        <div>
+            <h2 class="fw-bolder mb-0">Cập nhật tài khoản</h2>
+            <div class="text-muted small">Chỉnh sửa thông tin tài khoản #@Model.Id</div>
+        </div>
+    </div>
+
+    <div class="row g-5">
+        <div class="col-lg-7">
+            <div class="glass-panel p-4 p-md-5">
+                <form asp-action="Edit" method="post">
+                    <input type="hidden" asp-for="Id" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <div class="mb-4">
+                        <label class="form-label-custom">Ngân hàng thụ hưởng</label>
+                        <select asp-for="BankId" id="inputBank" class="form-select form-select-lg rounded-3 shadow-sm border-2">
+                            <option value="" data-shortname="BANK NAME">-- Chọn ngân hàng --</option>
+                            @foreach (var bank in banks)
+                            {
+                                <option value="@bank.Id" data-shortname="@bank.ShortName" selected="@(bank.Id == Model.BankId)">@bank.Code - @bank.Name</option>
+                            }
+                        </select>
+                        <span asp-validation-for="BankId" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-12">
+                            <label asp-for="AccountNumber" class="form-label-custom">Số tài khoản</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0 rounded-start-3 ps-3"><i class="fa-solid fa-credit-card text-muted"></i></span>
+                                <input asp-for="AccountNumber" id="inputNumber" class="form-control form-control-lg border-start-0 rounded-end-3" />
+                            </div>
+                            <span asp-validation-for="AccountNumber" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label asp-for="AccountName" class="form-label-custom">Tên chủ tài khoản</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0 rounded-start-3 ps-3"><i class="fa-solid fa-user text-muted"></i></span>
+                                <input asp-for="AccountName" id="inputName" class="form-control form-control-lg border-start-0 rounded-end-3" style="text-transform: uppercase;" />
+                            </div>
+                            <span asp-validation-for="AccountName" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label asp-for="Branch" class="form-label-custom">Chi nhánh</label>
+                            <input asp-for="Branch" id="inputBranch" class="form-control rounded-3" />
+                            <span asp-validation-for="Branch" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Note" class="form-label-custom">Ghi chú</label>
+                            <input asp-for="Note" class="form-control rounded-3" />
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-light rounded-3 mb-4 d-flex justify-content-between align-items-center">
+                        <div class="form-check form-switch ps-0">
+                            <label class="form-check-label fw-bold ms-5" for="switchDefault">Mặc định</label>
+                            <input asp-for="IsDefault" class="form-check-input ms-0 fs-5" type="checkbox" role="switch" id="switchDefault">
+                        </div>
+                        <div class="vr mx-3"></div>
+                        <div class="form-check form-switch ps-0 text-end">
+                            <label class="form-check-label fw-bold me-5" for="switchActive">Hoạt động</label>
+                            <input asp-for="IsActive" class="form-check-input float-end fs-5" type="checkbox" role="switch" id="switchActive">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill fw-bold shadow-lg" style="background: var(--grad-primary); border:none">
+                        <i class="fa-solid fa-check me-2"></i> Cập nhật thay đổi
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div style="position: sticky; top: 100px;">
+                <h5 class="text-muted text-uppercase fw-bold small mb-3 ps-2">Xem trước</h5>
+                <div class="bank-card-preview" id="cardPreview">
+                    <div class="d-flex justify-content-between">
+                        <div class="card-chip shadow-sm"></div>
+                        <div class="preview-bank" id="previewBankName">BANK</div>
+                    </div>
+                    <div style="margin-top: 30px;">
+                        <div class="small opacity-75 mb-1">Số tài khoản</div>
+                        <div class="preview-number" id="previewNumber">...</div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-end mt-4">
+                        <div>
+                            <div class="small opacity-75" style="font-size: 10px;">CHỦ TÀI KHOẢN</div>
+                            <div class="preview-name" id="previewName">NAME</div>
+                        </div>
+                        <div class="small" id="previewBranch">CHI NHÁNH</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // DOM Elements
+        const inputBank = document.getElementById('inputBank');
+        const inputNumber = document.getElementById('inputNumber');
+        const inputName = document.getElementById('inputName');
+        const inputBranch = document.getElementById('inputBranch');
+
+        const pBank = document.getElementById('previewBankName');
+        const pNumber = document.getElementById('previewNumber');
+        const pName = document.getElementById('previewName');
+        const pBranch = document.getElementById('previewBranch');
+        const card = document.getElementById('cardPreview');
+
+        // Random Background
+        const gradients = [
+            'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+            'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+            'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+            'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+        ];
+        // Dùng ID để chọn màu cố định cho lần Edit này (giúp đỡ bị nháy màu mỗi lần F5)
+        const colorIndex = @Model.Id % gradients.length;
+        card.style.background = gradients[colorIndex];
+
+        // Hàm cập nhật Preview
+        function updatePreview() {
+            // Update Bank Name
+            const selectedOption = inputBank.options[inputBank.selectedIndex];
+            pBank.innerText = selectedOption.getAttribute('data-shortname') || "BANK";
+
+            // Update Text
+            pNumber.innerText = inputNumber.value || "0000 0000 0000";
+            pName.innerText = (inputName.value || "YOUR NAME").toUpperCase();
+            pBranch.innerText = inputBranch.value || "CHI NHÁNH";
+        }
+
+        // Init: Chạy ngay lập tức khi load trang để điền dữ liệu cũ lên thẻ
+        updatePreview();
+
+        // Event Listeners
+        inputBank.addEventListener('change', updatePreview);
+        inputNumber.addEventListener('input', updatePreview);
+        inputName.addEventListener('input', function() { this.value = this.value.toUpperCase(); updatePreview(); });
+        inputBranch.addEventListener('input', updatePreview);
+    </script>
+}

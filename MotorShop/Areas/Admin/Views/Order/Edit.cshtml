@@ -1,0 +1,210 @@
+﻿@model MotorShop.Areas.Admin.Controllers.UserController.UserEditVM
+@{
+    ViewData["Title"] = "Cập nhật người dùng";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Head {
+    <style>
+        .edit-card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: var(--shadow-card);
+            border: 1px solid rgba(255,255,255,0.8);
+            padding: 30px;
+            height: 100%;
+        }
+
+        .form-label {
+            font-weight: 600;
+            font-size: 13px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .input-3d {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 12px 16px;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+            .input-3d:focus {
+                background: white;
+                border-color: #6366f1;
+                box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
+            }
+
+        /* Checkbox Custom */
+        .role-check-wrapper {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .role-option {
+            position: relative;
+        }
+
+            .role-option input[type="checkbox"] {
+                position: absolute;
+                opacity: 0;
+            }
+
+            .role-option label {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                padding: 10px;
+                border-radius: 12px;
+                border: 2px solid #f1f5f9;
+                cursor: pointer;
+                font-weight: 600;
+                font-size: 13px;
+                color: #64748b;
+                transition: all 0.2s;
+            }
+
+            .role-option input:checked + label {
+                background: #eff6ff;
+                border-color: #3b82f6;
+                color: #2563eb;
+                box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2);
+            }
+
+        /* Toggle Switch */
+        .form-switch .form-check-input {
+            width: 3em;
+            height: 1.5em;
+            cursor: pointer;
+        }
+
+            .form-switch .form-check-input:checked {
+                background-color: #ef4444;
+                border-color: #ef4444;
+            }
+    </style>
+}
+
+<div class="container-fluid p-0 fade-in-up">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <a asp-action="Index" class="text-decoration-none text-muted small mb-1 d-inline-block">
+                <i class="bi bi-arrow-left"></i> Quay lại danh sách
+            </a>
+            <h2 class="fw-bolder m-0">Cập nhật tài khoản</h2>
+        </div>
+    </div>
+
+    <form method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+
+        <div class="row g-4">
+            <div class="col-lg-7">
+                <div class="edit-card">
+                    <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+                        <div class="rounded-circle d-grid place-items-center bg-light text-primary fs-4 shadow-sm" style="width: 50px; height: 50px;">
+                            <i class="bi bi-person-bounding-box"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold m-0">Thông tin cá nhân</h5>
+                            <span class="text-muted small">Cập nhật các thông tin cơ bản của người dùng</span>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="Email" class="form-label">Email (Đăng nhập)</label>
+                            <input asp-for="Email" class="form-control input-3d" />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="UserName" class="form-label">Tên hiển thị (User Name)</label>
+                            <input asp-for="UserName" class="form-control input-3d" />
+                            <span asp-validation-for="UserName" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-12">
+                            <label asp-for="FullName" class="form-label">Họ và tên</label>
+                            <input asp-for="FullName" class="form-control input-3d" />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="PhoneNumber" class="form-label">Số điện thoại</label>
+                            <input asp-for="PhoneNumber" class="form-control input-3d" />
+                        </div>
+                        <div class="col-md-12">
+                            <label asp-for="Address" class="form-label">Địa chỉ</label>
+                            <textarea asp-for="Address" class="form-control input-3d" rows="3"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="edit-card">
+                    <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+                        <div class="rounded-circle d-grid place-items-center bg-light text-warning fs-4 shadow-sm" style="width: 50px; height: 50px;">
+                            <i class="bi bi-shield-lock-fill"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold m-0">Quyền hạn & Bảo mật</h5>
+                            <span class="text-muted small">Phân quyền và kiểm soát truy cập</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label d-block mb-3">Vai trò (Roles)</label>
+                        <div class="role-check-wrapper">
+                            @foreach (var role in Model.AllRoles)
+                            {
+                                <div class="role-option">
+                                    <input type="checkbox" name="SelectedRoles" value="@role" id="role_@role"
+                                           @(Model.SelectedRoles.Contains(role) ? "checked" : "") />
+                                    <label for="role_@role">
+                                        <i class="bi bi-check-circle-fill"></i> @role
+                                    </label>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <hr class="text-muted opacity-25 my-4" />
+
+                    <div class="mb-4">
+                        <div class="form-check form-switch p-0 d-flex justify-content-between align-items-center">
+                            <div>
+                                <label class="form-check-label fw-bold text-dark d-block" for="lockoutSwitch">Khoá tài khoản</label>
+                                <small class="text-muted">Người dùng sẽ không thể đăng nhập</small>
+                            </div>
+                            <input class="form-check-input ms-0" type="checkbox" asp-for="IsLockedOut" id="lockoutSwitch">
+                        </div>
+                    </div>
+
+                    <div class="mb-4 p-3 bg-light rounded-3 border">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" asp-for="SendNotification" id="notifCheck">
+                            <label class="form-check-label fw-semibold" for="notifCheck">
+                                Gửi email thông báo cho người dùng
+                            </label>
+                        </div>
+                        <div class="small text-muted mt-1 ms-4">
+                            Gửi mail về các thay đổi quyền hạn hoặc trạng thái tài khoản.
+                        </div>
+                    </div>
+
+                    <div class="d-grid mt-auto pt-3">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm"
+                                style="background: var(--grad-primary); border:none;">
+                            <i class="bi bi-save me-2"></i> Lưu thay đổi
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

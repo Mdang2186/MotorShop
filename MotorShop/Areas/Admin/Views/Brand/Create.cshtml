@@ -1,0 +1,221 @@
+﻿@model MotorShop.Models.Brand
+@{
+    ViewData["Title"] = "Thêm thương hiệu";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Head {
+    <style>
+        /* Glass Form Center */
+        .form-center-glass {
+            max-width: 700px;
+            margin: 2rem auto;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 1);
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 20px 60px -10px rgba(99, 102, 241, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+            /* Background Decoration */
+            .form-center-glass::before {
+                content: '';
+                position: absolute;
+                top: -60px;
+                left: -60px;
+                width: 180px;
+                height: 180px;
+                border-radius: 50%;
+                background: var(--grad-success);
+                opacity: 0.1;
+                filter: blur(40px);
+            }
+
+        /* Inputs */
+        .input-glass {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 14px 20px;
+            font-weight: 600;
+            color: #334155;
+            transition: 0.3s;
+        }
+
+            .input-glass:focus {
+                background: white;
+                border-color: #8b5cf6;
+                box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15);
+                outline: none;
+            }
+
+        .form-label-neon {
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #94a3b8;
+            margin-bottom: 8px;
+            display: block;
+            margin-left: 4px;
+        }
+
+        /* Upload Box */
+        .logo-upload-zone {
+            border: 2px dashed #cbd5e1;
+            border-radius: 20px;
+            background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+            height: 180px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .logo-upload-zone:hover {
+                border-color: #8b5cf6;
+                background: #f5f3ff;
+                box-shadow: inset 0 0 20px rgba(139, 92, 246, 0.05);
+            }
+
+        .upload-icon {
+            font-size: 40px;
+            color: #cbd5e1;
+            margin-bottom: 10px;
+            transition: 0.3s;
+        }
+
+        .logo-upload-zone:hover .upload-icon {
+            transform: scale(1.2);
+            color: #8b5cf6;
+        }
+
+        #previewImg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 20px;
+            display: none;
+            background: white;
+        }
+
+        /* Switch */
+        .status-card {
+            background: white;
+            border: 1px solid #f1f5f9;
+            border-radius: 16px;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+        }
+    </style>
+}
+
+<div class="container fade-in-up">
+    <div class="d-flex align-items-center gap-3 mb-3" style="max-width: 700px; margin: 0 auto;">
+        <a asp-action="Index" class="btn btn-light rounded-circle shadow-sm d-grid place-items-center" style="width: 45px; height: 45px;">
+            <i class="bi bi-arrow-left text-dark fs-5"></i>
+        </a>
+        <span class="text-muted fw-bold small text-uppercase">Quay lại danh sách</span>
+    </div>
+
+    <div class="form-center-glass">
+        <div class="text-center mb-5">
+            <div class="d-inline-flex p-3 rounded-4 mb-3 text-white shadow-lg" style="background: var(--grad-success);">
+                <i class="bi bi-stars fs-2"></i>
+            </div>
+            <h2 class="fw-bolder mb-1 h-value text-dark">Thương Hiệu Mới</h2>
+            <p class="text-muted small">Tạo đối tác hoặc nhà cung cấp mới.</p>
+        </div>
+
+        <form asp-action="Create" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+
+            <div class="row g-4">
+                <div class="col-md-5">
+                    <label class="form-label-neon">Logo thương hiệu</label>
+                    <div class="logo-upload-zone" onclick="document.getElementById('logoInput').click()">
+                        <input type="file" name="logoFile" id="logoInput" class="d-none" accept="image/*" />
+                        <i class="bi bi-cloud-arrow-up-fill upload-icon"></i>
+                        <div class="small fw-bold text-muted">Chọn ảnh...</div>
+                        <img id="previewImg" />
+                    </div>
+                    <div class="text-center mt-2 text-muted" style="font-size: 10px;">
+                        Hỗ trợ: PNG, JPG, WEBP (Max 2MB)
+                    </div>
+                </div>
+
+                <div class="col-md-7">
+                    <div class="mb-3">
+                        <label asp-for="Name" class="form-label-neon">Tên thương hiệu <span class="text-danger">*</span></label>
+                        <input asp-for="Name" class="form-control input-glass" placeholder="VD: Honda, Yamaha..." onkeyup="genSlug(this.value)" />
+                        <span asp-validation-for="Name" class="text-danger small fw-bold mt-1 d-block ps-2"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Slug" class="form-label-neon">Slug (SEO)</label>
+                        <input asp-for="Slug" id="slugInput" class="form-control input-glass text-muted" readonly tabindex="-1" />
+                    </div>
+
+                    <div class="status-card">
+                        <div>
+                            <label class="fw-bold d-block text-dark" for="IsActive">Hoạt động</label>
+                            <small class="text-muted" style="font-size: 10px;">Hiển thị ngay trên web</small>
+                        </div>
+                        <div class="form-check form-switch m-0">
+                            <input class="form-check-input" type="checkbox" asp-for="IsActive" checked style="cursor: pointer; transform: scale(1.2);">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <label asp-for="Description" class="form-label-neon">Mô tả (Tùy chọn)</label>
+                    <textarea asp-for="Description" class="form-control input-glass" rows="3" placeholder="Giới thiệu ngắn về thương hiệu này..."></textarea>
+                </div>
+            </div>
+
+            <div class="d-grid gap-3 mt-5">
+                <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-lg py-3 border-0"
+                        style="background: var(--grad-success);">
+                    <i class="bi bi-check2-circle me-2"></i> Hoàn tất
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        // Slug Gen
+        function genSlug(text) {
+            const slug = text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                .replace(/đ/g, "d").replace(/[^a-z0-9\s-]/g, "").trim().replace(/\s+/g, "-");
+            document.getElementById('slugInput').value = slug;
+        }
+
+        // Image Preview
+        const logoInput = document.getElementById('logoInput');
+        const previewImg = document.getElementById('previewImg');
+        logoInput.onchange = evt => {
+            const [file] = logoInput.files;
+            if (file) {
+                previewImg.src = URL.createObjectURL(file);
+                previewImg.style.display = 'block';
+            }
+        }
+    </script>
+}

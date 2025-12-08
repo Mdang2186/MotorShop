@@ -1,44 +1,62 @@
 ﻿@model MotorShop.Models.Product
-@{
-    string Vnd(decimal v) => v.ToString("#,0") + " ₫";
-    var slug = (Model.Name ?? "").Trim().ToLower().Replace(" ", "-");
 
-    // Lấy ảnh đầu theo Id; nếu không có thì dùng placeholder
-    var imageUrl = (Model.Images != null && Model.Images.Any())
-        ? (Model.Images.OrderBy(i => i.Id).First().ImageUrl ?? "/images/products/placeholder.png")
-        : "/images/products/placeholder.png";
+@{
+    // Chọn ảnh chính: ưu tiên ImageUrl, nếu không có thì lấy ảnh đầu tiên trong Images
+    var imgs = (Model.Images ?? Enumerable.Empty<MotorShop.Models.ProductImage>())
+               .OrderBy(i => i.SortOrder)
+               .ToList();
+
+    var mainImg = !string.IsNullOrWhiteSpace(Model.ImageUrl)
+        ? Url.Content(Model.ImageUrl)
+        : (imgs.FirstOrDefault() != null
+            ? Url.Content(imgs.First().ImageUrl)
+            : Url.Content("~/images/placeholders/product.webp"));
+
+    string Price(decimal x) => string.Format(
+        System.Globalization.CultureInfo.GetCultureInfo("vi-VN"),
+        "{0:N0} ₫", x);
+
+    bool hasSale = Model.OriginalPrice.HasValue && Model.OriginalPrice.Value > Model.Price;
+    var discount = hasSale
+        ? Math.Round((1 - (Model.Price / Model.OriginalPrice.Value)) * 100)
+        : 0;
 }
 
-<div class="bg-white rounded-2xl border shadow-sm hover:shadow-lg transition overflow-hidden group">
-    <!-- Link chỉ bao ảnh + thông tin, KHÔNG bao nút -->
-    <a asp-controller="Products" asp-action="Details" asp-route-id="@Model.Id" asp-route-slug="@slug" class="block focus:outline-none focus:ring-2 focus:ring-blue-500">
-        <div class="aspect-[4/3] bg-gray-50 relative">
-            <img src="@imageUrl" alt="@Model.Name" class="absolute inset-0 w-full h-full object-cover"
-                 onerror="this.src='/images/products/placeholder.png'" />
-        </div>
+<a asp-controller="Products"
+   asp-action="Details"
+   asp-route-id="@Model.Id"
+   class="ms-card block rounded-2xl bg-white border border-slate-100 overflow-hidden hover:shadow-xl transition group">
 
-        <div class="p-4">
-            <div class="text-xs text-gray-500">@Model.Brand?.Name</div>
-            <div class="mt-0.5 font-semibold text-gray-900 line-clamp-2 group-hover:text-blue-600">
-                @Model.Name
-            </div>
+    <div class="relative bg-slate-50">
+        <img src="@mainImg"
+             alt="@Model.Name"
+             class="w-full h-44 object-cover group-hover:scale-[1.03] transition-transform duration-300" />
 
-            <div class="mt-2 flex items-center justify-between">
-                <div>
-                    <div class="text-blue-600 font-extrabold">@Vnd(Model.Price)</div>
-                    <div class="text-xs text-gray-400">Còn @Model.StockQuantity</div>
-                </div>
-            </div>
-        </div>
-    </a>
-
-    <!-- Nút Add to cart (đứng ngoài <a>) -->
-    <div class="px-4 pb-4">
-        <button type="button"
-                class="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700"
-                data-add-to-cart data-id="@Model.Id" data-qty="1" aria-label="Thêm @Model.Name vào giỏ">
-            <i class="fa-solid fa-cart-plus"></i>
-            <span>Thêm vào giỏ</span>
-        </button>
+        @if (hasSale)
+        {
+            <span class="absolute top-2 left-2 px-2 py-1 rounded-full bg-rose-600 text-white text-[11px] font-semibold shadow">
+                -@discount%
+            </span>
+        }
     </div>
-</div>
+
+    <div class="p-4 space-y-2">
+        <h3 class="text-sm font-semibold text-slate-900 line-clamp-2">
+            @Model.Name
+        </h3>
+
+        <div class="flex items-baseline gap-2">
+            <span class="text-base font-bold text-blue-600">@Price(Model.Price)</span>
+            @if (hasSale)
+            {
+                <span class="text-xs text-slate-400 line-through">
+                    @Price(Model.OriginalPrice!.Value)
+                </span>
+            }
+        </div>
+
+        <p class="text-[11px] text-slate-400">
+            Kho còn: @Model.StockQuantity chiếc
+        </p>
+    </div>
+</a>

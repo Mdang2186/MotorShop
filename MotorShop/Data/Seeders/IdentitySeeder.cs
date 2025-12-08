@@ -87,5 +87,7 @@ namespace MotorShop.Data.Seeders
                 }
             }
         }
+
     }
+
 }

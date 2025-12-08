@@ -8,24 +8,36 @@
     var subtotal = hasItems ? Model.Sum(x => x.UnitPrice * x.Quantity) : 0m;
 }
 
-<section class="min-h-screen bg-[radial-gradient(600px_400px_at_15%_10%,#eaf2ff_0%,transparent_60%),radial-gradient(600px_400px_at_85%_8%,#e6fbff_0%,transparent_62%),linear-gradient(180deg,#fff_0%,#f7fbff_100%)] py-10">
+<section class="min-h-screen bg-[radial-gradient(600px_400px_at_15%_10%,#e0f2fe_0%,transparent_60%),radial-gradient(600px_400px_at_85%_8%,#e9f5ff_0%,transparent_62%),linear-gradient(180deg,#ffffff_0%,#f3f7ff_100%)] py-10">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        <div class="mb-6">
-            <h1 class="text-3xl font-extrabold tracking-tight text-gray-900">Giỏ hàng</h1>
-            <p class="text-gray-500 mt-1">Kiểm tra sản phẩm, chỉnh số lượng, hoặc chuyển qua thanh toán.</p>
+        <div class="mb-6 flex flex-col md:flex-row md:items-end md:justify-between gap-2">
+            <div>
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-50 text-sky-700 text-xs font-semibold border border-sky-200 mb-2">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    Giỏ hàng MotorShop
+                </div>
+                <h1 class="text-3xl font-extrabold tracking-tight text-slate-900">Giỏ hàng của bạn</h1>
+                <p class="text-slate-500 mt-1 text-sm">Chọn sản phẩm muốn thanh toán, chỉnh số lượng hoặc xoá bớt.</p>
+            </div>
+            @if (hasItems)
+            {
+                <div class="text-xs text-slate-500">
+                    Tổng <span class="font-semibold" id="cartLineCountTop">@Model.Count</span> dòng sản phẩm trong giỏ.
+                </div>
+            }
         </div>
 
         @if (!hasItems)
         {
-            <div class="bg-white/90 backdrop-blur border border-gray-100 shadow-2xl rounded-2xl p-10 text-center">
-                <div class="w-16 h-16 bg-blue-600/10 text-blue-600 rounded-2xl grid place-items-center mx-auto mb-4 shadow">
+            <div class="bg-white/95 backdrop-blur border border-slate-100 shadow-2xl rounded-2xl p-10 text-center">
+                <div class="w-16 h-16 bg-sky-500/10 text-sky-600 rounded-2xl grid place-items-center mx-auto mb-4 shadow">
                     <i class="fa-solid fa-cart-shopping text-2xl"></i>
                 </div>
-                <h3 class="text-xl font-semibold text-gray-800 mb-1">Giỏ hàng đang trống</h3>
-                <p class="text-gray-500 mb-6">Khám phá các mẫu xe mới nhất và thêm vào giỏ nhé.</p>
+                <h3 class="text-xl font-semibold text-slate-900 mb-1">Giỏ hàng đang trống</h3>
+                <p class="text-slate-500 mb-6">Khám phá các mẫu xe mới nhất và thêm vào giỏ nhé.</p>
                 <a asp-controller="Products" asp-action="Index"
-                   class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 shadow">
+                   class="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-sky-500 via-indigo-500 to-emerald-500 text-white font-semibold shadow-[0_18px_35px_rgba(37,99,235,.45)] hover:brightness-110">
                     <i class="fa-solid fa-motorcycle"></i> Xem sản phẩm
                 </a>
             </div>
@@ -35,80 +47,101 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <!-- LIST -->
                 <div class="lg:col-span-2">
-                    <div class="bg-white/90 backdrop-blur border border-gray-100 shadow-xl rounded-2xl overflow-hidden">
-                        <div class="px-6 py-4 flex items-center justify-between">
-                            <div class="text-sm text-gray-600">
-                                Có <span class="font-semibold" id="cartLineCount">@Model.Count</span> dòng sản phẩm.
+                    <div class="bg-white/95 backdrop-blur border border-slate-100 shadow-2xl rounded-2xl overflow-hidden">
+                        <!-- Header list -->
+                        <div class="px-4 sm:px-6 py-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100">
+                            <div class="flex items-center gap-3">
+                                <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+                                    <input id="chkAll" type="checkbox" class="h-4 w-4 rounded-md border-slate-300 text-sky-600 focus:ring-sky-500" checked />
+                                    <span>
+                                        Chọn tất cả
+                                        <span class="text-xs text-slate-400">(tích để thanh toán)</span>
+                                    </span>
+                                </label>
                             </div>
                             <div class="flex gap-2">
                                 <button type="button" data-act="refresh"
-                                        class="px-3 py-2 rounded-lg border hover:bg-gray-50 text-sm">
-                                    <i class="fa-solid fa-rotate"></i> Làm mới giá
+                                        class="px-3 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs sm:text-sm inline-flex items-center gap-1">
+                                    <i class="fa-solid fa-rotate"></i> Làm mới
                                 </button>
                                 <button type="button" data-act="clear"
-                                        class="px-3 py-2 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 text-sm">
+                                        class="px-3 py-2 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs sm:text-sm inline-flex items-center gap-1">
                                     <i class="fa-solid fa-trash"></i> Xoá giỏ
                                 </button>
                             </div>
                         </div>
 
-                        <div class="divide-y">
+                        <!-- Items -->
+                        <div class="divide-y divide-slate-100">
                             @foreach (var it in Model)
                             {
                                 var line = it.UnitPrice * it.Quantity;
-                                <div class="px-4 sm:px-6 py-4 group" id="row-@it.ProductId" data-row data-pid="@it.ProductId" data-unit="@it.UnitPrice">
-                                    <div class="flex gap-4">
+                                <div class="px-3 sm:px-6 py-4 group" id="row-@it.ProductId"
+                                     data-row data-pid="@it.ProductId" data-unit="@it.UnitPrice">
+                                    <div class="flex gap-3 sm:gap-4">
+                                        <!-- Checkbox -->
+                                        <div class="pt-2">
+                                            <input type="checkbox" class="h-4 w-4 rounded-md border-slate-300 text-sky-600 focus:ring-sky-500"
+                                                   data-select data-pid="@it.ProductId" checked />
+                                        </div>
+
+                                        <!-- Image -->
                                         <a asp-controller="Products" asp-action="Details" asp-route-id="@it.ProductId"
-                                           class="flex-shrink-0 w-24 h-24 rounded-xl overflow-hidden bg-gray-100 shadow-sm">
+                                           class="flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-slate-100 shadow-sm ring-1 ring-slate-100">
                                             <img src="@(string.IsNullOrWhiteSpace(it.ImageUrl) ? "/images/products/placeholder.png" : it.ImageUrl)"
                                                  alt="@it.Name"
                                                  class="w-full h-full object-cover"
                                                  onerror="this.src='/images/products/placeholder.png'">
                                         </a>
 
+                                        <!-- Info -->
                                         <div class="flex-1 min-w-0">
-                                            <div class="flex items-start justify-between gap-4">
+                                            <div class="flex items-start justify-between gap-3">
                                                 <div class="min-w-0">
                                                     <a asp-controller="Products" asp-action="Details" asp-route-id="@it.ProductId"
-                                                       class="font-semibold text-gray-900 line-clamp-2 hover:text-blue-600">
+                                                       class="font-semibold text-slate-900 text-sm sm:text-base line-clamp-2 hover:text-sky-600">
                                                         @it.Name
                                                     </a>
-                                                    <div class="mt-1 text-sm text-gray-500">Mã: #@it.ProductId</div>
+                                                    <div class="mt-1 text-[11px] text-slate-400 uppercase tracking-wide">
+                                                        Mã sản phẩm: <span class="font-semibold text-slate-600">MS-@it.ProductId</span>
+                                                    </div>
                                                 </div>
                                                 <div class="text-right">
-                                                    <div class="font-extrabold text-gray-900" data-unit-text>
+                                                    <div class="font-extrabold text-slate-900 text-sm sm:text-base" data-unit-text>
                                                         @Vnd(it.UnitPrice)
                                                     </div>
-                                                    <div class="text-xs text-gray-400">Đơn giá</div>
+                                                    <div class="text-[11px] text-slate-400">Đơn giá</div>
                                                 </div>
                                             </div>
 
-                                            <div class="mt-3 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                            <div class="mt-3 flex flex-col md:flex-row md:items-center justify-between gap-3">
                                                 <!-- Qty -->
-                                                <div class="inline-flex items-center rounded-xl border bg-white overflow-hidden shadow-sm">
-                                                    <button type="button" class="px-3 py-2 text-gray-600 hover:bg-gray-50"
+                                                <div class="inline-flex items-center rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+                                                    <button type="button" class="px-3 py-2 text-slate-600 hover:bg-slate-50"
                                                             data-act="dec" data-pid="@it.ProductId" aria-label="Giảm">
                                                         <i class="fa-solid fa-minus"></i>
                                                     </button>
                                                     <input type="number" min="1" step="1"
-                                                           class="w-16 text-center py-2 outline-none"
+                                                           class="w-16 text-center py-2 outline-none border-x border-slate-100 text-sm"
                                                            value="@it.Quantity" data-qty data-pid="@it.ProductId" />
-                                                    <button type="button" class="px-3 py-2 text-gray-600 hover:bg-gray-50"
+                                                    <button type="button" class="px-3 py-2 text-slate-600 hover:bg-slate-50"
                                                             data-act="inc" data-pid="@it.ProductId" aria-label="Tăng">
                                                         <i class="fa-solid fa-plus"></i>
                                                     </button>
                                                 </div>
 
                                                 <!-- Line total -->
-                                                <div class="text-right sm:ml-auto">
-                                                    <div class="font-bold text-gray-900" data-line-total data-pid="@it.ProductId">
+                                                <div class="text-right md:ml-auto">
+                                                    <div class="font-bold text-slate-900 text-sm sm:text-base"
+                                                         data-line-total data-pid="@it.ProductId">
                                                         @Vnd(line)
                                                     </div>
-                                                    <div class="text-xs text-gray-400">Tạm tính dòng</div>
+                                                    <div class="text-[11px] text-slate-400">Tạm tính dòng</div>
                                                 </div>
 
                                                 <!-- Remove -->
-                                                <button type="button" class="px-3 py-2 rounded-lg border hover:bg-gray-50 text-sm"
+                                                <button type="button"
+                                                        class="px-3 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs sm:text-sm text-slate-600 inline-flex items-center gap-1"
                                                         data-act="remove" data-pid="@it.ProductId" aria-label="Xoá">
                                                     <i class="fa-solid fa-xmark"></i> Xoá
                                                 </button>
@@ -122,7 +155,7 @@
 
                     <div class="mt-4 flex items-center gap-3">
                         <a asp-controller="Products" asp-action="Index"
-                           class="inline-flex items-center gap-2 px-4 py-2 rounded-xl border hover:bg-gray-50">
+                           class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl border border-slate-200 bg-white/80 text-slate-700 hover:bg-slate-50 text-sm font-medium shadow-sm">
                             <i class="fa-solid fa-arrow-left"></i> Tiếp tục mua sắm
                         </a>
                     </div>
@@ -130,41 +163,61 @@
 
                 <!-- SUMMARY -->
                 <aside class="lg:col-span-1">
-                    <div class="bg-white/90 backdrop-blur border border-gray-100 shadow-xl rounded-2xl p-6 sticky top-24">
-                        <h3 class="text-lg font-bold text-gray-900 mb-4">Tóm tắt đơn</h3>
+                    <div class="bg-white/95 backdrop-blur border border-slate-100 shadow-2xl rounded-2xl p-6 sticky top-24">
+                        <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                            <span class="inline-flex h-8 w-8 rounded-xl bg-sky-500/10 text-sky-600 items-center justify-center">
+                                <i class="fa-solid fa-receipt"></i>
+                            </span>
+                            Tóm tắt đơn
+                        </h3>
 
                         <dl class="space-y-2 text-sm">
                             <div class="flex justify-between">
-                                <dt class="text-gray-600">Tạm tính</dt>
-                                <dd class="font-semibold text-gray-900" id="sumSubtotal">
+                                <dt class="text-slate-600">Tổng giỏ hàng</dt>
+                                <dd class="font-semibold text-slate-900" id="sumCart">
+                                    @Vnd(subtotal)
+                                </dd>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <dt class="text-slate-600">
+                                    Đã chọn thanh toán
+                                    <span class="block text-[11px] text-slate-400" id="selectedCountLabel">
+                                        (@Model.Count sản phẩm)
+                                    </span>
+                                </dt>
+                                <dd class="text-base font-bold text-emerald-600" id="sumSelected">
                                     @Vnd(subtotal)
                                 </dd>
                             </div>
                             <div class="flex justify-between">
-                                <dt class="text-gray-600">Phí vận chuyển (ước tính)</dt>
-                                <dd class="text-gray-700">—</dd>
+                                <dt class="text-slate-600">Phí vận chuyển (ước tính)</dt>
+                                <dd class="text-slate-700">Tính ở bước thanh toán</dd>
                             </div>
-                            <div class="pt-2 border-t flex justify-between items-center">
-                                <dt class="text-gray-800 font-semibold">Thành tiền</dt>
-                                <dd class="text-xl font-extrabold text-gray-900" id="sumTotal">
+                            <div class="pt-2 border-t border-slate-200 flex justify-between items-center">
+                                <dt class="text-slate-800 font-semibold">Thành tiền tạm tính</dt>
+                                <dd class="text-xl font-extrabold text-slate-900" id="sumTotal">
                                     @Vnd(subtotal)
                                 </dd>
                             </div>
                         </dl>
 
                         <div class="mt-6 space-y-2">
-                            <a asp-controller="Checkout" asp-action="Index"
-                               class="w-full inline-flex justify-center items-center gap-2 py-3 rounded-xl shadow-sm text-white bg-blue-600 hover:bg-blue-700 font-semibold">
-                                Tiến hành thanh toán
-                            </a>
+                            <button type="button" id="btnCheckout"
+                                    class="w-full inline-flex justify-center items-center gap-2 py-3 rounded-2xl text-white text-sm font-semibold
+                                                       bg-gradient-to-r from-sky-500 via-indigo-500 to-emerald-500 shadow-[0_18px_35px_rgba(37,99,235,.5)] hover:brightness-110">
+                                <i class="fa-solid fa-lock"></i>
+                                <span>Tiến hành thanh toán</span>
+                            </button>
+
                             <button type="button" data-act="refresh"
-                                    class="w-full inline-flex justify-center items-center gap-2 py-2.5 rounded-xl border hover:bg-gray-50">
+                                    class="w-full inline-flex justify-center items-center gap-2 py-2.5 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 text-xs sm:text-sm text-slate-700">
                                 <i class="fa-solid fa-rotate"></i> Đồng bộ lại giỏ
                             </button>
                         </div>
 
-                        <p class="mt-3 text-xs text-gray-500">
-                            Giá/tồn kho có thể thay đổi. Nhấn “Đồng bộ lại” để cập nhật theo thời gian thực.
+                        <p class="mt-3 text-[11px] text-slate-500">
+                            Giá &amp; tồn kho có thể thay đổi. Nhấn “Đồng bộ lại” để cập nhật theo thời gian thực.
+                            Chỉ các mục <span class="font-semibold">được tick chọn</span> mới được chuyển sang bước thanh toán.
                         </p>
                     </div>
                 </aside>
@@ -173,7 +226,7 @@
     </div>
 </section>
 
-<!-- Anti-forgery (phòng khi layout của bạn chưa có) -->
+<!-- Anti-forgery -->
 <form id="af-cart" class="hidden">@Html.AntiForgeryToken()</form>
 
 @section Scripts {
@@ -198,19 +251,57 @@
             return { ok: res.ok, data };
         }
 
-        function updateSummary(total) {
-            const sum1 = q('#sumSubtotal'), sum2 = q('#sumTotal');
-            if (sum1) sum1.textContent = vnd(total);
-            if (sum2) sum2.textContent = vnd(total);
+        // Cập nhật tổng giỏ hàng (toàn bộ)
+        function updateCartTotal(total) {
+            const sumCart = q('#sumCart');
+            if (sumCart) sumCart.textContent = vnd(total);
+        }
+
+        // Tính lại tổng của các sản phẩm được tick chọn
+        function calcSelected() {
+            const rows = qa('[data-row]');
+            let total = 0;
+            let count = 0;
+            rows.forEach(row => {
+                const cb = row.querySelector('[data-select]');
+                if (cb && cb.checked) {
+                    const pid  = row.dataset.pid;
+                    const unit = Number(row.dataset.unit || 0);
+                    const qtyInput = row.querySelector('input[data-qty][data-pid="'+pid+'"]');
+                    const qty  = Math.max(1, parseInt(qtyInput?.value || '1', 10) || 1);
+                    total += unit * qty;
+                    count++;
+                }
+            });
+
+            const sumSel  = q('#sumSelected');
+            const sumTot  = q('#sumTotal');
+            if (sumSel) sumSel.textContent = vnd(total);
+            if (sumTot) sumTot.textContent = vnd(total);
+
+            const lbl = q('#selectedCountLabel');
+            if (lbl) lbl.textContent = `(${count} sản phẩm được chọn)`;
+
+            const btn = q('#btnCheckout');
+            if (btn) {
+                btn.disabled = (count === 0 || total <= 0);
+                btn.classList.toggle('opacity-60', btn.disabled);
+                btn.classList.toggle('cursor-not-allowed', btn.disabled);
+            }
+
+            return { total, count };
         }
 
         function removeRow(pid) {
             const row = q(`#row-${pid}`);
             if (row) row.remove();
             const lineCount = qa('[data-row]').length;
-            const label = q('#cartLineCount');
-            if (label) label.textContent = lineCount;
-            if (lineCount === 0) location.reload(); // quay về trạng thái giỏ trống
+            const label1 = q('#cartLineCountTop');
+            if (label1) label1.textContent = lineCount;
+            const label2 = q('#cartLineCount');
+            if (label2) label2.textContent = lineCount;
+            if (lineCount === 0) location.reload();
+            calcSelected();
         }
 
         function setLineTotal(pid, amount) {
@@ -238,28 +329,28 @@
             if (ok && data.success) {
                 const unit = getUnitPrice(pid);
                 setLineTotal(pid, unit * qty);
-                updateSummary(data.newTotalAmount);
+                updateCartTotal(data.newTotalAmount);
                 (window.refreshCartBadge && refreshCartBadge());
                 window.toast && toast(data.message || 'Đã cập nhật số lượng', 'success');
             } else {
-                // clamp / hết hàng / không còn bán
                 if (typeof data.appliedQty === 'number') {
                     const input = q(`input[data-qty][data-pid="${pid}"]`);
                     input.value = data.appliedQty;
                     const unit = getUnitPrice(pid);
                     setLineTotal(pid, unit * data.appliedQty);
-                    updateSummary(data.newTotalAmount);
+                    updateCartTotal(data.newTotalAmount);
                 }
                 if (data.message) window.toast && toast(data.message, 'warning');
                 if (data.success === false && data.message === 'Sản phẩm không còn bán.') removeRow(pid);
             }
+            calcSelected();
         }
 
         async function onRemove(pid) {
             const { ok, data } = await postJson('@Url.Action("RemoveItem", "Cart")', { productId: pid });
             if (ok && data.success) {
                 removeRow(pid);
-                updateSummary(data.newTotalAmount);
+                updateCartTotal(data.newTotalAmount);
                 (window.refreshCartBadge && refreshCartBadge());
                 window.toast && toast(data.message, 'success');
             } else {
@@ -279,14 +370,14 @@
         async function onRefresh() {
             const { ok, data } = await postJson('@Url.Action("Refresh", "Cart")');
             if (ok && data.success) {
-                updateSummary(data.newTotalAmount);
-                location.reload(); // đồng bộ UI nếu server đã loại bỏ SP
+                updateCartTotal(data.newTotalAmount);
+                location.reload();
             } else {
                 window.toast && toast(data.message || 'Không làm mới được.', 'error');
             }
         }
 
-        // Event delegation
+        // ===== Event binding =====
         document.addEventListener('click', (e) => {
             const b = e.target.closest('[data-act]');
             if (!b) return;
@@ -299,7 +390,7 @@
             if (act === 'refresh') onRefresh();
         });
 
-        // Change on input blur / Enter
+        // Qty change
         document.addEventListener('change', (e) => {
             const inp = e.target.closest('input[data-qty]');
             if (!inp) return;
@@ -317,5 +408,59 @@
                 onSetQty(pid, qty);
             }
         });
+
+        // Checkbox chọn từng dòng + chọn tất cả
+        document.addEventListener('change', (e) => {
+            const cb = e.target.closest('input[data-select]');
+            if (cb) {
+                const { count } = calcSelected();
+                const all = q('#chkAll');
+                if (all) {
+                    const totalRows = qa('[data-row]').length;
+                    all.checked = (count === totalRows && totalRows > 0);
+                }
+            }
+        });
+
+        const chkAll = q('#chkAll');
+        if (chkAll) {
+            chkAll.addEventListener('change', () => {
+                const rows = qa('[data-row]');
+                rows.forEach(r => {
+                    const cb = r.querySelector('[data-select]');
+                    if (cb) cb.checked = chkAll.checked;
+                });
+                calcSelected();
+            });
+        }
+
+        // Nút tiến hành thanh toán: chỉ dùng các sản phẩm đã chọn
+        const btnCheckout = q('#btnCheckout');
+        if (btnCheckout) {
+            btnCheckout.addEventListener('click', () => {
+                const selected = qa('[data-row]').filter(r => {
+                    const cb = r.querySelector('[data-select]');
+                    return cb && cb.checked;
+                }).map(r => r.dataset.pid);
+
+                if (selected.length === 0) {
+                    window.toast && toast('Vui lòng chọn ít nhất một sản phẩm để thanh toán.', 'warning');
+                    return;
+                }
+
+                const qs = encodeURIComponent(selected.join(','));
+                const url = '@Url.Action("Index", "Checkout")' + '?selected=' + qs;
+                window.location.href = url;
+            });
+        }
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            calcSelected();
+        });
+        // nếu DOMContentLoaded đã bắn trước đó
+        if (document.readyState === 'interactive' || document.readyState === 'complete') {
+            calcSelected();
+        }
     </script>
 }

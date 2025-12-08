@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// ViewModels/OrderSuccessViewModel.cs
 using MotorShop.Models.Enums;
-
+using MotorShop.ViewModels;
 namespace MotorShop.ViewModels
 {
     public class OrderSuccessViewModel
@@ -22,7 +21,6 @@ namespace MotorShop.ViewModels
         public decimal DiscountAmount { get; set; }
         public decimal Total { get; set; }
 
-        // Đặt cọc
         public bool RequiresDeposit { get; set; }
         public decimal DepositAmount { get; set; }
         public decimal RemainingAmount { get; set; }
@@ -31,16 +29,20 @@ namespace MotorShop.ViewModels
         public PaymentStatus PaymentStatus { get; set; }
         public string PaymentMethodLabel { get; set; } = "";
 
-        // QR
+        // QR THANH TOÁN (đang dùng sẵn)
+        public string? QrPayload { get; set; }          // VietQR (payment)
+        public string? QrDescription { get; set; }
+
+        // ========= MỚI: QR ĐƠN HÀNG =========
         /// <summary>
-        /// Chuỗi dữ liệu để tạo QR (sẽ render bằng JS QRCode).
+        /// Payload / URL cho mã QR đơn hàng (dùng để tra cứu nhanh).
         /// </summary>
-        public string? QrPayload { get; set; }
+        public string? OrderQrPayload { get; set; }
 
         /// <summary>
-        /// Mô tả ngắn về nội dung QR (hiển thị dưới hình).
+        /// Mô tả ngắn cho QR đơn hàng (hiển thị dưới mã QR).
         /// </summary>
-        public string? QrDescription { get; set; }
+        public string? OrderQrDescription { get; set; }
 
         public List<CheckoutLineVm> Items { get; set; } = new();
     }

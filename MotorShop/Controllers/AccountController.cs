@@ -194,9 +194,25 @@ namespace MotorShop.Controllers
             var user = await _userManager.FindByEmailAsync(vm.Email);
             if (user is null)
             {
+                // Không nói rõ email hay mật khẩu sai
                 ModelState.AddModelError(string.Empty, "Tài khoản hoặc mật khẩu không đúng.");
                 return View(vm);
             }
+
+            // Nếu đã bị khóa rồi thì không cho thử nữa
+            if (await _userManager.IsLockedOutAsync(user))
+            {
+                var lockoutEnd = await _userManager.GetLockoutEndDateAsync(user);
+                string when = lockoutEnd.HasValue
+                    ? lockoutEnd.Value.ToLocalTime().ToString("HH:mm dd/MM/yyyy")
+                    : "một lúc nữa";
+
+                ModelState.AddModelError(string.Empty,
+                    $"Tài khoản đang bị khóa do đăng nhập sai nhiều lần. Vui lòng thử lại sau {when}.");
+                return View(vm);
+            }
+
+            // Chưa xác nhận email thì bắt đi xác nhận
             if (!user.EmailConfirmed)
             {
                 if (user.EmailOtpExpiryUtc == null || user.EmailOtpExpiryUtc < DateTime.UtcNow)
@@ -212,24 +228,46 @@ namespace MotorShop.Controllers
                 return RedirectToAction(nameof(VerifyEmailCode), new { email = user.Email });
             }
 
-            var result = await _signInManager.PasswordSignInAsync(user, vm.Password, vm.RememberMe, lockoutOnFailure: true);
+            // ĐÂY LÀ CHỖ QUAN TRỌNG:
+            // lockoutOnFailure: true => sai mật khẩu sẽ tăng đếm, quá 5 lần thì khóa
+            var result = await _signInManager.PasswordSignInAsync(
+                user, vm.Password, vm.RememberMe, lockoutOnFailure: true);
+
             if (result.Succeeded)
             {
+                // Nếu là Admin thì vào thẳng Admin/Dashboard
+                if (await _userManager.IsInRoleAsync(user, SD.Role_Admin))
+                {
+                    return RedirectToAction("Index", "Dashboard", new { area = SD.AdminAreaName });
+                }
+
+                // User thường: ưu tiên returnUrl, sau đó về Home
                 var ret = vm.ReturnUrl ?? HttpContext.Session.GetString(SD.SessionReturnUrl);
                 if (!string.IsNullOrEmpty(ret) && Url.IsLocalUrl(ret))
                     return Redirect(ret);
+
                 return RedirectToAction("Index", "Home");
             }
 
+            // Đăng nhập sai quá 5 lần (theo cấu hình) => LockedOut = true
             if (result.IsLockedOut)
             {
-                ModelState.AddModelError(string.Empty, "Tài khoản tạm bị khóa do đăng nhập sai nhiều lần.");
+                var lockoutEnd = await _userManager.GetLockoutEndDateAsync(user);
+                string when = lockoutEnd.HasValue
+                    ? lockoutEnd.Value.ToLocalTime().ToString("HH:mm dd/MM/yyyy")
+                    : "một lúc nữa";
+
+                ModelState.AddModelError(string.Empty,
+                    $"Tài khoản tạm bị khóa do đăng nhập sai quá 5 lần. Vui lòng thử lại sau {when}.");
                 return View(vm);
             }
 
+            // Sai mật khẩu nhưng chưa đủ 5 lần => chỉ báo sai
             ModelState.AddModelError(string.Empty, "Tài khoản hoặc mật khẩu không đúng.");
             return View(vm);
         }
+
+
 
 
         [HttpPost]

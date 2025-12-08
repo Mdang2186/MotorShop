@@ -1,31 +1,460 @@
-﻿@model IEnumerable<MotorShop.Areas.Admin.Controllers.UserController.UserListItemVM>
+﻿@model MotorShop.Areas.Admin.Controllers.UserController.UserIndexVM
 @{
-    ViewData["Title"] = "Người dùng";
-}
-<h1 class="text-2xl font-semibold mb-4">Người dùng</h1>
+    ViewData["Title"] = "Quản lý tài khoản";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 
-<div class="bg-white border rounded-xl p-5 overflow-x-auto">
-    <table class="min-w-full text-sm">
-        <thead class="text-slate-500">
-            <tr class="text-left">
-                <th class="p-3">Tài khoản</th>
-                <th>Email</th>
-                <th>Vai trò</th>
-                <th>Ngày tạo</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var u in Model)
-            {
-                <tr class="border-t">
-                    <td class="p-3">@u.UserName</td>
-                    <td>@u.Email</td>
-                    <td>
-                        <span class="px-2 py-1 rounded-full bg-slate-100 text-slate-700 text-xs">@u.Roles</span>
-                    </td>
-                    <td>@u.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
-                </tr>
+    // Pagination Helper
+    int currentPage = Model.Page;
+    int totalPages = Model.TotalPages;
+}
+
+@section Head {
+    <style>
+        /* --- 1. CORE LAYOUT --- */
+        .glass-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: end;
+            margin-bottom: 2rem;
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        /* --- 2. FLOATING FILTER BAR --- */
+        .filter-bar {
+            background: white;
+            border-radius: 16px;
+            padding: 8px 12px;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255,255,255,0.8);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .search-input {
+            border: none;
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 12px 16px 12px 42px;
+            font-weight: 600;
+            color: #334155;
+            width: 100%;
+            transition: all 0.2s;
+        }
+
+            .search-input:focus {
+                background: white;
+                box-shadow: inset 0 0 0 2px #8b5cf6;
+                outline: none;
             }
-        </tbody>
-    </table>
+
+        .filter-select {
+            border: none;
+            background-color: #f8fafc;
+            border-radius: 12px;
+            padding: 12px 36px 12px 16px;
+            font-weight: 700;
+            font-size: 13px;
+            color: #475569;
+            cursor: pointer;
+            appearance: none;
+            transition: 0.2s;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+        }
+
+            .filter-select:hover {
+                background-color: white;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            }
+
+        /* --- 3. 3D USER CARD ROW --- */
+        .user-table {
+            border-collapse: separate;
+            border-spacing: 0 12px;
+            width: 100%;
+        }
+
+        .user-row {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+            .user-row td {
+                padding: 16px 20px;
+                border-top: 1px solid white;
+                border-bottom: 1px solid white;
+                vertical-align: middle;
+            }
+
+                .user-row td:first-child {
+                    border-left: 1px solid white;
+                    border-top-left-radius: 20px;
+                    border-bottom-left-radius: 20px;
+                }
+
+                .user-row td:last-child {
+                    border-right: 1px solid white;
+                    border-top-right-radius: 20px;
+                    border-bottom-right-radius: 20px;
+                }
+
+            .user-row:hover {
+                transform: translateY(-5px) scale(1.01);
+                background: white;
+                box-shadow: 0 15px 30px -5px rgba(99, 102, 241, 0.15);
+                z-index: 10;
+            }
+
+        /* --- 4. AVATAR & BADGES --- */
+        .avatar-neon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 18px;
+            color: white;
+            background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.25);
+            text-transform: uppercase;
+        }
+
+        .role-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+            .role-badge.admin {
+                background: #fdf2f8;
+                color: #db2777;
+                border: 1px solid #fce7f3;
+            }
+
+            .role-badge.user {
+                background: #eff6ff;
+                color: #3b82f6;
+                border: 1px solid #dbeafe;
+            }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+        }
+
+        .status-active {
+            background-color: #10b981;
+            box-shadow: 0 0 8px #34d399;
+        }
+
+        .status-locked {
+            background-color: #ef4444;
+            box-shadow: 0 0 8px #f87171;
+        }
+
+        /* --- 5. ACTION BUTTONS --- */
+        .btn-icon-soft {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            border: none;
+            background: #f1f5f9;
+            color: #64748b;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+            .btn-icon-soft:hover {
+                background: white;
+                color: #6366f1;
+                transform: scale(1.1);
+                box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            }
+
+        /* --- 6. PAGINATION --- */
+        .page-link-custom {
+            width: 36px;
+            height: 36px;
+            display: grid;
+            place-items: center;
+            border-radius: 10px;
+            font-weight: 700;
+            color: #64748b;
+            background: white;
+            border: 1px solid #f1f5f9;
+            transition: 0.2s;
+            text-decoration: none;
+        }
+
+            .page-link-custom.active {
+                background: linear-gradient(135deg, #6366f1, #8b5cf6);
+                color: white;
+                border: none;
+                box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+            }
+
+            .page-link-custom:hover:not(.active) {
+                background: #f8fafc;
+                color: #334155;
+            }
+
+        /* Floating Export */
+        .floating-export {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn-float {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            background: white;
+            box-shadow: 0 10px 30px -5px rgba(0,0,0,0.15);
+            display: grid;
+            place-items: center;
+            font-size: 20px;
+            transition: 0.3s;
+        }
+
+            .btn-float:hover {
+                transform: translateY(-5px);
+            }
+
+            .btn-float.excel {
+                color: #10b981;
+            }
+
+            .btn-float.pdf {
+                color: #ef4444;
+            }
+    </style>
+}
+
+<div class="container-fluid px-0">
+
+    <div class="glass-header">
+        <div>
+            <h1 class="fw-bolder mb-1 text-dark" style="font-size: 2rem; letter-spacing: -1px;">Tài khoản</h1>
+            <p class="text-muted mb-0 font-monospace small">
+                <i class="bi bi-people-fill me-1"></i> Quản lý thành viên & phân quyền hệ thống
+            </p>
+        </div>
+        <div class="d-none d-md-block" style="width: 60%;">
+            <form asp-action="Index" method="get" class="filter-bar">
+                <div class="position-relative flex-grow-1">
+                    <i class="bi bi-search position-absolute text-muted" style="left: 14px; top: 50%; transform: translateY(-50%); font-size: 18px;"></i>
+                    <input type="text" name="search" value="@Model.Search" class="search-input" placeholder="Tìm tên, email, số điện thoại...">
+                </div>
+                <div class="vr opacity-25 mx-1"></div>
+                <select name="role" class="filter-select" onchange="this.form.submit()" style="min-width: 160px;">
+                    <option value="">-- Tất cả quyền --</option>
+                    @foreach (var r in Model.AllRoles)
+                    {
+                        <option value="@r" selected="@(r == Model.Role)">@r</option>
+                    }
+                </select>
+                <button type="submit" class="btn btn-primary rounded-circle shadow-sm d-grid place-items-center" style="width: 42px; height: 42px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border: none;">
+                    <i class="bi bi-arrow-right"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="d-block d-md-none mb-4">
+        <form asp-action="Index" method="get">
+            <div class="input-group shadow-sm">
+                <input type="text" name="search" value="@Model.Search" class="form-control border-0" placeholder="Tìm kiếm...">
+                <button class="btn btn-primary"><i class="bi bi-search"></i></button>
+            </div>
+        </form>
+    </div>
+
+    @if (Model.Users.Any())
+    {
+        <div class="table-responsive" style="overflow-x: visible;">
+            <table class="user-table">
+                <thead>
+                    <tr class="text-uppercase text-muted small fw-bold" style="letter-spacing: 1px;">
+                        <th class="ps-4 pb-2">Thành viên</th>
+                        <th class="pb-2">Quyền hạn</th>
+                        <th class="pb-2">Ngày tham gia</th>
+                        <th class="text-center pb-2">Trạng thái</th>
+                        <th class="text-end pe-4 pb-2">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model.Users)
+                    {
+                        var initial = !string.IsNullOrEmpty(user.UserName) ? user.UserName.Substring(0, 1) : "U";
+                        <tr class="user-row">
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="avatar-neon">@initial</div>
+                                    <div>
+                                        <div class="fw-bold text-dark text-truncate" style="max-width: 180px;">@user.UserName</div>
+                                        <div class="text-muted small text-truncate" style="max-width: 200px;">@user.Email</div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td>
+                                @if (!string.IsNullOrEmpty(user.Roles))
+                                {
+                                    @foreach (var role in user.Roles.Split(','))
+                                    {
+                                        var r = role.Trim();
+                                        var isAdmin = r.Contains("Admin") || r.Contains("Manager");
+                                        <span class="role-badge @(isAdmin ? "admin" : "user") me-1">@r</span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-muted small fst-italic">Thành viên</span>
+                                }
+                            </td>
+
+                            <td>
+                                <div class="d-flex align-items-center gap-2 text-dark font-monospace small">
+                                    <i class="bi bi-calendar4-week text-muted"></i>
+                                    @user.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy")
+                                </div>
+                            </td>
+
+                            <td class="text-center">
+                                @if (user.IsLocked)
+                                {
+                                    <span class="badge bg-danger-subtle text-danger rounded-pill px-3 py-2 border border-danger-subtle">
+                                        <span class="status-dot status-locked"></span> Bị khóa
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success-subtle text-success rounded-pill px-3 py-2 border border-success-subtle">
+                                        <span class="status-dot status-active"></span> Hoạt động
+                                    </span>
+                                }
+                            </td>
+
+                            <td class="text-end pe-4">
+                                <div class="dropdown">
+                                    <button class="btn btn-icon-soft" type="button" data-bs-toggle="dropdown">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-4 p-2" style="min-width: 220px;">
+                                        <li><h6 class="dropdown-header text-uppercase small fw-bold text-muted">Tài khoản</h6></li>
+                                        <li>
+                                            <a class="dropdown-item rounded-3 fw-medium mb-1" asp-action="Edit" asp-route-id="@user.Id">
+                                                <i class="bi bi-pencil-square me-2 text-primary"></i> Chỉnh sửa thông tin
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <form asp-action="ResetPassword" asp-route-id="@user.Id" method="post" onsubmit="return confirm('Xác nhận đặt lại mật khẩu cho @user.UserName?');">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="dropdown-item rounded-3 fw-medium mb-1">
+                                                    <i class="bi bi-key-fill me-2 text-warning"></i> Reset mật khẩu
+                                                </button>
+                                            </form>
+                                        </li>
+                                        <li><hr class="dropdown-divider my-2"></li>
+                                        <li>
+                                            <form asp-action="Delete" asp-route-id="@user.Id" method="post" onsubmit="return confirm('CẢNH BÁO: Xóa tài khoản này không thể khôi phục. Tiếp tục?');">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="dropdown-item rounded-3 fw-bold text-danger bg-danger-subtle">
+                                                    <i class="bi bi-trash3-fill me-2"></i> Xóa tài khoản
+                                                </button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (totalPages > 1)
+        {
+            <div class="d-flex justify-content-center mt-5">
+                <nav>
+                    <ul class="pagination pagination-sm gap-2 mb-0">
+                        @for (int i = 1; i <= totalPages; i++)
+                        {
+                            <li class="page-item">
+                                <a class="page-link-custom @(i == currentPage ? "active" : "")"
+                                   href="@Url.Action("Index", new { page = i, search = Model.Search, role = Model.Role })">
+                                    @i
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="text-center py-5 mt-4">
+            <div class="d-inline-block p-4 rounded-circle bg-white shadow-sm mb-3">
+                <i class="bi bi-person-x fs-1 text-muted opacity-50"></i>
+            </div>
+            <h5 class="fw-bold text-dark">Không tìm thấy người dùng</h5>
+            <p class="text-muted">Thử thay đổi từ khóa tìm kiếm hoặc bộ lọc.</p>
+            <a asp-action="Index" class="btn btn-outline-primary rounded-pill px-4 fw-bold">Xóa bộ lọc</a>
+        </div>
+    }
 </div>
+
+<div class="floating-export">
+    <form asp-action="ExportExcel" method="post">
+        <input type="hidden" name="search" value="@Model.Search" />
+        <input type="hidden" name="role" value="@Model.Role" />
+        <button type="submit" class="btn-float excel" title="Xuất Excel" data-bs-toggle="tooltip" data-bs-placement="left">
+            <i class="bi bi-file-earmark-excel-fill"></i>
+        </button>
+    </form>
+
+    <form asp-action="ExportPdf" method="post">
+        <input type="hidden" name="search" value="@Model.Search" />
+        <input type="hidden" name="role" value="@Model.Role" />
+        <button type="submit" class="btn-float pdf" title="Xuất PDF" data-bs-toggle="tooltip" data-bs-placement="left">
+            <i class="bi bi-file-earmark-pdf-fill"></i>
+        </button>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        // Kích hoạt tooltip bootstrap
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    </script>
+}

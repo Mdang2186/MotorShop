@@ -1,0 +1,298 @@
+﻿@using Microsoft.AspNetCore.Mvc.Rendering
+@using MotorShop.Utilities
+
+@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    var currentArea = ViewContext.RouteData.Values["area"]?.ToString() ?? "";
+
+    string Active(string controllerName)
+        => currentController.Equals(controllerName, StringComparison.OrdinalIgnoreCase)
+           && currentArea.Equals(SD.AdminAreaName, StringComparison.OrdinalIgnoreCase)
+               ? "active"
+               : "";
+
+    bool GroupActive(params string[] controllers)
+        => controllers.Any(c => currentController.Equals(c, StringComparison.OrdinalIgnoreCase));
+}
+
+<style>
+    .brand-logo {
+        font-size: 24px;
+        font-weight: 800;
+        background: linear-gradient(to right, #6366f1, #ec4899);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: -0.5px;
+        position: relative;
+    }
+
+    .brand-sub {
+        font-size: 11px;
+        color: #94a3b8;
+        margin-top: -2px;
+    }
+
+    .nav-label {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #94a3b8;
+        letter-spacing: 1px;
+        margin: 22px 0 10px 10px;
+    }
+
+    .nav-item-3d {
+        display: flex;
+        align-items: center;
+        padding: 11px 16px;
+        margin-bottom: 6px;
+        border-radius: 14px;
+        color: #64748b;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid transparent;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .nav-item-3d i {
+            font-size: 19px;
+            margin-right: 12px;
+            color: #94a3b8;
+            transition: color 0.28s, transform 0.28s;
+        }
+
+        .nav-item-3d span {
+            position: relative;
+            z-index: 2;
+        }
+
+        .nav-item-3d::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            background: radial-gradient(circle at 0% 0%, rgba(129, 140, 248, 0.22), transparent 60%);
+            transition: opacity 0.3s;
+        }
+
+        .nav-item-3d:hover {
+            background: #ffffff;
+            color: #4f46e5;
+            box-shadow: 0 6px 22px -5px rgba(99, 102, 241, 0.25);
+            transform: translateX(4px);
+            border-color: rgba(255, 255, 255, 0.9);
+        }
+
+            .nav-item-3d:hover i {
+                color: #4f46e5;
+                transform: translateY(-1px);
+            }
+
+            .nav-item-3d:hover::before {
+                opacity: 1;
+            }
+
+        .nav-item-3d.active {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: #ffffff;
+            box-shadow: 0 10px 24px -8px rgba(79, 70, 229, 0.7);
+            border-color: transparent;
+        }
+
+            .nav-item-3d.active i {
+                color: #ffffff;
+            }
+
+            .nav-item-3d.active::before {
+                opacity: 0;
+            }
+
+    .nav-badge {
+        margin-left: auto;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.18);
+        color: #ffffff;
+    }
+
+    .nav-item-3d:not(.active) .nav-badge {
+        background: #f1f5f9;
+        color: #64748b;
+    }
+
+    .custom-scrollbar {
+        scrollbar-width: thin;
+        scrollbar-color: #cbd5e1 transparent;
+    }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+</style>
+
+<aside class="admin-sidebar d-flex flex-column h-100">
+
+    <!-- Logo + Brand -->
+    <div class="d-flex align-items-center gap-3 mb-4 px-1 pt-2">
+        <div class="rounded-4 d-grid place-items-center text-white shadow-sm"
+             style="width: 44px; height: 44px; background: linear-gradient(135deg, #6366f1, #8b5cf6);">
+            <i class="bi bi-bicycle fs-5"></i>
+        </div>
+        <div>
+            <div class="brand-logo">MotorShop</div>
+            <div class="brand-sub">Admin · Neon v3.0</div>
+        </div>
+    </div>
+
+    <!-- Menu -->
+    <div class="flex-grow-1 overflow-auto pe-2 custom-scrollbar">
+
+        <!-- Analytics -->
+        <div class="nav-label">Analytics</div>
+        <nav class="d-flex flex-column">
+            <a asp-area="Admin"
+               asp-controller="Dashboard"
+               asp-action="Index"
+               class="nav-item-3d @Active("Dashboard")">
+                <i class="bi bi-grid-1x2-fill"></i>
+                <span>Tổng quan</span>
+            </a>
+        </nav>
+
+        <!-- Bán hàng -->
+        <div class="nav-label">Bán hàng</div>
+        <nav class="d-flex flex-column">
+            <a asp-area="Admin"
+               asp-controller="Order"
+               asp-action="Index"
+               class="nav-item-3d @Active("Order")">
+                <i class="bi bi-bag-check-fill"></i>
+                <span>Đơn hàng</span>
+            </a>
+            @* Nếu có controller Payment, bạn mở comment đoạn này *@
+            @* 
+            <a asp-area="Admin"
+               asp-controller="Payment"
+               asp-action="Index"
+               class="nav-item-3d @Active("Payment")">
+                <i class="bi bi-credit-card-2-front-fill"></i>
+                <span>Thanh toán</span>
+            </a>
+            *@
+        </nav>
+
+        <!-- Sản phẩm -->
+        <div class="nav-label">Sản phẩm</div>
+        <nav class="d-flex flex-column">
+            <a asp-area="Admin"
+               asp-controller="Product"
+               asp-action="Index"
+               class="nav-item-3d @Active("Product")">
+                <i class="bi bi-box-fill"></i>
+                <span>Sản phẩm</span>
+            </a>
+
+            <a asp-area="Admin"
+               asp-controller="Category"
+               asp-action="Index"
+               class="nav-item-3d @Active("Category")">
+                <i class="bi bi-tags-fill"></i>
+                <span>Danh mục</span>
+            </a>
+
+            <a asp-area="Admin"
+               asp-controller="Brand"
+               asp-action="Index"
+               class="nav-item-3d @Active("Brand")">
+                <i class="bi bi-badge-tm-fill"></i>
+                <span>Thương hiệu</span>
+            </a>
+        </nav>
+
+        <!-- Kho & giao nhận -->
+        <div class="nav-label">Kho & Giao nhận</div>
+        <nav class="d-flex flex-column">
+            <a asp-area="Admin"
+               asp-controller="Branch"
+               asp-action="Index"
+               class="nav-item-3d @Active("Branch")">
+                <i class="bi bi-buildings-fill"></i>
+                <span>Chi nhánh kho</span>
+            </a>
+
+            <a asp-area="Admin"
+               asp-controller="Shipper"
+               asp-action="Index"
+               class="nav-item-3d @Active("Shipper")">
+                <i class="bi bi-truck-front-fill"></i>
+                <span>Đối tác giao hàng</span>
+            </a>
+        </nav>
+
+        <!-- Hệ thống -->
+        <div class="nav-label">Hệ thống</div>
+        <nav class="d-flex flex-column">
+            <a asp-area="Admin"
+               asp-controller="User"
+               asp-action="Index"
+               class="nav-item-3d @Active("User")">
+                <i class="bi bi-people-fill"></i>
+                <span>Tài khoản</span>
+            </a>
+
+            <a asp-area="Admin"
+               asp-controller="Chat"
+               asp-action="Index"
+               class="nav-item-3d @Active("Chat")">
+                <i class="bi bi-chat-quote-fill"></i>
+                <span>Hỗ trợ chat</span>
+            </a>
+
+            <a asp-area="Admin"
+               asp-controller="ShopBankAccounts"
+               asp-action="Index"
+               class="nav-item-3d @Active("ShopBankAccounts")">
+                <i class="bi bi-bank2"></i>
+                <span>Ngân hàng</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Card nhỏ dưới cùng -->
+    <div class="mt-3 p-4 rounded-4 text-center position-relative overflow-hidden text-white shadow-sm"
+         style="background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%);">
+
+        <div class="position-absolute top-0 end-0 rounded-circle bg-white opacity-25"
+             style="width: 80px; height: 80px; margin: -20px;"></div>
+        <div class="position-absolute bottom-0 start-0 rounded-circle bg-white opacity-10"
+             style="width: 50px; height: 50px; margin: -10px;"></div>
+
+        <div class="position-relative z-1">
+            <div class="d-inline-flex p-2 rounded-circle bg-white bg-opacity-20 mb-2">
+                <i class="bi bi-stars fs-5"></i>
+            </div>
+            <div class="fw-bold mb-1">Admin Pro</div>
+            <div style="font-size: 11px; opacity: 0.9;" class="mb-3">
+                Giao diện Neon · 3D UI
+            </div>
+
+            <a href="/" class="btn btn-sm bg-white text-primary w-100 rounded-pill fw-bold border-0 shadow-sm">
+                <i class="bi bi-shop me-1"></i> Về trang chủ
+            </a>
+        </div>
+    </div>
+</aside>

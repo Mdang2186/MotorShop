@@ -1,27 +1,222 @@
 ﻿@model MotorShop.Models.Product
 @{
     ViewData["Title"] = "Cập nhật sản phẩm";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="max-w-3xl mx-auto">
-    <div class="flex items-center justify-between mb-6">
-        <h1 class="text-2xl font-bold text-slate-900">Cập nhật sản phẩm</h1>
-        <a asp-action="Index" class="text-slate-500 hover:text-blue-600 flex items-center gap-1 text-sm font-medium transition-colors">
-            <i class="fa-solid fa-arrow-left"></i> Quay lại
-        </a>
-    </div>
+@section Head {
+    <style>
+        .form-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            height: 100%;
+        }
 
-    <div class="bg-white shadow-sm ring-1 ring-black/5 rounded-xl p-6 sm:p-8">
-        <form asp-action="Edit">
-            <input type="hidden" asp-for="Id" />
-            <partial name="_ProductForm" model="Model" />
-            <div class="mt-8 flex justify-end gap-3 border-t border-slate-100 pt-6">
-                <a asp-action="Index" class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors">Hủy</a>
-                <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm">Lưu thay đổi</button>
-            </div>
-        </form>
+        .section-header {
+            font-size: 14px;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: #94a3b8;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .input-neon {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-weight: 500;
+            color: #334155;
+            transition: all 0.3s ease;
+        }
+
+            .input-neon:focus {
+                background: white;
+                border-color: #8b5cf6;
+                box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+                outline: none;
+            }
+
+        .form-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748b;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .img-upload-box {
+            border: 2px dashed #cbd5e1;
+            border-radius: 16px;
+            background: #f1f5f9;
+            height: 220px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+            .img-upload-box img {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+            }
+    </style>
+}
+
+<div class="d-flex align-items-center justify-content-between mb-4 animate-fade-up">
+    <div class="d-flex align-items-center gap-3">
+        <a asp-action="Index" class="btn btn-light rounded-circle shadow-sm d-grid place-items-center" style="width: 45px; height: 45px;">
+            <i class="bi bi-arrow-left text-dark fs-5"></i>
+        </a>
+        <div>
+            <h2 class="fw-bolder mb-0" style="color: #1e293b;">Cập nhật sản phẩm</h2>
+            <span class="text-muted small">ID: #@Model.Id &bull; @Model.Name</span>
+        </div>
     </div>
+    <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-primary rounded-pill fw-bold border-2">
+        <i class="bi bi-eye me-1"></i> Xem chi tiết
+    </a>
 </div>
+
+<form asp-action="Edit" method="post" class="animate-fade-up delay-1">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="form-card">
+                <div class="section-header"><i class="bi bi-pencil-square text-primary"></i> Thông tin chính</div>
+
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label asp-for="Name" class="form-label">Tên sản phẩm <span class="text-danger">*</span></label>
+                        <input asp-for="Name" class="form-control input-neon" />
+                        <span asp-validation-for="Name" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="SKU" class="form-label">Mã SKU</label>
+                        <input asp-for="SKU" class="form-control input-neon" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Slug" class="form-label">SEO URL (Slug)</label>
+                        <input asp-for="Slug" class="form-control input-neon" />
+                    </div>
+
+                    <div class="col-12">
+                        <label asp-for="Description" class="form-label">Mô tả sản phẩm</label>
+                        <textarea asp-for="Description" class="form-control input-neon" rows="6"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="d-flex flex-column gap-4 h-100">
+                <div class="form-card">
+                    <div class="section-header"><i class="bi bi-sliders text-warning"></i> Cấu hình</div>
+
+                    <div class="mb-3">
+                        <label asp-for="CategoryId" class="form-label">Danh mục</label>
+                        <select asp-for="CategoryId" asp-items="ViewBag.CategoryId" class="form-select input-neon">
+                            <option value="">-- Chọn danh mục --</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="BrandId" class="form-label">Thương hiệu</label>
+                        <select asp-for="BrandId" asp-items="ViewBag.BrandId" class="form-select input-neon">
+                            <option value="">-- Chọn thương hiệu --</option>
+                        </select>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label asp-for="Price" class="form-label">Giá bán</label>
+                            <input asp-for="Price" class="form-control input-neon fw-bold text-primary" />
+                        </div>
+                        <div class="col-6">
+                            <label asp-for="OriginalPrice" class="form-label">Giá gốc</label>
+                            <input asp-for="OriginalPrice" class="form-control input-neon text-muted" />
+                        </div>
+                    </div>
+
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <label asp-for="StockQuantity" class="form-label">Tồn kho</label>
+                            <input asp-for="StockQuantity" class="form-control input-neon" />
+                        </div>
+                        <div class="col-6">
+                            <label asp-for="Year" class="form-label">Năm SX</label>
+                            <input asp-for="Year" class="form-control input-neon" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-card flex-grow-1">
+                    <div class="section-header"><i class="bi bi-image text-success"></i> Ảnh đại diện</div>
+                    <div class="mb-3">
+                        <input asp-for="ImageUrl" class="form-control input-neon" id="imgInput" placeholder="URL ảnh..." />
+                    </div>
+                    <div class="img-upload-box">
+                        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                        {
+                            <img id="imgPreview" src="@Model.ImageUrl" />
+                        }
+                        else
+                        {
+                            <img id="imgPreview" src="" style="display:none;" />
+                            <div id="imgPreviewPlaceholder" class="text-center text-muted">
+                                <i class="bi bi-image fs-1 opacity-50"></i><br><small>No Image</small>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 mt-2">
+            <div class="form-card py-3 d-flex align-items-center justify-content-between">
+                <div class="d-flex gap-4 ps-2">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" asp-for="IsActive" style="cursor: pointer;">
+                        <label class="form-check-label fw-bold small text-dark" for="IsActive">Kinh doanh</label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" asp-for="IsPublished" style="cursor: pointer;">
+                        <label class="form-check-label fw-bold small text-dark" for="IsPublished">Hiển thị Web</label>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary rounded-pill px-5 py-2 fw-bold shadow-lg"
+                        style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); border: none;">
+                    <i class="bi bi-save me-2"></i> Lưu thay đổi
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        const imgInput = document.getElementById('imgInput');
+        const imgPreview = document.getElementById('imgPreview');
+        imgInput.addEventListener('input', function() {
+            if(this.value) { imgPreview.src = this.value; imgPreview.style.display='block'; }
+        });
+    </script>
 }

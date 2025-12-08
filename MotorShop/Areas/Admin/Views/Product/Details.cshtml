@@ -1,0 +1,388 @@
+﻿@model MotorShop.Models.Product
+@{
+    ViewData["Title"] = "Hồ sơ sản phẩm";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Head {
+    <style>
+        /* --- Hero Card Styles --- */
+        .hero-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: var(--shadow-card);
+            border: 1px solid rgba(255,255,255,0.9);
+            position: relative;
+            transition: transform 0.3s;
+        }
+
+            .hero-card:hover {
+                transform: translateY(-5px);
+                box-shadow: var(--shadow-hover);
+            }
+
+        /* Image Display */
+        .product-hero-img {
+            width: 100%;
+            height: 350px;
+            object-fit: contain;
+            background: radial-gradient(circle, #f8fafc 0%, #e2e8f0 100%);
+            padding: 20px;
+            transition: transform 0.5s ease;
+        }
+
+        .hero-card:hover .product-hero-img {
+            transform: scale(1.05);
+        }
+
+        /* Typography */
+        .price-display {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, #6366f1 0%, #d946ef 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.2;
+        }
+
+        .section-label {
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #94a3b8;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        /* Stat Box 3D */
+        .stat-box {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            border: 1px solid rgba(255,255,255,0.5);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.2s;
+        }
+
+            .stat-box:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 20px rgba(99, 102, 241, 0.1);
+                border-color: #c4b5fd;
+            }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: grid;
+            place-items: center;
+            font-size: 22px;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        /* Gallery Strip */
+        .gallery-strip {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 4px;
+            scrollbar-width: thin;
+        }
+
+        .gallery-thumb {
+            width: 70px;
+            height: 70px;
+            border-radius: 12px;
+            overflow: hidden;
+            flex-shrink: 0;
+            border: 2px solid white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        /* Đè style mặc định của HTML editor để khớp giao diện */
+        .product-description-content {
+            color: #64748b; /* Màu text muted của theme */
+            font-size: 14px;
+        }
+
+            .product-description-content h2,
+            .product-description-content h3 {
+                color: #1e293b; /* Màu tiêu đề đậm */
+                font-weight: 800;
+                margin-top: 1.5rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .product-description-content img {
+                max-width: 100%; /* Đảm bảo ảnh không bị tràn khung */
+                height: auto;
+                border-radius: 12px;
+                margin: 10px 0;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            }
+
+            .product-description-content ul,
+            .product-description-content ol {
+                padding-left: 20px;
+                margin-bottom: 1rem;
+            }
+            .gallery-thumb:hover {
+                border-color: #6366f1;
+                transform: scale(1.1);
+            }
+
+            .gallery-thumb img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+        /* Spec Row */
+        .spec-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px dashed #e2e8f0;
+        }
+
+            .spec-row:last-child {
+                border-bottom: none;
+            }
+
+        .spec-label {
+            font-weight: 600;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .spec-value {
+            font-weight: 700;
+            color: #1e293b;
+            font-size: 14px;
+        }
+    </style>
+}
+
+<div class="d-flex align-items-center justify-content-between mb-5 animate-fade-up">
+    <div class="d-flex align-items-center gap-3">
+        <a asp-action="Index" class="btn btn-light rounded-circle shadow-sm d-grid place-items-center" style="width: 48px; height: 48px;">
+            <i class="bi bi-arrow-left text-dark fs-5"></i>
+        </a>
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge bg-light text-secondary border fw-bold px-2 py-1">ID: #@Model.Id</span>
+                @if (Model.IsActive)
+                {
+                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1">Đang kinh doanh</span>
+                }
+                else
+                {
+                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1">Ngừng kinh doanh</span>
+                }
+            </div>
+            <h1 class="fw-bolder mb-0 h2 text-dark">@Model.Name</h1>
+        </div>
+    </div>
+
+    <div class="d-flex gap-2">
+        <a asp-action="Images" asp-route-id="@Model.Id" class="btn btn-light rounded-pill fw-bold shadow-sm px-3 text-warning">
+            <i class="bi bi-images me-1"></i> Gallery
+        </a>
+        <a asp-action="Specs" asp-route-id="@Model.Id" class="btn btn-light rounded-pill fw-bold shadow-sm px-3 text-info">
+            <i class="bi bi-list-check me-1"></i> Thông số
+        </a>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary rounded-pill fw-bold shadow-lg px-4"
+           style="background: var(--grad-primary); border: none;">
+            <i class="bi bi-pencil-square me-2"></i> Chỉnh sửa
+        </a>
+    </div>
+</div>
+
+<div class="row g-4 animate-fade-up delay-1">
+
+    <div class="col-xl-4 col-lg-5">
+        <div class="hero-card mb-4">
+            <div class="position-relative">
+                @if (!string.IsNullOrEmpty(Model.PrimaryImageUrl))
+                {
+                    <img src="@Model.PrimaryImageUrl" class="product-hero-img" alt="@Model.Name" />
+                }
+                else
+                {
+                    <div class="product-hero-img d-flex align-items-center justify-content-center">
+                        <i class="bi bi-box-seam text-secondary opacity-25" style="font-size: 5rem;"></i>
+                    </div>
+                }
+                <div class="position-absolute top-0 end-0 m-3">
+                    @if (Model.StockQuantity > 0)
+                    {
+                        <span class="badge bg-white text-success shadow-sm rounded-pill px-3 py-2 fw-bold">
+                            <i class="bi bi-check-circle-fill me-1"></i> Còn hàng
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-white text-danger shadow-sm rounded-pill px-3 py-2 fw-bold">
+                            <i class="bi bi-x-circle-fill me-1"></i> Hết hàng
+                        </span>
+                    }
+                </div>
+            </div>
+
+            <div class="p-4 bg-white">
+                <div class="d-flex justify-content-between align-items-end mb-3">
+                    <div>
+                        <small class="text-uppercase text-muted fw-bold" style="font-size: 10px;">Giá niêm yết</small>
+                        <div class="price-display">@Model.Price.ToString("N0")<small style="font-size: 1.5rem">₫</small></div>
+                    </div>
+                    @if (Model.OriginalPrice > Model.Price)
+                    {
+                        <div class="text-end pb-2">
+                            <small class="text-decoration-line-through text-muted fw-bold">@Model.OriginalPrice?.ToString("N0") ₫</small>
+                            <div class="badge bg-danger rounded-pill">-@((int)((1 - Model.Price / Model.OriginalPrice) * 100))%</div>
+                        </div>
+                    }
+                </div>
+
+                <div class="section-label mt-4">Thư viện ảnh (@Model.Images.Count)</div>
+                <div class="gallery-strip pb-2">
+                    @foreach (var img in Model.Images.Take(5))
+                    {
+                        <div class="gallery-thumb">
+                            <img src="@img.ImageUrl" alt="Thumbnail" />
+                        </div>
+                    }
+                    @if (Model.Images.Count > 5)
+                    {
+                        <a asp-action="Images" asp-route-id="@Model.Id" class="gallery-thumb d-grid place-items-center bg-light text-decoration-none text-muted fw-bold small">
+                            +@(Model.Images.Count - 5)
+                        </a>
+                    }
+                    <a asp-action="Images" asp-route-id="@Model.Id" class="gallery-thumb d-grid place-items-center bg-light text-decoration-none text-primary">
+                        <i class="bi bi-plus-lg fs-4"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-card p-4">
+            <div class="section-label"><i class="bi bi-info-circle me-1"></i> Thông tin quản lý</div>
+            <div class="d-flex flex-column gap-3">
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted small fw-bold">Mã SKU</span>
+                    <span class="font-monospace fw-bold text-dark">@(Model.SKU ?? "---")</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted small fw-bold">Ngày tạo</span>
+                    <span class="fw-bold text-dark">@Model.CreatedAt.ToString("dd/MM/yyyy")</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted small fw-bold">Cập nhật cuối</span>
+                    <span class="fw-bold text-dark">@Model.UpdatedAt?.ToString("dd/MM/yyyy HH:mm")</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                    <span class="text-muted small fw-bold">Hiển thị Web</span>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" checked="@Model.IsPublished" disabled>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-8 col-lg-7">
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="stat-box">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #3b82f6, #06b6d4);">
+                        <i class="bi bi-folder2-open"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small fw-bold text-uppercase">Danh mục</div>
+                        <div class="fw-bolder text-dark">@(Model.Category?.Name ?? "N/A")</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-box">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b, #fbbf24);">
+                        <i class="bi bi-tag-fill"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small fw-bold text-uppercase">Thương hiệu</div>
+                        <div class="fw-bolder text-dark">@(Model.Brand?.Name ?? "N/A")</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-box">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #10b981, #34d399);">
+                        <i class="bi bi-box-seam-fill"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small fw-bold text-uppercase">Tồn kho</div>
+                        <div class="fw-bolder text-dark">@Model.StockQuantity <span class="small text-muted fw-normal">sp</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-card p-4 mb-4">
+            <div class="section-label"><i class="bi bi-file-text me-1"></i> Mô tả sản phẩm</div>
+            <div class="text-muted product-description-content" style="line-height: 1.6;">
+                @if (string.IsNullOrEmpty(Model.Description))
+                {
+                    <span>Chưa có mô tả chi tiết cho sản phẩm này.</span>
+                }
+                else
+                {
+                    @Html.Raw(Model.Description)
+                }
+            </div>
+        </div>
+
+        <div class="hero-card p-0 overflow-hidden">
+            <div class="p-4 bg-light border-bottom d-flex justify-content-between align-items-center">
+                <div class="section-label m-0"><i class="bi bi-list-check me-1"></i> Thông số kỹ thuật</div>
+                <a asp-action="Specs" asp-route-id="@Model.Id" class="btn btn-sm btn-white shadow-sm fw-bold text-primary rounded-pill px-3">
+                    Quản lý <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+
+            <div class="p-4">
+                @if (Model.Specifications != null && Model.Specifications.Any())
+                {
+                    <div class="row">
+                        @foreach (var spec in Model.Specifications)
+                        {
+                            <div class="col-md-6">
+                                <div class="spec-row">
+                                    <span class="spec-label">@spec.Name</span>
+                                    <span class="spec-value">@spec.Value</span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-clipboard-x fs-1 opacity-25"></i>
+                        <p class="mt-2 small fw-bold">Chưa có thông số nào.</p>
+                    </div>
+                }
+            </div>
+        </div>
+
+    </div>
+</div>

@@ -96,5 +96,11 @@ namespace MotorShop.ViewModels
 
             return res;
         }
+        public bool RequiresDeposit { get; set; }
+        public decimal? DepositAmount { get; set; }
+        public string? DepositNote { get; set; }
+
+        // URL ảnh QR chuyển khoản (dùng cho view / email)
+        public string? TransferQrUrl { get; set; }
     }
 }

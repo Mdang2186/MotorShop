@@ -22,6 +22,9 @@ namespace MotorShop.Controllers
         private const string RecentlyViewedCookie = "rv";
         private const int RecentlyViewedMax = 10;
 
+        // dùng chung tên danh mục phụ tùng với Admin
+        private const string PartsCategoryName = SD.Category_PartsName;
+
         public ProductsController(
             ApplicationDbContext db,
             IMemoryCache cache,
@@ -35,8 +38,7 @@ namespace MotorShop.Controllers
         }
 
         // =========================================================
-        // GET: /Products (TRANG XE MÁY)
-        // Chỉ hiển thị Xe máy (Loại bỏ Phụ tùng)
+        // GET: /Products (TRANG XE MÁY – loại bỏ phụ tùng)
         // =========================================================
         [HttpGet]
         public async Task<IActionResult> Index(
@@ -62,14 +64,13 @@ namespace MotorShop.Controllers
             IQueryable<Product> productsQuery = _db.Products
                 .AsNoTracking()
                 .Include(p => p.Brand)
-                .Include(p => p.Category) // Cần include để lọc tên danh mục
+                .Include(p => p.Category)
+                .Include(p => p.Images)
                 .Where(p => p.IsPublished);
 
-            // --- [QUAN TRỌNG] TÁCH RIÊNG: LOẠI BỎ PHỤ TÙNG ---
-            // Chỉ hiển thị xe máy ở trang này.
-            // Nếu tên danh mục trong DB khác, bạn hãy sửa lại chuỗi string này.
-            productsQuery = productsQuery.Where(p => p.Category == null || p.Category.Name != "Phụ tùng & Linh kiện");
-            // -------------------------------------------------
+            // === Chỉ hiển thị XE MÁY: loại bỏ phụ tùng ===
+            productsQuery = productsQuery
+                .Where(p => p.Category == null || p.Category.Name != PartsCategoryName);
 
             // 1) Từ khoá trên tên/brand
             if (!string.IsNullOrWhiteSpace(keyword))
@@ -80,19 +81,26 @@ namespace MotorShop.Controllers
                     (p.Brand != null && EF.Functions.Like(p.Brand.Name, like)));
             }
 
-            // 2) Lọc Brand/Category
-            if (brandFilter.HasValue) productsQuery = productsQuery.Where(p => p.BrandId == brandFilter.Value);
-            if (categoryFilter.HasValue) productsQuery = productsQuery.Where(p => p.CategoryId == categoryFilter.Value);
+            // 2) Lọc Brand/Category (chỉ những category xe máy – vì query đã loại phụ tùng ở trên)
+            if (brandFilter.HasValue)
+                productsQuery = productsQuery.Where(p => p.BrandId == brandFilter.Value);
+
+            if (categoryFilter.HasValue)
+                productsQuery = productsQuery.Where(p => p.CategoryId == categoryFilter.Value);
 
             // 3) Lọc năm
-            if (year.HasValue) productsQuery = productsQuery.Where(p => p.Year == year.Value);
+            if (year.HasValue)
+                productsQuery = productsQuery.Where(p => p.Year == year.Value);
 
             // 4) Lọc giá
-            if (minPrice.HasValue) productsQuery = productsQuery.Where(p => p.Price >= minPrice.Value);
-            if (maxPrice.HasValue) productsQuery = productsQuery.Where(p => p.Price <= maxPrice.Value);
+            if (minPrice.HasValue)
+                productsQuery = productsQuery.Where(p => p.Price >= minPrice.Value);
+            if (maxPrice.HasValue)
+                productsQuery = productsQuery.Where(p => p.Price <= maxPrice.Value);
 
             // 5) Chỉ hàng còn tồn
-            if (inStockOnly) productsQuery = productsQuery.Where(p => p.StockQuantity > 0);
+            if (inStockOnly)
+                productsQuery = productsQuery.Where(p => p.StockQuantity > 0);
 
             // 6) Sort
             productsQuery = sortBy switch
@@ -101,7 +109,7 @@ namespace MotorShop.Controllers
                 "price-high" => productsQuery.OrderByDescending(p => p.Price).ThenByDescending(p => p.CreatedAt),
                 "name-asc" => productsQuery.OrderBy(p => p.Name),
                 "name-desc" => productsQuery.OrderByDescending(p => p.Name),
-                _ => productsQuery.OrderByDescending(p => p.CreatedAt).ThenByDescending(p => p.Id) // mặc định mới nhất
+                _ => productsQuery.OrderByDescending(p => p.CreatedAt).ThenByDescending(p => p.Id)
             };
 
             // 7) Phân trang
@@ -121,13 +129,15 @@ namespace MotorShop.Controllers
                 e.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10);
                 return await _db.Brands.AsNoTracking().OrderBy(b => b.Name).ToListAsync(ct);
             });
+
             var categories = await _cache.GetOrCreateAsync(SD.Cache_Categories, async e =>
             {
                 e.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10);
-                // Lấy danh mục xe máy để hiển thị ở filter trang chủ
+                // Chỉ danh mục XE MÁY
                 return await _db.Categories.AsNoTracking()
-                    .Where(c => c.Name != "Phụ tùng & Linh kiện")
-                    .OrderBy(c => c.Name).ToListAsync(ct);
+                    .Where(c => c.Name != PartsCategoryName)
+                    .OrderBy(c => c.Name)
+                    .ToListAsync(ct);
             });
 
             var vm = new ProductIndexViewModel
@@ -149,8 +159,10 @@ namespace MotorShop.Controllers
                 TotalProductCount = totalItems
             };
 
+            // Nếu request là AJAX (chỉ reload grid)
             var xrw = Request.Headers["X-Requested-With"].ToString();
-            if (xrw.Equals("XMLHttpRequest", StringComparison.OrdinalIgnoreCase) || Request.Query.ContainsKey("partial"))
+            if (xrw.Equals("XMLHttpRequest", StringComparison.OrdinalIgnoreCase) ||
+                Request.Query.ContainsKey("partial"))
             {
                 return PartialView("_ProductGridPartial", vm.Products);
             }
@@ -159,8 +171,7 @@ namespace MotorShop.Controllers
         }
 
         // =========================================================
-        // GET: /Parts (TRANG PHỤ TÙNG)
-        // Chỉ hiển thị Phụ tùng & Linh kiện
+        // GET: /parts (TRANG PHỤ TÙNG & LINH KIỆN)
         // =========================================================
         [HttpGet("/parts")]
         public async Task<IActionResult> Parts(
@@ -173,16 +184,17 @@ namespace MotorShop.Controllers
             page = Math.Max(1, page);
             pageSize = Math.Clamp(pageSize, 4, 48);
 
-            // 1. Tạo Query cơ bản: Lọc ĐÚNG Category "Phụ tùng & Linh kiện"
+            // 1. Chỉ lấy sản phẩm thuộc danh mục phụ tùng
             var query = _db.Products
                 .AsNoTracking()
                 .Include(p => p.Brand)
                 .Include(p => p.Category)
+                .Include(p => p.Images)
                 .Where(p => p.IsPublished &&
                             p.Category != null &&
-                            p.Category.Name == "Phụ tùng & Linh kiện");
+                            p.Category.Name == PartsCategoryName);
 
-            // 2. Lọc theo hãng (Brand)
+            // 2. Lọc theo hãng
             if (!string.IsNullOrWhiteSpace(brand))
             {
                 var likeBrand = $"%{brand.Trim()}%";
@@ -190,7 +202,7 @@ namespace MotorShop.Controllers
                                          EF.Functions.Like(p.Brand.Name, likeBrand));
             }
 
-            // 3. Tìm kiếm (Search)
+            // 3. Tìm kiếm
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var kw = $"%{search.Trim()}%";
@@ -199,10 +211,9 @@ namespace MotorShop.Controllers
                     (!string.IsNullOrEmpty(p.SKU) && EF.Functions.Like(p.SKU, kw)));
             }
 
-            // 4. Tính toán phân trang
+            // 4. Phân trang
             var totalItems = await query.CountAsync(ct);
 
-            // Lấy dữ liệu
             var items = await query
                 .OrderByDescending(p => p.CreatedAt)
                 .ThenByDescending(p => p.Id)
@@ -210,8 +221,6 @@ namespace MotorShop.Controllers
                 .Take(pageSize)
                 .ToListAsync(ct);
 
-            // 5. Đóng gói vào ViewModel (PartsListViewModel)
-            // Đảm bảo View Parts.cshtml sử dụng @model PartsListViewModel
             var vm = new PartsListViewModel
             {
                 Items = items,
@@ -227,26 +236,23 @@ namespace MotorShop.Controllers
 
         // =========================================================
         // DETAILS: /products/123/slug
+        // Tự động chọn view: xe -> Details, phụ tùng -> PartDetails
         // =========================================================
         [HttpGet("/products/{id:int}/{slug?}")]
         public async Task<IActionResult> Details(int id, string? slug, CancellationToken ct = default)
         {
-            // Trong ProductsController.cs -> Details
-            // Trong ProductsController.cs -> Details
             var product = await _db.Products
                 .AsNoTracking()
                 .Include(p => p.Brand)
                 .Include(p => p.Category)
                 .Include(p => p.Images)
                 .Include(p => p.Specifications)
-                // --- THÊM DÒNG NÀY ĐỂ LẤY TAG TỪ CSDL ---
                 .Include(p => p.ProductTags).ThenInclude(pt => pt.Tag)
-                // ----------------------------------------
                 .FirstOrDefaultAsync(p => p.Id == id && p.IsPublished, ct);
 
             if (product == null) return NotFound();
 
-            // Canonical slug redirect
+            // Canonical slug
             var expected = ToSlug(product.Name);
             if (!string.IsNullOrWhiteSpace(slug) &&
                 !string.Equals(slug, expected, StringComparison.OrdinalIgnoreCase))
@@ -254,30 +260,35 @@ namespace MotorShop.Controllers
                 return RedirectToActionPermanent(nameof(Details), new { id, slug = expected });
             }
 
-            // Sản phẩm liên quan: cùng Category
+            // Sản phẩm liên quan cùng Category
             var related = await _db.Products
                 .AsNoTracking()
                 .Include(p => p.Brand)
-                .Where(p => p.CategoryId == product.CategoryId && p.Id != id && p.IsPublished)
+                .Include(p => p.Images)
+                .Where(p => p.CategoryId == product.CategoryId &&
+                            p.Id != id &&
+                            p.IsPublished)
                 .OrderByDescending(p => p.CreatedAt)
                 .Take(4)
                 .ToListAsync(ct);
 
             TrackRecentlyViewed(id);
 
-             
-            var branches = await _db.Branches.AsNoTracking().Where(b => b.IsActive).ToListAsync(ct);
+            var branches = await _db.Branches
+                .AsNoTracking()
+                .Where(b => b.IsActive)
+                .ToListAsync(ct);
 
             var vm = new ProductDetailViewModel
             {
                 Product = product,
                 RelatedProducts = related,
-                Branches = branches // Truyền dữ liệu chi nhánh
+                Branches = branches
             };
-            // Tự động chọn View dựa trên loại sản phẩm
-            // Nếu là phụ tùng -> PartDetails, Xe máy -> Details
+
+            // Nếu là phụ tùng thì dùng view PartDetails
             var viewName = product.Category != null &&
-                           product.Category.Name == "Phụ tùng & Linh kiện"
+                           product.Category.Name == PartsCategoryName
                 ? "PartDetails"
                 : "Details";
 
@@ -285,14 +296,15 @@ namespace MotorShop.Controllers
         }
 
         // =========================================================
-        // ADD TO CART
+        // ADD TO CART (trang chi tiết)
         // =========================================================
         [HttpPost("/products/{id:int}/add")]
         public async Task<IActionResult> AddToCart(int id, int qty = 1, CancellationToken ct = default)
         {
             qty = Math.Max(1, qty);
 
-            var p = await _db.Products.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id && x.IsPublished, ct);
+            var p = await _db.Products.AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == id && x.IsPublished, ct);
             if (p == null)
             {
                 TempData[SD.Temp_Error] = "Sản phẩm không tồn tại hoặc tạm ngừng bán.";
@@ -381,25 +393,34 @@ namespace MotorShop.Controllers
         }
 
         // =========================================================
-        // PRICE RANGE (Helper for Filter Slider)
+        // PRICE RANGE (Helper cho filter slider)
         // =========================================================
         [HttpGet]
-        [ResponseCache(Duration = 30, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "brandId", "categoryId" })]
-        public async Task<IActionResult> PriceRange(int? brandId, int? categoryId, CancellationToken ct = default)
+        [ResponseCache(Duration = 30, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "brandId", "categoryId", "isParts" })]
+        public async Task<IActionResult> PriceRange(int? brandId, int? categoryId, bool isParts = false, CancellationToken ct = default)
         {
             var q = _db.Products.AsNoTracking().Where(p => p.IsPublished);
 
-            // Nếu đang lọc ở trang xe máy, loại bỏ phụ tùng khi tính range giá
-            if (categoryId == null)
+            if (isParts)
             {
-                q = q.Where(p => p.Category == null || p.Category.Name != "Phụ tùng & Linh kiện");
+                // Trang phụ tùng -> chỉ tính trong danh mục phụ tùng
+                q = q.Where(p => p.Category != null && p.Category.Name == PartsCategoryName);
             }
             else
             {
-                q = q.Where(p => p.CategoryId == categoryId.Value);
+                // Trang xe -> loại bỏ phụ tùng
+                if (categoryId == null)
+                {
+                    q = q.Where(p => p.Category == null || p.Category.Name != PartsCategoryName);
+                }
+                else
+                {
+                    q = q.Where(p => p.CategoryId == categoryId.Value);
+                }
             }
 
-            if (brandId.HasValue) q = q.Where(p => p.BrandId == brandId.Value);
+            if (brandId.HasValue)
+                q = q.Where(p => p.BrandId == brandId.Value);
 
             var stats = await q
                 .GroupBy(_ => 1)
@@ -461,7 +482,10 @@ namespace MotorShop.Controllers
                         Expires = DateTimeOffset.UtcNow.AddDays(7)
                     });
             }
-            catch { /* best-effort */ }
+            catch
+            {
+                // best-effort
+            }
         }
     }
 }

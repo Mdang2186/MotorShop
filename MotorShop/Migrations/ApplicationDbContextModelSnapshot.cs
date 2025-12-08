@@ -441,6 +441,20 @@ namespace MotorShop.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("LogoUrl")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -449,6 +463,9 @@ namespace MotorShop.Migrations
                     b.Property<string>("Slug")
                         .HasMaxLength(120)
                         .HasColumnType("nvarchar(120)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -507,7 +524,6 @@ namespace MotorShop.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("SenderId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("SentAt")
@@ -580,6 +596,13 @@ namespace MotorShop.Migrations
                     b.Property<int>("DeliveryMethod")
                         .HasColumnType("int");
 
+                    b.Property<decimal?>("DepositAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("DepositNote")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
                     b.Property<decimal>("DiscountAmount")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
@@ -613,6 +636,10 @@ namespace MotorShop.Migrations
                     b.Property<string>("ReceiverPhone")
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("SelectedBankCode")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<int?>("ShipperId")
                         .HasColumnType("int");
@@ -881,6 +908,49 @@ namespace MotorShop.Migrations
                     b.ToTable("Shippers");
                 });
 
+            modelBuilder.Entity("MotorShop.Models.ShopBankAccount", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AccountName")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<string>("AccountNumber")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<int>("BankId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Branch")
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BankId", "IsDefault")
+                        .HasFilter("[IsDefault] = 1");
+
+                    b.ToTable("ShopBankAccounts");
+                });
+
             modelBuilder.Entity("MotorShop.Models.Tag", b =>
                 {
                     b.Property<int>("Id")
@@ -986,13 +1056,13 @@ namespace MotorShop.Migrations
             modelBuilder.Entity("MotorShop.Models.BranchInventory", b =>
                 {
                     b.HasOne("MotorShop.Models.Branch", "Branch")
-                        .WithMany()
+                        .WithMany("Inventories")
                         .HasForeignKey("BranchId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("MotorShop.Models.Product", "Product")
-                        .WithMany()
+                        .WithMany("BranchInventories")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1007,8 +1077,7 @@ namespace MotorShop.Migrations
                     b.HasOne("MotorShop.Models.ApplicationUser", "Sender")
                         .WithMany()
                         .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("MotorShop.Models.Entities.ChatThread", "Thread")
                         .WithMany("Messages")
@@ -1141,6 +1210,17 @@ namespace MotorShop.Migrations
                     b.Navigation("Tag");
                 });
 
+            modelBuilder.Entity("MotorShop.Models.ShopBankAccount", b =>
+                {
+                    b.HasOne("MotorShop.Models.Bank", "Bank")
+                        .WithMany()
+                        .HasForeignKey("BankId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Bank");
+                });
+
             modelBuilder.Entity("MotorShop.Models.AiConversation", b =>
                 {
                     b.Navigation("Messages");
@@ -1153,6 +1233,8 @@ namespace MotorShop.Migrations
 
             modelBuilder.Entity("MotorShop.Models.Branch", b =>
                 {
+                    b.Navigation("Inventories");
+
                     b.Navigation("PickupOrders");
                 });
 
@@ -1178,6 +1260,8 @@ namespace MotorShop.Migrations
 
             modelBuilder.Entity("MotorShop.Models.Product", b =>
                 {
+                    b.Navigation("BranchInventories");
+
                     b.Navigation("Images");
 
                     b.Navigation("ProductTags");

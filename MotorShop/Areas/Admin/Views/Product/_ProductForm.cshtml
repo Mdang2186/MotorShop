@@ -1,40 +1,287 @@
-﻿@model Product
-<div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-    <div class="sm:col-span-2">
-        <label asp-for="Name" class="block text-sm font-medium text-gray-700">Tên sản phẩm *</label>
-        <input asp-for="Name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
-        <span asp-validation-for="Name" class="text-red-500 text-xs"></span>
+﻿@model MotorShop.Models.Product
+
+<style>
+    /* Glass Panel Effect */
+    .form-glass-card {
+        background: rgba(255, 255, 255, 0.75);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.9);
+        border-radius: 24px;
+        padding: 30px;
+        box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.05);
+        height: 100%;
+        transition: transform 0.3s ease;
+    }
+
+        .form-glass-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.1);
+        }
+
+    /* Typography */
+    .form-section-title {
+        font-size: 13px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #94a3b8;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+        .form-section-title i {
+            font-size: 18px;
+            color: #6366f1;
+        }
+
+    /* Neon Inputs */
+    .input-3d {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 12px 18px;
+        font-size: 14px;
+        font-weight: 500;
+        color: #334155;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+        .input-3d:focus {
+            background: white;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15), 0 10px 20px -5px rgba(139, 92, 246, 0.1);
+            outline: none;
+            transform: translateY(-1px);
+        }
+
+    .form-label-neon {
+        font-size: 12px;
+        font-weight: 700;
+        color: #64748b;
+        margin-bottom: 8px;
+        margin-left: 4px;
+        display: block;
+    }
+
+    /* Image Preview */
+    .img-upload-zone {
+        border: 2px dashed #cbd5e1;
+        border-radius: 20px;
+        background: #f8fafc;
+        height: 240px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        overflow: hidden;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+        .img-upload-zone:hover {
+            border-color: #6366f1;
+            background: #eef2ff;
+            box-shadow: inset 0 0 20px rgba(99, 102, 241, 0.05);
+        }
+
+        .img-upload-zone img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            z-index: 2;
+        }
+
+    .upload-icon {
+        font-size: 3rem;
+        color: #cbd5e1;
+        transition: 0.3s;
+    }
+
+    .img-upload-zone:hover .upload-icon {
+        transform: scale(1.1);
+        color: #8b5cf6;
+    }
+
+    /* Switch */
+    .switch-card {
+        background: white;
+        border-radius: 16px;
+        padding: 15px;
+        border: 1px solid #f1f5f9;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+    }
+
+    .form-switch .form-check-input {
+        width: 3em;
+        height: 1.5em;
+        cursor: pointer;
+        border-radius: 2em;
+        background-color: #e2e8f0;
+        border: none;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='white'/%3e%3c/svg%3e");
+    }
+
+        .form-switch .form-check-input:checked {
+            background-color: #10b981; /* Green Neon */
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+        }
+</style>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="form-glass-card">
+            <div class="form-section-title">
+                <i class="bi bi-pencil-square"></i> Thông tin cơ bản
+            </div>
+
+            <div class="row g-4">
+                <div class="col-12">
+                    <label asp-for="Name" class="form-label-neon">Tên sản phẩm <span class="text-danger">*</span></label>
+                    <input asp-for="Name" class="form-control input-3d form-control-lg" placeholder="Nhập tên sản phẩm..." onkeyup="generateSlug(this.value)" />
+                    <span asp-validation-for="Name" class="text-danger small mt-1 d-block"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="SKU" class="form-label-neon">Mã SKU</label>
+                    <div class="input-group">
+                        <span class="input-group-text border-0 bg-light rounded-start-4 text-muted"><i class="bi bi-upc-scan"></i></span>
+                        <input asp-for="SKU" class="form-control input-3d rounded-end-4" placeholder="Tự động tạo nếu trống" />
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Slug" class="form-label-neon">SEO Slug</label>
+                    <input asp-for="Slug" id="slugInput" class="form-control input-3d text-muted" readonly tabindex="-1" />
+                </div>
+
+                <div class="col-12">
+                    <label asp-for="Description" class="form-label-neon">Mô tả chi tiết</label>
+                    <textarea asp-for="Description" class="form-control input-3d" rows="8" placeholder="Viết mô tả hấp dẫn cho sản phẩm..."></textarea>
+                </div>
+            </div>
+        </div>
     </div>
-    <div>
-        <label asp-for="SKU" class="block text-sm font-medium text-gray-700">Mã SKU</label>
-        <input asp-for="SKU" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm font-mono" />
-    </div>
-    <div>
-        <label asp-for="Price" class="block text-sm font-medium text-gray-700">Giá bán *</label>
-        <input asp-for="Price" type="number" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
-    </div>
-    <div>
-        <label asp-for="StockQuantity" class="block text-sm font-medium text-gray-700">Tồn kho</label>
-        <input asp-for="StockQuantity" type="number" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
-    </div>
-    <div>
-        <label asp-for="CategoryId" class="block text-sm font-medium text-gray-700">Danh mục</label>
-        <select asp-for="CategoryId" asp-items="ViewBag.CategoryId" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
-            <option value="">-- Chọn danh mục --</option>
-        </select>
-    </div>
-    <div>
-        <label asp-for="BrandId" class="block text-sm font-medium text-gray-700">Thương hiệu</label>
-        <select asp-for="BrandId" asp-items="ViewBag.BrandId" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
-            <option value="">-- Chọn thương hiệu --</option>
-        </select>
-    </div>
-    <div class="sm:col-span-2">
-        <label asp-for="ImageUrl" class="block text-sm font-medium text-gray-700">URL Hình ảnh</label>
-        <input asp-for="ImageUrl" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
-    </div>
-    <div class="flex items-center gap-2">
-        <input asp-for="IsActive" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-        <label asp-for="IsActive" class="text-sm font-medium text-gray-900">Đang kinh doanh</label>
+
+    <div class="col-lg-4">
+        <div class="d-flex flex-column gap-4 h-100">
+
+            <div class="form-glass-card p-4">
+                <div class="form-section-title text-primary">
+                    <i class="bi bi-image"></i> Ảnh đại diện
+                </div>
+
+                <div class="mb-3">
+                    <input asp-for="ImageUrl" id="imgUrlInput" class="form-control input-3d" placeholder="Dán đường dẫn ảnh (URL)..." />
+                    <span asp-validation-for="ImageUrl" class="text-danger small"></span>
+                </div>
+
+                <div class="img-upload-zone" onclick="document.getElementById('imgUrlInput').focus()">
+                    @if (!string.IsNullOrEmpty(Model?.ImageUrl))
+                    {
+                        <img id="imgPreview" src="@Model.ImageUrl" />
+                    }
+                    else
+                    {
+                        <img id="imgPreview" src="" style="display:none;" />
+                        <div id="placeholderPreview" class="text-center">
+                            <i class="bi bi-cloud-arrow-up upload-icon"></i>
+                            <div class="mt-3 small fw-bold text-muted text-uppercase">Preview</div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="form-glass-card p-4 flex-grow-1">
+                <div class="form-section-title text-warning">
+                    <i class="bi bi-sliders"></i> Cấu hình
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="CategoryId" class="form-label-neon">Danh mục</label>
+                    <select asp-for="CategoryId" asp-items="ViewBag.CategoryId" class="form-select input-3d cursor-pointer">
+                        <option value="">-- Chọn danh mục --</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label asp-for="BrandId" class="form-label-neon">Thương hiệu</label>
+                    <select asp-for="BrandId" asp-items="ViewBag.BrandId" class="form-select input-3d cursor-pointer">
+                        <option value="">-- Chọn thương hiệu --</option>
+                    </select>
+                </div>
+
+                <hr class="border-secondary opacity-10 my-4">
+
+                <div class="row g-3 mb-3">
+                    <div class="col-12">
+                        <label asp-for="Price" class="form-label-neon">Giá bán (VNĐ)</label>
+                        <div class="input-group">
+                            <input asp-for="Price" class="form-control input-3d border-end-0 fw-bold text-primary fs-5" />
+                            <span class="input-group-text bg-white border-start-0 text-muted rounded-end-4 fw-bold">₫</span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <label asp-for="StockQuantity" class="form-label-neon">Tồn kho</label>
+                        <input asp-for="StockQuantity" class="form-control input-3d" />
+                    </div>
+                    <div class="col-6">
+                        <label asp-for="Year" class="form-label-neon">Năm SX</label>
+                        <input asp-for="Year" class="form-control input-3d" />
+                    </div>
+                </div>
+
+                <div class="d-flex flex-column gap-3 mt-4">
+                    <div class="switch-card">
+                        <div>
+                            <label class="fw-bold d-block text-dark" for="IsActive">Kinh doanh</label>
+                            <small class="text-muted" style="font-size: 11px;">Bật để bán sản phẩm này</small>
+                        </div>
+                        <div class="form-check form-switch m-0">
+                            <input class="form-check-input" type="checkbox" asp-for="IsActive">
+                        </div>
+                    </div>
+
+                    <div class="switch-card">
+                        <div>
+                            <label class="fw-bold d-block text-dark" for="IsPublished">Hiển thị Web</label>
+                            <small class="text-muted" style="font-size: 11px;">Hiển thị cho khách hàng thấy</small>
+                        </div>
+                        <div class="form-check form-switch m-0">
+                            <input class="form-check-input" type="checkbox" asp-for="IsPublished">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+<script>
+    // JS Auto Preview & Slug Gen
+    const imgInp = document.getElementById('imgUrlInput');
+    const preview = document.getElementById('imgPreview');
+    const place = document.getElementById('placeholderPreview');
+
+    imgInp.addEventListener('input', (e) => {
+        const val = e.target.value;
+        if(val) {
+            preview.src = val; preview.style.display = 'block';
+            if(place) place.style.display = 'none';
+        } else {
+            preview.style.display = 'none';
+            if(place) place.style.display = 'block';
+        }
+    });
+
+    function generateSlug(text) {
+        const slug = text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+            .replace(/đ/g, "d").replace(/[^a-z0-9\s-]/g, "").trim().replace(/\s+/g, "-");
+        document.getElementById('slugInput').value = slug;
+    }
+</script>

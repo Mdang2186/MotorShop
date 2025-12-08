@@ -1,0 +1,422 @@
+﻿@model MotorShop.Areas.Admin.Controllers.UserController.UserEditVM
+@{
+    ViewData["Title"] = "Hồ sơ người dùng";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+
+    // Tạo avatar chữ cái
+    string initials = !string.IsNullOrEmpty(Model.UserName) ? Model.UserName.Substring(0, 1).ToUpper() : "U";
+}
+
+@section Head {
+    <style>
+        /* --- LAYOUT CONTAINERS --- */
+        .edit-container {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        /* --- GLASS CARDS --- */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            border-radius: 24px;
+            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+            .glass-card:hover {
+                box-shadow: 0 20px 40px -5px rgba(99, 102, 241, 0.1);
+            }
+
+        /* --- PROFILE SECTION (LEFT) --- */
+        .profile-header {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            padding: 40px 20px 30px;
+            text-align: center;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            position: relative;
+        }
+
+        .avatar-lg {
+            width: 100px;
+            height: 100px;
+            border-radius: 24px;
+            background: linear-gradient(135deg, #6366f1, #d946ef);
+            color: white;
+            font-size: 40px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+            border: 4px solid white;
+        }
+
+        .user-status-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-active {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .status-locked {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        /* --- FORM ELEMENTS --- */
+        .form-section-title {
+            font-size: 14px;
+            font-weight: 800;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+            .form-section-title i {
+                color: #6366f1;
+                font-size: 18px;
+            }
+
+        .input-neon {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 12px 16px;
+            font-weight: 600;
+            color: #334155;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+            .input-neon:focus {
+                background: white;
+                border-color: #8b5cf6;
+                box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15);
+                outline: none;
+            }
+
+            .input-neon[readonly] {
+                background: #f1f5f9;
+                color: #94a3b8;
+                cursor: not-allowed;
+            }
+
+        .form-label-sm {
+            font-size: 11px;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            margin-left: 4px;
+            display: block;
+        }
+
+        /* --- ROLE CARDS (INTERACTIVE) --- */
+        .role-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 16px;
+        }
+
+        .role-check-card {
+            position: relative;
+            cursor: pointer;
+        }
+
+            .role-check-card input {
+                position: absolute;
+                opacity: 0;
+            }
+
+        .role-content {
+            background: white;
+            border: 2px solid #f1f5f9;
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .role-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: #f1f5f9;
+            color: #94a3b8;
+            display: grid;
+            place-items: center;
+            font-size: 20px;
+            transition: 0.2s;
+        }
+
+        .role-name {
+            font-weight: 700;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        /* Checked State */
+        .role-check-card input:checked + .role-content {
+            border-color: #8b5cf6;
+            background: #f5f3ff;
+            box-shadow: 0 8px 20px -5px rgba(124, 58, 237, 0.2);
+        }
+
+            .role-check-card input:checked + .role-content .role-icon {
+                background: #8b5cf6;
+                color: white;
+            }
+
+            .role-check-card input:checked + .role-content .role-name {
+                color: #5b21b6;
+            }
+
+        /* --- SECURITY TOGGLE --- */
+        .security-box {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .switch-lg {
+            position: relative;
+            display: inline-block;
+            width: 56px;
+            height: 30px;
+        }
+
+            .switch-lg input {
+                opacity: 0;
+                width: 0;
+                height: 0;
+            }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e1;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+            .slider:before {
+                position: absolute;
+                content: "";
+                height: 24px;
+                width: 24px;
+                left: 3px;
+                bottom: 3px;
+                background-color: white;
+                transition: .4s;
+                border-radius: 50%;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            }
+
+        input:checked + .slider {
+            background-color: #ef4444;
+        }
+            /* Red for Locked */
+            input:checked + .slider:before {
+                transform: translateX(26px);
+            }
+
+        /* Responsive */
+        @@media (max-width: 992px) {
+            .edit-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+}
+
+<div class="d-flex align-items-center gap-3 mb-5 fade-in-up">
+    <a asp-action="Index" class="btn btn-light rounded-circle shadow-sm d-grid place-items-center" style="width: 48px; height: 48px;">
+        <i class="bi bi-arrow-left text-dark fs-5"></i>
+    </a>
+    <div>
+        <h2 class="fw-bolder mb-0 h-value text-dark">Hồ sơ người dùng</h2>
+        <div class="d-flex align-items-center gap-2 text-muted small">
+            <span>Quản lý</span> <i class="bi bi-chevron-right" style="font-size: 10px;"></i> <span>@Model.UserName</span>
+        </div>
+    </div>
+</div>
+
+<form method="post" class="edit-container fade-in-up delay-1">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+
+    <div class="glass-card">
+        <div class="profile-header">
+            @if (Model.IsLockedOut)
+            {
+                <div class="user-status-badge status-locked">
+                    <i class="bi bi-lock-fill me-1"></i> Locked
+                </div>
+            }
+            else
+            {
+                <div class="user-status-badge status-active">
+                    <i class="bi bi-check-circle-fill me-1"></i> Active
+                </div>
+            }
+
+            <div class="avatar-lg">@initials</div>
+
+            <h4 class="fw-bold text-dark mb-1">@Model.FullName</h4>
+            <p class="text-muted small mb-0">@Model.Email</p>
+            <p class="text-primary small fw-bold mt-1">@string.Join(", ", Model.SelectedRoles)</p>
+        </div>
+
+        <div class="p-4">
+            <div class="form-section-title"><i class="bi bi-info-circle"></i> Thông tin liên hệ</div>
+
+            <div class="d-flex flex-column gap-3">
+                <div>
+                    <label asp-for="UserName" class="form-label-sm">Tên đăng nhập</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0 rounded-start-4 ps-3"><i class="bi bi-person text-muted"></i></span>
+                        <input asp-for="UserName" class="form-control input-neon border-start-0 rounded-end-4" />
+                    </div>
+                    <span asp-validation-for="UserName" class="text-danger small"></span>
+                </div>
+
+                <div>
+                    <label asp-for="Email" class="form-label-sm">Email</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0 rounded-start-4 ps-3"><i class="bi bi-envelope text-muted"></i></span>
+                        <input asp-for="Email" class="form-control input-neon border-start-0 rounded-end-4" />
+                    </div>
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+
+                <div>
+                    <label asp-for="PhoneNumber" class="form-label-sm">Số điện thoại</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0 rounded-start-4 ps-3"><i class="bi bi-telephone text-muted"></i></span>
+                        <input asp-for="PhoneNumber" class="form-control input-neon border-start-0 rounded-end-4" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-light p-4 border-top">
+            <label asp-for="Address" class="form-label-sm">Địa chỉ</label>
+            <textarea asp-for="Address" class="form-control input-neon bg-white" rows="3" placeholder="Nhập địa chỉ..."></textarea>
+        </div>
+    </div>
+
+    <div class="d-flex flex-column gap-4">
+
+        <div class="glass-card p-4">
+            <div class="form-section-title text-warning">
+                <i class="bi bi-shield-lock-fill"></i> Phân quyền hệ thống
+            </div>
+            <p class="text-muted small mb-4">Chọn vai trò để cấp quyền truy cập các chức năng tương ứng.</p>
+
+            <div class="role-grid">
+                @foreach (var role in Model.AllRoles)
+                {
+                    <label class="role-check-card">
+                        <input type="checkbox" name="SelectedRoles" value="@role" @(Model.SelectedRoles.Contains(role) ? "checked" : "") />
+                        <div class="role-content">
+                            <div class="role-icon">
+                                @if (role.Contains("Admin"))
+                                {
+                                    <i class="bi bi-exclude"></i>
+                                }
+                                else if (role.Contains("Manager"))
+                                {
+
+                                    <i class="bi bi-briefcase-fill"></i>
+                                }
+                                else
+                                {
+
+                                    <i class="bi bi-person-fill"></i>
+                                }
+                            </div>
+                            <span class="role-name">@role</span>
+                        </div>
+                    </label>
+                }
+            </div>
+        </div>
+
+        <div class="glass-card p-4">
+            <div class="form-section-title text-danger">
+                <i class="bi bi-shield-exclamation"></i> Bảo mật & Trạng thái
+            </div>
+
+            <div class="security-box mb-3">
+                <div>
+                    <div class="fw-bold text-danger">Khoá tài khoản</div>
+                    <div class="small text-muted" style="font-size: 11px;">Người dùng sẽ bị đăng xuất và không thể truy cập.</div>
+                </div>
+                <label class="switch-lg">
+                    <input type="checkbox" asp-for="IsLockedOut">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="form-check p-3 rounded-4 bg-light border border-white mb-4">
+                <input class="form-check-input" type="checkbox" asp-for="SendNotification" id="notifCheck" style="width: 20px; height: 20px; margin-right: 10px; cursor: pointer;">
+                <label class="form-check-label fw-bold text-dark cursor-pointer" for="notifCheck" style="padding-top: 2px;">
+                    Gửi email thông báo
+                </label>
+                <div class="small text-muted ms-1 mt-1">
+                    Gửi email cho người dùng về các thay đổi trong hồ sơ này.
+                </div>
+            </div>
+
+            <hr class="border-secondary opacity-10 my-4">
+
+            <div class="d-flex gap-2 justify-content-end">
+                <a asp-action="Index" class="btn btn-light rounded-pill px-4 fw-bold">Hủy bỏ</a>
+                <button type="submit" class="btn btn-primary rounded-pill px-5 py-2 fw-bold shadow-lg d-flex align-items-center gap-2"
+                        style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); border: none;">
+                    <i class="bi bi-floppy2-fill"></i> Lưu thay đổi
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

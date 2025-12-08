@@ -1,0 +1,101 @@
+﻿@model MotorShop.Models.ShopBankAccount
+
+@{
+    ViewData["Title"] = "Xóa tài khoản";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Head {
+    <style>
+        .delete-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* CSS Thẻ tĩnh cho trang Delete */
+        .bank-card-static {
+            height: 220px;
+            border-radius: 20px;
+            padding: 25px;
+            color: white;
+            position: relative;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%); /* Màu cảnh báo nhẹ */
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        /* Overlay cảnh báo chéo trên thẻ */
+        .card-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .delete-icon {
+            font-size: 80px;
+            color: rgba(255,255,255,0.4);
+        }
+
+        .card-number {
+            font-family: 'Courier New', monospace;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+    </style>
+}
+
+<div class="container py-5 fade-in-up">
+    <div class="delete-container text-center">
+
+        <div class="mb-4">
+            <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                <i class="fa-solid fa-trash-can fs-1"></i>
+            </div>
+            <h2 class="fw-bold text-danger">Xóa tài khoản này?</h2>
+            <p class="text-muted">Hành động này không thể hoàn tác. Vui lòng kiểm tra kỹ thông tin bên dưới.</p>
+        </div>
+
+        <div class="bank-card-static text-start mx-auto shadow-lg" style="background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);">
+            <div class="card-overlay">
+                <i class="fa-solid fa-xmark delete-icon"></i>
+            </div>
+
+            <div class="d-flex justify-content-between position-relative" style="z-index: 2;">
+                <div style="width: 50px; height: 35px; background: rgba(255,255,255,0.3); border-radius: 6px;"></div>
+                <div class="fw-bold fst-italic fs-5">@Model.Bank?.ShortName</div>
+            </div>
+
+            <div class="mt-4 position-relative" style="z-index: 2;">
+                <div class="small opacity-75">Số tài khoản</div>
+                <div class="card-number">@Model.AccountNumber</div>
+            </div>
+
+            <div class="mt-4 position-relative" style="z-index: 2;">
+                <div class="small opacity-75">CHỦ TÀI KHOẢN</div>
+                <div class="fw-bold text-uppercase">@Model.AccountName</div>
+            </div>
+        </div>
+
+        <form asp-action="Delete">
+            <input type="hidden" asp-for="Id" />
+
+            <div class="d-flex justify-content-center gap-3 mt-4">
+                <a asp-action="Index" class="btn btn-light btn-lg rounded-pill px-5 fw-bold">
+                    Hủy bỏ
+                </a>
+                <button type="submit" class="btn btn-danger btn-lg rounded-pill px-5 fw-bold shadow-sm">
+                    <i class="fa-solid fa-trash me-2"></i> Xác nhận xóa
+                </button>
+            </div>
+        </form>
+
+    </div>
+</div>

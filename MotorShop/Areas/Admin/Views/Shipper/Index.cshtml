@@ -1,0 +1,276 @@
+﻿@model MotorShop.Areas.Admin.Controllers.ShipperController.ShipperIndexViewModel
+@{
+    ViewData["Title"] = "Quản lý đối tác vận chuyển";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+
+    int currentPage = Model.Page;
+    int totalPages = Model.TotalPages;
+}
+
+@section Head {
+    <style>
+        /* Shipper Card 3D */
+        .shipper-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-radius: 24px;
+            padding: 20px;
+            border: 1px solid white;
+            box-shadow: var(--shadow-card);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .shipper-card:hover {
+                transform: translateY(-6px);
+                box-shadow: 0 20px 40px -5px rgba(99, 102, 241, 0.15);
+                border-color: #c4b5fd;
+            }
+
+        /* Header with Icon */
+        .shipper-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .shipper-icon-box {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            display: grid;
+            place-items: center;
+            font-size: 26px;
+            color: white;
+            background: linear-gradient(135deg, #f97316 0%, #fbbf24 100%);
+            box-shadow: 0 8px 20px -5px rgba(249, 115, 22, 0.4);
+            flex-shrink: 0;
+        }
+
+        .shipper-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 2px;
+            line-height: 1.2;
+        }
+
+        .shipper-code {
+            font-family: monospace;
+            font-size: 11px;
+            color: #f97316;
+            background: #fff7ed;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: 700;
+            border: 1px solid #ffedd5;
+        }
+
+        /* Stats Grid inside Card */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #f1f5f9;
+        }
+
+        .stat-value {
+            font-size: 16px;
+            font-weight: 800;
+            color: #1e293b;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+        }
+
+        .text-active {
+            color: #10b981;
+        }
+        /* Green for open orders */
+
+        /* Contact Info */
+        .contact-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+
+            .contact-row i {
+                color: #cbd5e1;
+                font-size: 16px;
+            }
+
+        /* Actions Footer */
+        .shipper-footer {
+            padding-top: 15px;
+            border-top: 1px dashed #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-end mb-5 fade-in-up">
+    <div>
+        <h2 class="fw-bolder mb-1 h-value">Đối tác vận chuyển</h2>
+        <div class="d-flex align-items-center gap-3 text-muted small">
+            <span><i class="bi bi-truck me-1"></i> @Model.TotalShippers Đơn vị</span>
+            <span class="text-success fw-bold"><i class="bi bi-check-circle-fill me-1"></i> @Model.ActiveCount Hoạt động</span>
+        </div>
+    </div>
+
+    <div class="d-flex gap-2">
+        <form asp-action="Index" method="get" class="d-flex bg-white p-1 rounded-pill shadow-sm border">
+            <input type="text" name="q" value="@Model.Search" class="form-control border-0 bg-transparent rounded-pill ps-3" placeholder="Tìm tên, mã, SĐT..." style="font-size: 13px; width: 220px;">
+            <button class="btn btn-primary rounded-circle d-grid place-items-center" style="width: 36px; height: 36px; background: var(--grad-primary); border: none;"><i class="bi bi-search"></i></button>
+        </form>
+
+        <a asp-action="Create" class="btn btn-primary rounded-pill px-4 fw-bold shadow-lg d-flex align-items-center gap-2 ms-2"
+           style="background: var(--grad-success); border: none;">
+            <i class="bi bi-plus-lg"></i> Thêm mới
+        </a>
+    </div>
+</div>
+
+<div class="row g-4 fade-in-up delay-1">
+    @foreach (var item in Model.Items)
+    {
+        // Lấy thống kê đơn hàng từ ViewModel
+        int totalOrders = Model.TotalOrdersByShipper.ContainsKey(item.Id) ? Model.TotalOrdersByShipper[item.Id] : 0;
+        int openOrders = Model.OpenOrdersByShipper.ContainsKey(item.Id) ? Model.OpenOrdersByShipper[item.Id] : 0;
+
+        <div class="col-md-6 col-xl-4">
+            <div class="shipper-card">
+                <div class="shipper-header">
+                    <div class="shipper-icon-box">
+                        <i class="bi bi-box-seam-fill"></i>
+                    </div>
+                    <div>
+                        <div class="shipper-title text-truncate" style="max-width: 180px;" title="@item.Name">@item.Name</div>
+                        @if (!string.IsNullOrEmpty(item.Code))
+                        {
+                            <span class="shipper-code">@item.Code</span>
+                        }
+                    </div>
+                    <div class="ms-auto">
+                        @if (item.IsActive)
+                        {
+                            <span class="badge bg-success bg-opacity-10 text-success rounded-pill"><i class="bi bi-lightning-fill"></i></span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill"><i class="bi bi-pause-fill"></i></span>
+                        }
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-value text-active">@openOrders</span>
+                        <span class="stat-label">Đang giao</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">@totalOrders</span>
+                        <span class="stat-label">Tổng đơn</span>
+                    </div>
+                </div>
+
+                <div class="flex-grow-1">
+                    <div class="contact-row">
+                        <i class="bi bi-telephone"></i>
+                        <span class="fw-bold text-dark">@(item.Phone ?? "---")</span>
+                    </div>
+                    <div class="contact-row align-items-start">
+                        <i class="bi bi-journal-text mt-1"></i>
+                        <span class="small text-muted" style="line-height: 1.4;">
+                            @(string.IsNullOrEmpty(item.Note) ? "Không có ghi chú." : item.Note)
+                        </span>
+                    </div>
+                </div>
+
+                <div class="shipper-footer mt-3">
+                    <div class="form-check form-switch">
+                        <form asp-action="ToggleActive" asp-route-id="@item.Id" method="post" id="toggle-@item.Id">
+                            @Html.AntiForgeryToken()
+                            <input class="form-check-input cursor-pointer" type="checkbox" @(item.IsActive ? "checked" : "")
+                                   onchange="document.getElementById('toggle-@item.Id').submit()">
+                        </form>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        @if (!string.IsNullOrEmpty(item.Phone))
+                        {
+                            <a href="tel:@item.Phone" class="btn btn-sm btn-light rounded-circle shadow-sm text-success" title="Gọi điện">
+                                <i class="bi bi-telephone-fill"></i>
+                            </a>
+                        }
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-light rounded-circle shadow-sm text-primary" title="Sửa">
+                            <i class="bi bi-pencil-fill"></i>
+                        </a>
+                        <form asp-action="Delete" asp-route-id="@item.Id" method="post" onsubmit="return confirm('Xóa đơn vị này?');">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-light rounded-circle shadow-sm text-danger" title="Xóa">
+                                <i class="bi bi-trash3-fill"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="col-md-6 col-xl-4">
+        <a asp-action="Create" class="shipper-card d-flex align-items-center justify-content-center text-decoration-none bg-light border-dashed"
+           style="border: 2px dashed #cbd5e1; background: rgba(255,255,255,0.4); box-shadow: none; min-height: 280px; cursor: pointer;">
+            <div class="text-center text-muted">
+                <div class="mb-3 p-3 rounded-circle bg-white shadow-sm d-inline-grid place-items-center" style="width: 70px; height: 70px;">
+                    <i class="bi bi-truck-front-fill fs-2 text-warning"></i>
+                </div>
+                <div class="fw-bold fs-6">Thêm đơn vị vận chuyển</div>
+            </div>
+        </a>
+    </div>
+</div>
+
+@if (totalPages > 1)
+{
+    <div class="d-flex justify-content-center mt-5">
+        <nav>
+            <ul class="pagination pagination-sm gap-2 mb-0">
+                @for (int i = 1; i <= totalPages; i++)
+                {
+                    <li class="page-item">
+                        <a class="page-link border-0 rounded-circle fw-bold shadow-sm @(i == currentPage ? "bg-primary text-white" : "text-muted bg-white")"
+                           style="width: 35px; height: 35px; display: grid; place-items: center; @(i == currentPage ? "background: var(--grad-primary);" : "")"
+                           href="@Url.Action("Index", new { page = i, q = Model.Search, onlyActive = Model.OnlyActive })">
+                            @i
+                        </a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    </div>
+}

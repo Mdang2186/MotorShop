@@ -1,0 +1,207 @@
+﻿@model MotorShop.ViewModels.Admin.AdminProfileViewModel
+@{
+    ViewData["Title"] = "Thông tin tài khoản";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Head {
+    <style>
+        /* --- LAYOUT --- */
+        .profile-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 80vh;
+            padding-top: 20px;
+        }
+
+        .profile-card {
+            width: 100%;
+            max-width: 800px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid white;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px -10px rgba(99, 102, 241, 0.15);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* --- HEADER BACKGROUND --- */
+        .profile-header-bg {
+            height: 150px;
+            background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%);
+            position: relative;
+        }
+
+            .profile-header-bg::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                height: 50%;
+                background: linear-gradient(to top, rgba(255,255,255,0.8), transparent);
+            }
+
+        /* --- AVATAR 3D --- */
+        .profile-avatar-wrapper {
+            position: absolute;
+            top: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+
+        .avatar-3d-lg {
+            width: 110px;
+            height: 110px;
+            border-radius: 24px;
+            background: white;
+            padding: 4px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            transform: rotate(-3deg);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+            .avatar-3d-lg:hover {
+                transform: rotate(0deg) scale(1.05);
+                box-shadow: 0 15px 35px rgba(99, 102, 241, 0.25);
+            }
+
+        .avatar-placeholder {
+            width: 100%;
+            height: 100%;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+            display: grid;
+            place-items: center;
+            font-size: 40px;
+            font-weight: 800;
+            color: #6366f1;
+        }
+
+        /* --- FORM BODY --- */
+        .profile-body {
+            padding: 70px 40px 40px 40px; /* Padding top to clear avatar */
+        }
+
+        .input-glass {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 12px 18px;
+            font-weight: 600;
+            color: #334155;
+            transition: 0.3s;
+        }
+
+            .input-glass:focus {
+                background: white;
+                border-color: #6366f1;
+                box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+                outline: none;
+            }
+
+            .input-glass[readonly] {
+                background: #f1f5f9;
+                color: #94a3b8;
+                border-color: transparent;
+            }
+
+        .form-label-neon {
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 6px;
+            display: block;
+            margin-left: 4px;
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border: none;
+            color: white;
+            font-weight: 700;
+            padding: 12px 30px;
+            border-radius: 50px;
+            box-shadow: 0 8px 20px -5px rgba(99, 102, 241, 0.4);
+            transition: 0.3s;
+        }
+
+            .btn-save:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 12px 25px -5px rgba(99, 102, 241, 0.5);
+            }
+    </style>
+}
+
+<div class="container fade-in-up">
+    <div class="profile-container">
+        <div class="profile-card">
+            <div class="profile-header-bg"></div>
+
+            <div class="profile-avatar-wrapper">
+                <div class="avatar-3d-lg">
+                    <div class="avatar-placeholder">
+                        @Model.FullName?.Substring(0, 1).ToUpper()
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-body">
+                <div class="text-center mb-5">
+                    <h2 class="fw-bolder mb-1 h-value text-dark">Hồ sơ của bạn</h2>
+                    <p class="text-muted small">Quản lý thông tin cá nhân và liên hệ.</p>
+                </div>
+
+                <form asp-action="Profile" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <label class="form-label-neon">Email đăng nhập</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-0 rounded-start-4 ps-3 text-muted"><i class="bi bi-envelope-fill"></i></span>
+                                <input asp-for="Email" class="form-control input-glass rounded-end-4" readonly />
+                            </div>
+                            <div class="form-text small fst-italic ps-2 mt-1"><i class="bi bi-lock-fill"></i> Email không thể thay đổi tại đây.</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="FullName" class="form-label-neon">Họ và tên</label>
+                            <input asp-for="FullName" class="form-control input-glass" placeholder="Nhập họ tên..." />
+                            <span asp-validation-for="FullName" class="text-danger small fw-bold"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="PhoneNumber" class="form-label-neon">Số điện thoại</label>
+                            <input asp-for="PhoneNumber" class="form-control input-glass" placeholder="Nhập số điện thoại..." />
+                            <span asp-validation-for="PhoneNumber" class="text-danger small fw-bold"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="Address" class="form-label-neon">Địa chỉ liên hệ</label>
+                            <textarea asp-for="Address" class="form-control input-glass" rows="3" placeholder="Số nhà, đường, quận/huyện..."></textarea>
+                            <span asp-validation-for="Address" class="text-danger small fw-bold"></span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-3 mt-5 pt-3 border-top border-light">
+                        <a asp-controller="Dashboard" asp-action="Index" class="btn btn-light rounded-pill fw-bold px-4">Hủy bỏ</a>
+                        <button type="submit" class="btn-save">
+                            <i class="bi bi-check2-circle me-2"></i> Lưu thay đổi
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

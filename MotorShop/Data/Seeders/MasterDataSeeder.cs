@@ -12,12 +12,68 @@ namespace MotorShop.Data.Seeders
             if (!await context.Branches.AnyAsync())
             {
                 context.Branches.AddRange(
-                    new Branch { Name = "MotorShop Hà Nội 1", Address = "88 Phố Huế, Hai Bà Trưng, Hà Nội", Phone = "024.3971.8888", IsActive = true },
-                    new Branch { Name = "MotorShop Hà Nội 2", Address = "368 Cầu Giấy, Q. Cầu Giấy, Hà Nội", Phone = "024.3767.9999", IsActive = true },
-                    new Branch { Name = "MotorShop Đà Nẵng", Address = "255 Hùng Vương, Q. Hải Châu, Đà Nẵng", Phone = "0236.382.7777", IsActive = true },
-                    new Branch { Name = "MotorShop Sài Gòn 1", Address = "15 Nguyễn Huệ, Quận 1, TP.HCM", Phone = "028.3822.6666", IsActive = true },
-                    new Branch { Name = "MotorShop Sài Gòn 2", Address = "456 Cộng Hòa, Q. Tân Bình, TP.HCM", Phone = "028.3811.5555", IsActive = true }
-                );
+        new Branch
+        {
+            Name = "MotorShop Hà Nội 1",
+            Code = "HN-HBT",
+            Address = "88 Phố Huế, Hai Bà Trưng, Hà Nội",
+            Phone = "024.3971.8888",
+            OpeningHours = "08:00–20:30 (Thứ 2 – Chủ nhật)",
+            MapUrl = "https://www.google.com/maps/search/?api=1&query=88+Pho+Hue,+Hai+Ba+Trung,+Ha+Noi",
+            IsActive = true,
+            Latitude = 21.0135,   // có thể chỉnh lại cho đúng
+            Longitude = 105.8541
+        },
+        new Branch
+        {
+            Name = "MotorShop Hà Nội 2",
+            Code = "HN-CG",
+            Address = "368 Cầu Giấy, Q. Cầu Giấy, Hà Nội",
+            Phone = "024.3767.9999",
+            OpeningHours = "08:00–20:30 (Thứ 2 – Chủ nhật)",
+            MapUrl = "https://www.google.com/maps/search/?api=1&query=368+Cau+Giay,+Cau+Giay,+Ha+Noi",
+            IsActive = true,
+            Latitude = 21.0369,
+            Longitude = 105.7906
+        },
+        new Branch
+        {
+            Name = "MotorShop Đà Nẵng",
+            Code = "DN-HC",
+            Address = "255 Hùng Vương, Q. Hải Châu, Đà Nẵng",
+            Phone = "0236.382.7777",
+            OpeningHours = "08:00–20:00 (Thứ 2 – Chủ nhật)",
+            MapUrl = "https://www.google.com/maps/search/?api=1&query=255+Hung+Vuong,+Hai+Chau,+Da+Nang",
+            IsActive = true,
+            Latitude = 16.0678,
+            Longitude = 108.2208
+        },
+        new Branch
+        {
+            Name = "MotorShop Sài Gòn 1",
+            Code = "HCM-Q1",
+            Address = "15 Nguyễn Huệ, Quận 1, TP.HCM",
+            Phone = "028.3822.6666",
+            OpeningHours = "09:00–21:00 (Thứ 2 – Chủ nhật)",
+            MapUrl = "https://www.google.com/maps/search/?api=1&query=15+Nguyen+Hue,+Quan+1,+TP+HCM",
+            IsActive = true,
+            Latitude = 10.7731,
+            Longitude = 106.7042
+        },
+        new Branch
+        {
+            Name = "MotorShop Sài Gòn 2",
+            Code = "HCM-TB",
+            Address = "456 Cộng Hòa, Q. Tân Bình, TP.HCM",
+            Phone = "028.3811.5555",
+            OpeningHours = "09:00–21:00 (Thứ 2 – Chủ nhật)",
+            MapUrl = "https://www.google.com/maps/search/?api=1&query=456+Cong+Hoa,+Tan+Binh,+TP+HCM",
+            IsActive = true,
+            Latitude = 10.8009,
+            Longitude = 106.6477
+        }
+    );
+
             }
 
             // --- 3.2. Thương hiệu (10) ---

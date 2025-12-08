@@ -1,0 +1,95 @@
+﻿@model MotorShop.Models.Brand
+@{
+    ViewData["Title"] = "Xóa thương hiệu";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+
+    bool canDelete = Model.Products == null || !Model.Products.Any();
+}
+
+<div class="d-flex align-items-center justify-content-center min-vh-100 fade-in-up" style="min-height: 80vh;">
+    <div class="card border-0 shadow-2xl rounded-5 p-5 text-center position-relative overflow-hidden"
+         style="max-width: 500px; width: 100%; background: rgba(255,255,255,0.95); backdrop-filter: blur(30px);">
+
+        <div class="position-absolute top-0 start-0 w-100 h-100" style="background: radial-gradient(circle at center, rgba(239, 68, 68, 0.05), transparent 70%); pointer-events: none;"></div>
+
+        <div class="mx-auto mb-4 d-flex align-items-center justify-content-center rounded-circle bg-danger bg-opacity-10 text-danger shadow-sm"
+             style="width: 90px; height: 90px; animation: pulse 2s infinite;">
+            <i class="bi bi-shield-exclamation" style="font-size: 40px;"></i>
+        </div>
+
+        <h3 class="fw-bolder text-dark mb-3">Xóa Thương Hiệu?</h3>
+
+        <div class="bg-light rounded-4 p-3 mb-4 border d-flex align-items-center gap-3 text-start shadow-sm">
+            <div class="rounded-3 bg-white border d-flex align-items-center justify-content-center p-2" style="width: 60px; height: 60px;">
+                @if (!string.IsNullOrEmpty(Model.LogoUrl))
+                {
+                    <img src="@(string.IsNullOrEmpty(Model.LogoUrl) ? $"/images/brands/{Model.Slug}.png" : Model.LogoUrl)" class="w-100 h-100 object-fit-contain" />
+                }
+                else
+                {
+                    <span class="fw-bold text-muted fs-4">@Model.Name.Substring(0,1)</span>
+                }
+            </div>
+            <div>
+                <div class="fw-bold text-dark">@Model.Name</div>
+                <div class="small text-muted">ID: #@Model.Id</div>
+            </div>
+            <div class="ms-auto">
+                <span class="badge bg-white text-dark border shadow-sm">
+                    @(Model.Products?.Count ?? 0) SP
+                </span>
+            </div>
+        </div>
+
+        @if (!canDelete)
+        {
+            <div class="alert alert-danger border-0 bg-danger bg-opacity-10 text-danger text-start small mb-4 rounded-3">
+                <div class="d-flex gap-2">
+                    <i class="bi bi-x-circle-fill mt-1"></i>
+                    <div>
+                        <strong>Không thể xóa!</strong><br>
+                        Thương hiệu này đang gắn với <strong>@Model.Products!.Count sản phẩm</strong>. Vui lòng xóa sản phẩm hoặc chuyển sang thương hiệu khác trước.
+                    </div>
+                </div>
+            </div>
+            <a asp-action="Index" class="btn btn-light btn-lg w-100 rounded-pill fw-bold border">Quay lại</a>
+        }
+        else
+        {
+            <p class="text-muted mb-4">
+                Hành động này sẽ xóa vĩnh viễn thương hiệu và logo liên quan. Không thể hoàn tác.
+            </p>
+            <form asp-action="Delete" method="post">
+                <input type="hidden" asp-for="Id" />
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-danger btn-lg rounded-pill fw-bold shadow-lg border-0"
+                            style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                        <i class="bi bi-trash3-fill me-2"></i> Xác nhận xóa
+                    </button>
+                    <a asp-action="Index" class="btn btn-light btn-lg rounded-pill fw-bold text-muted">Hủy bỏ</a>
+                </div>
+            </form>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <style>
+        @@keyframes pulse {
+            0%
+
+        {
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+        }
+
+        70% {
+            box-shadow: 0 0 0 20px rgba(239, 68, 68, 0);
+        }
+
+        100% {
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+        }
+
+        }
+    </style>
+}

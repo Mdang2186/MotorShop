@@ -1,0 +1,132 @@
+﻿@model MotorShop.Models.Category
+@{
+    ViewData["Title"] = "Cập nhật danh mục";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Head {
+    <style>
+        /* Reuse style from Create */
+        .form-center-glass {
+            max-width: 650px;
+            margin: 2rem auto;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 20px 50px -10px rgba(14, 165, 233, 0.15); /* Blue Shadow for Edit */
+            border: 1px solid white;
+            position: relative;
+        }
+
+        .input-glass {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 14px 20px;
+            font-weight: 600;
+            color: #334155;
+            transition: 0.3s;
+        }
+
+            .input-glass:focus {
+                background: white;
+                border-color: #0ea5e9;
+                box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
+                outline: none;
+            }
+
+        .form-label-neon {
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 8px;
+            display: block;
+            margin-left: 5px;
+        }
+    </style>
+}
+
+<div class="container fade-in-up">
+    <div class="d-flex align-items-center justify-content-between mb-3" style="max-width: 650px; margin: 0 auto;">
+        <a asp-action="Index" class="btn btn-light rounded-circle shadow-sm d-grid place-items-center" style="width: 45px; height: 45px;">
+            <i class="bi bi-arrow-left text-dark fs-5"></i>
+        </a>
+
+        <div class="dropdown">
+            <button class="btn btn-light rounded-pill shadow-sm fw-bold px-3 dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                <i class="bi bi-gear-fill me-1 text-secondary"></i> Tùy chọn
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-4 p-2">
+                <li>
+                    <form asp-action="Delete" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('Cảnh báo: Xóa danh mục này?');">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="dropdown-item rounded-3 text-danger fw-bold"><i class="bi bi-trash3 me-2"></i> Xóa danh mục</button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="form-center-glass">
+        <div class="text-center mb-5">
+            <div class="d-inline-flex p-3 rounded-4 mb-3 text-white shadow-lg" style="background: var(--grad-info);">
+                <i class="bi bi-pencil-square fs-2"></i>
+            </div>
+            <h2 class="fw-bolder mb-1 h-value text-dark">Cập nhật Danh Mục</h2>
+            <div class="badge bg-light text-secondary border rounded-pill px-3 py-2">ID: #@Model.Id</div>
+        </div>
+
+        <form asp-action="Edit" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+
+            <div class="mb-4">
+                <label asp-for="Name" class="form-label-neon">Tên danh mục <span class="text-danger">*</span></label>
+                <input asp-for="Name" class="form-control input-glass" placeholder="Nhập tên mới..." onkeyup="generateSlug(this.value)" />
+                <span asp-validation-for="Name" class="text-danger small fw-bold mt-1 d-block ps-2"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="Slug" class="form-label-neon">SEO Slug</label>
+                <div class="input-group">
+                    <input asp-for="Slug" id="slugInput" class="form-control input-glass text-muted rounded-start-4" />
+                    <button type="button" class="btn btn-light border border-start-0 rounded-end-4 text-muted" onclick="regenerateSlug()" title="Tạo lại từ tên">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="mb-5">
+                <label asp-for="Description" class="form-label-neon">Mô tả</label>
+                <textarea asp-for="Description" class="form-control input-glass" rows="4"></textarea>
+            </div>
+
+            <div class="d-grid gap-3">
+                <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-lg py-3"
+                        style="background: var(--grad-info); border: none; font-size: 16px;">
+                    <i class="bi bi-floppy2-fill me-2"></i> Lưu thay đổi
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        function generateSlug(text) {
+            const slug = text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                .replace(/đ/g, "d").replace(/[^a-z0-9\s-]/g, "").trim().replace(/\s+/g, "-");
+            document.getElementById('slugInput').value = slug;
+        }
+
+        function regenerateSlug() {
+            const name = document.querySelector('input[name="Name"]').value;
+            generateSlug(name);
+        }
+    </script>
+}

@@ -1,0 +1,207 @@
+﻿@model MotorShop.Models.Product
+@{
+    ViewData["Title"] = "Thư viện ảnh";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Head {
+    <style>
+        .gallery-container {
+            background: rgba(255,255,255,0.6);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 30px;
+            border: 1px solid white;
+            box-shadow: var(--shadow-card);
+        }
+
+        .upload-card {
+            background: linear-gradient(145deg, #ffffff, #f1f5f9);
+            border-radius: 20px;
+            padding: 24px;
+            border: 2px dashed #cbd5e1;
+            text-align: center;
+            transition: all 0.3s;
+            h-100;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+            .upload-card:hover {
+                border-color: #6366f1;
+                transform: translateY(-5px);
+                box-shadow: var(--shadow-neon);
+            }
+
+        .img-card-3d {
+            background: white;
+            border-radius: 20px;
+            padding: 8px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+            .img-card-3d:hover {
+                transform: translateY(-8px) scale(1.02);
+                box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.25);
+                z-index: 10;
+            }
+
+        .img-frame {
+            border-radius: 16px;
+            overflow: hidden;
+            height: 200px;
+            width: 100%;
+            background: #f8fafc;
+            position: relative;
+        }
+
+            .img-frame img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+        .badge-main {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: rgba(16, 185, 129, 0.9);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+            backdrop-filter: blur(4px);
+        }
+
+        .action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            padding: 0 4px;
+        }
+
+        .btn-action {
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            border: none;
+            display: grid;
+            place-items: center;
+            transition: 0.2s;
+        }
+
+            .btn-action:hover {
+                transform: scale(1.1);
+            }
+
+        .btn-trash {
+            background: #fef2f2;
+            color: #ef4444;
+        }
+
+        .btn-star {
+            background: #fffbeb;
+            color: #f59e0b;
+        }
+    </style>
+}
+
+<div class="d-flex align-items-center gap-3 mb-5 fade-in-up">
+    <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-white rounded-circle shadow-sm" style="width: 48px; height: 48px; display: grid; place-items: center;">
+        <i class="bi bi-arrow-left text-dark fs-5"></i>
+    </a>
+    <div>
+        <h2 class="fw-bolder mb-0 h-value">Quản lý thư viện ảnh</h2>
+        <div class="d-flex align-items-center gap-2 text-muted small">
+            <i class="bi bi-box-seam"></i> @Model.Name <span class="mx-1">•</span> <span class="font-monospace">#@Model.SKU</span>
+        </div>
+    </div>
+</div>
+
+<div class="gallery-container fade-in-up delay-1">
+
+    <div class="bg-light rounded-4 p-4 mb-5 border">
+        <form asp-action="AddImage" method="post" class="row g-3 align-items-end">
+            <input type="hidden" name="productId" value="@Model.Id" />
+            <div class="col-md-7">
+                <label class="form-label-neon mb-2">Đường dẫn ảnh (URL)</label>
+                <div class="input-group shadow-sm">
+                    <span class="input-group-text bg-white border-0 ps-3 rounded-start-4"><i class="bi bi-link-45deg text-muted"></i></span>
+                    <input type="text" name="imageUrl" class="form-control border-0 py-3" placeholder="https://example.com/image.jpg" required>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label-neon mb-2">Mô tả (Alt text)</label>
+                <input type="text" name="caption" class="form-control border-0 py-3 shadow-sm rounded-4" placeholder="Mặt trước, mặt sau...">
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-primary w-100 py-3 rounded-4 fw-bold shadow-lg" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); border:none;">
+                    <i class="bi bi-cloud-plus me-2"></i> Upload
+                </button>
+            </div>
+            <div class="col-12">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="isPrimary" id="checkPrimary">
+                    <label class="form-check-label small fw-bold text-secondary" for="checkPrimary">Đặt làm ảnh đại diện ngay khi thêm</label>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="row g-4">
+        @foreach (var img in Model.Images.OrderByDescending(i => i.IsPrimary))
+        {
+            <div class="col-6 col-md-4 col-xl-3">
+                <div class="img-card-3d h-100">
+                    <div class="img-frame">
+                        <img src="@img.ImageUrl" alt="@img.Caption" loading="lazy" />
+                        @if (img.IsPrimary)
+                        {
+                            <div class="badge-main"><i class="bi bi-star-fill me-1"></i> MAIN</div>
+                        }
+                    </div>
+
+                    <div class="p-2">
+                        <div class="text-truncate fw-bold small text-dark mb-2">@(string.IsNullOrEmpty(img.Caption) ? "Không có mô tả" : img.Caption)</div>
+
+                        <div class="d-flex justify-content-between align-items-center bg-light rounded-pill p-1">
+                            @if (!img.IsPrimary)
+                            {
+                                <form asp-action="SetPrimaryImage" method="post" class="flex-grow-1">
+                                    <input type="hidden" name="id" value="@img.Id" />
+                                    <button class="btn btn-sm w-100 rounded-pill fw-bold text-warning small" style="font-size: 11px;">
+                                        Đặt làm chính
+                                    </button>
+                                </form>
+                                <div class="vr mx-1 opacity-25"></div>
+                            }
+
+                            <form asp-action="DeleteImage" method="post" onsubmit="return confirm('Xóa ảnh này?');">
+                                <input type="hidden" name="id" value="@img.Id" />
+                                <button class="btn-action btn-trash mx-1" title="Xóa"><i class="bi bi-trash3-fill"></i></button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (!Model.Images.Any())
+        {
+            <div class="col-12 py-5 text-center">
+                <div class="d-inline-block p-4 rounded-circle bg-light mb-3">
+                    <i class="bi bi-images fs-1 text-muted opacity-50"></i>
+                </div>
+                <p class="text-muted fw-bold">Chưa có ảnh nào.</p>
+            </div>
+        }
+    </div>
+</div>

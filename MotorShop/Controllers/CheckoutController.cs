@@ -1,9 +1,10 @@
-﻿// File: Controllers/CheckoutController.cs
+﻿// Controllers/CheckoutController.cs
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using MotorShop.Data;
 using MotorShop.Models;
 using MotorShop.Models.Enums;
@@ -24,30 +25,36 @@ namespace MotorShop.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IEmailSender _emailSender;
         private readonly ILogger<CheckoutController> _logger;
+        private readonly PaymentSettings _payCfg;
+
+        // % đặt cọc khi nhận tại cửa hàng
+        private const decimal DepositPercentPickup = 0.5m;
 
         public CheckoutController(
             ApplicationDbContext db,
             CartService cart,
             UserManager<ApplicationUser> userManager,
             IEmailSender emailSender,
-            ILogger<CheckoutController> logger)
+            ILogger<CheckoutController> logger,
+            IOptions<PaymentSettings> paymentOptions)
         {
             _db = db;
             _cart = cart;
             _userManager = userManager;
             _emailSender = emailSender;
             _logger = logger;
+            _payCfg = paymentOptions.Value;
         }
 
-        // ===============================
+        // =========================================
         // GET: /Checkout?selected=1,3,9
-        // ===============================
+        // =========================================
         [HttpGet]
         public async Task<IActionResult> Index(string? selected, CancellationToken ct)
         {
             var items = _cart.GetCartItems();
 
-            // Nếu có danh sách được chọn -> lọc
+            // Lọc theo danh sách sản phẩm được chọn (nếu có)
             int[]? selectedIds = null;
             if (!string.IsNullOrWhiteSpace(selected))
             {
@@ -83,6 +90,7 @@ namespace MotorShop.Controllers
                 .AsNoTracking()
                 .ToListAsync(ct);
 
+            // Lấy trạng thái checkout từ Session (giữ lại giữa GET / POST)
             var ss = _cart.GetCheckoutSession() ?? new CartService.CheckoutSession
             {
                 DeliveryMethod = DeliveryMethod.HomeDelivery,
@@ -100,6 +108,7 @@ namespace MotorShop.Controllers
                 Subtotal = items.Sum(i => i.Subtotal),
                 ShippingFee = CalculateShipping(ss.DeliveryMethod),
                 DiscountAmount = 0,
+
                 DeliveryMethod = ss.DeliveryMethod,
                 PaymentMethod = ss.PaymentMethod,
                 ReceiverName = ss.ReceiverName,
@@ -107,34 +116,38 @@ namespace MotorShop.Controllers
                 ReceiverEmail = ss.ReceiverEmail,
                 ShippingAddress = ss.ShippingAddress,
                 PickupBranchId = ss.PickupBranchId,
+
                 SelectedBankCode = string.IsNullOrWhiteSpace(ss.SelectedBankCode)
                     ? banks.FirstOrDefault()?.Code
                     : ss.SelectedBankCode,
+
                 CardHolder = ss.CardHolder,
                 CardNumber = "",
                 CardExpiry = ss.CardExpiry,
+
                 Banks = banks,
                 Branches = branches,
                 SelectedProductIds = selectedIds ?? items.Select(i => i.ProductId).ToArray()
             };
+
             vm.Total = vm.Subtotal + vm.ShippingFee - vm.DiscountAmount;
+
+            // Tính đặt cọc & QR cho màn hình GET
+            ApplyPaymentMeta(vm);
 
             return View(vm);
         }
 
-        // ============================================
-        // POST: /Checkout (đặt hàng + thanh toán mô phỏng)
-        // ============================================
-        // ============================================
-        // POST: /Checkout (đặt hàng + thanh toán mô phỏng)
-        // ============================================
+        // =========================================
+        // POST: /Checkout (đặt hàng)
+        // =========================================
         [HttpPost]
         public async Task<IActionResult> Index(CheckoutViewModel vm, CancellationToken ct)
         {
-            // 1. Lấy lại items hiện tại từ Session (Server-side authority - không tin client)
+            // 1. Lấy lại giỏ từ Session (không tin client gửi lên)
             var items = _cart.GetCartItems();
 
-            // Nếu người dùng chỉ chọn subset -> lọc lại theo SelectedProductIds
+            // Nếu chỉ thanh toán một phần giỏ -> lọc lại
             if (vm.SelectedProductIds is { Length: > 0 })
             {
                 var idSet = vm.SelectedProductIds.Distinct().ToHashSet();
@@ -147,7 +160,7 @@ namespace MotorShop.Controllers
                 return RedirectToAction("Index", "Products");
             }
 
-            // Lưu session checkout từ input user để giữ trạng thái nếu validation lỗi
+            // 2. Lưu session checkout (giữ dữ liệu nếu validate lỗi)
             var ss = _cart.GetCheckoutSession() ?? new CartService.CheckoutSession();
             ss.DeliveryMethod = vm.DeliveryMethod;
             ss.PaymentMethod = vm.PaymentMethod;
@@ -161,29 +174,22 @@ namespace MotorShop.Controllers
             ss.CardExpiry = vm.CardExpiry?.Trim();
             _cart.SaveCheckoutSession(ss);
 
-            // ==================================================================================
-            // [FIX LOGIC] TÍNH TOÁN LẠI TIỀN (Dùng biến cục bộ để ép buộc giá trị đúng)
-            // ==================================================================================
+            // 3. Tính tiền từ server
             var calculatedSubtotal = items.Sum(i => i.Subtotal);
-
-            // Tính phí ship dựa trên phương thức giao hàng user chọn (HomeDelivery = 30k, Store = 0)
             var calculatedShippingFee = CalculateShipping(vm.DeliveryMethod);
-
-            var calculatedDiscount = 0m; // Mở rộng sau này nếu có mã giảm giá
+            var calculatedDiscount = 0m;
             var calculatedTotal = calculatedSubtotal + calculatedShippingFee - calculatedDiscount;
 
-            // Cập nhật ngược lại vào ViewModel để hiển thị đúng nếu View được trả về (do lỗi validation)
             vm.Items = items;
             vm.Subtotal = calculatedSubtotal;
             vm.ShippingFee = calculatedShippingFee;
             vm.DiscountAmount = calculatedDiscount;
             vm.Total = calculatedTotal;
 
-            // ======================
-            // VALIDATIONS phía server
-            // ======================
+            // Tính đặt cọc + QR (trong trường hợp validate lỗi cũng cần hiển thị đúng)
+            ApplyPaymentMeta(vm);
 
-            // Thông tin người nhận
+            // 4. Validate thêm phía server (bổ sung cho IValidatableObject)
             if (string.IsNullOrWhiteSpace(vm.ReceiverName))
                 ModelState.AddModelError(nameof(vm.ReceiverName), "Vui lòng nhập tên người nhận.");
             if (string.IsNullOrWhiteSpace(vm.ReceiverPhone))
@@ -191,24 +197,16 @@ namespace MotorShop.Controllers
             if (string.IsNullOrWhiteSpace(vm.ReceiverEmail))
                 ModelState.AddModelError(nameof(vm.ReceiverEmail), "Vui lòng nhập email.");
 
-            // Giao nhận: địa chỉ/chi nhánh tuỳ phương thức
-            if (vm.DeliveryMethod == DeliveryMethod.HomeDelivery)
+            // Kiểm tra chi nhánh có tồn tại nếu chọn PickupAtStore
+            if (vm.DeliveryMethod == DeliveryMethod.PickupAtStore && vm.PickupBranchId.HasValue)
             {
-                if (string.IsNullOrWhiteSpace(vm.ShippingAddress))
-                    ModelState.AddModelError(nameof(vm.ShippingAddress), "Vui lòng nhập địa chỉ giao hàng.");
-            }
-            else // PickupAtStore
-            {
-                if (!vm.PickupBranchId.HasValue)
-                    ModelState.AddModelError(nameof(vm.PickupBranchId), "Vui lòng chọn chi nhánh nhận xe.");
-                else
-                {
-                    var branchOk = await _db.Branches.AnyAsync(b => b.IsActive && b.Id == vm.PickupBranchId.Value, ct);
-                    if (!branchOk) ModelState.AddModelError(nameof(vm.PickupBranchId), "Chi nhánh không hợp lệ.");
-                }
+                var branchOk = await _db.Branches
+                    .AnyAsync(b => b.IsActive && b.Id == vm.PickupBranchId.Value, ct);
+                if (!branchOk)
+                    ModelState.AddModelError(nameof(vm.PickupBranchId), "Chi nhánh không hợp lệ.");
             }
 
-            // Thanh toán
+            // Thanh toán thẻ: kiểm tra số thẻ & hạn
             string? last4 = null;
             if (vm.PaymentMethod == PaymentMethod.Card)
             {
@@ -221,11 +219,51 @@ namespace MotorShop.Controllers
                     last4 = digits[^4..];
             }
 
-            if (vm.PaymentMethod is PaymentMethod.Card or PaymentMethod.BankTransfer)
+            // ===========================
+            // Chuyển khoản / QR / Đặt cọc
+            // ===========================
+            if (vm.PaymentMethod == PaymentMethod.BankTransfer ||
+                vm.PaymentMethod == PaymentMethod.PayAtStore)
             {
-                var bankExists = await _db.Banks.AnyAsync(b => b.IsActive && b.Code == vm.SelectedBankCode, ct);
-                if (!bankExists)
-                    ModelState.AddModelError(nameof(vm.SelectedBankCode), "Vui lòng chọn ngân hàng hợp lệ.");
+                // Lấy danh sách bank đang active
+                var activeBanksQuery = _db.Banks.Where(b => b.IsActive);
+                var hasAnyBank = await activeBanksQuery.AnyAsync(ct);
+
+                if (hasAnyBank)
+                {
+                    // Nếu chưa chọn code → auto set bank đầu tiên để không bị lỗi khó chịu
+                    if (string.IsNullOrWhiteSpace(vm.SelectedBankCode))
+                    {
+                        var firstBank = await activeBanksQuery
+                            .OrderBy(b => b.SortOrder)
+                            .FirstOrDefaultAsync(ct);
+
+                        if (firstBank != null)
+                        {
+                            vm.SelectedBankCode = firstBank.Code;
+                            ss.SelectedBankCode = firstBank.Code;
+                            _cart.SaveCheckoutSession(ss);
+                        }
+                        else
+                        {
+                            ModelState.AddModelError(nameof(vm.SelectedBankCode),
+                                "Vui lòng chọn ngân hàng để chuyển khoản / nhận cọc.");
+                        }
+                    }
+                    else
+                    {
+                        var bankExists = await activeBanksQuery
+                            .AnyAsync(b => b.Code == vm.SelectedBankCode, ct);
+
+                        if (!bankExists)
+                        {
+                            ModelState.AddModelError(nameof(vm.SelectedBankCode),
+                                "Ngân hàng không hợp lệ.");
+                        }
+                    }
+                }
+                // Nếu KHÔNG có bản ghi bank nào trong DB:
+                // => dùng QR tĩnh từ PaymentSettings, không chặn ModelState.
             }
 
             if (!ModelState.IsValid)
@@ -234,9 +272,7 @@ namespace MotorShop.Controllers
                 return View(vm);
             }
 
-            // ======================
-            // Tạo đơn: transaction + concurrency
-            // ======================
+            // 5. Tạo đơn hàng trong transaction
             await using var tx = await _db.Database.BeginTransactionAsync(ct);
             try
             {
@@ -247,7 +283,7 @@ namespace MotorShop.Controllers
 
                 var map = products.ToDictionary(p => p.Id);
 
-                // Kiểm kho lần cuối
+                // Kiểm tra tồn kho
                 foreach (var ci in items)
                 {
                     if (!map.TryGetValue(ci.ProductId, out var prod))
@@ -266,26 +302,35 @@ namespace MotorShop.Controllers
 
                 var me = await _userManager.GetUserAsync(User);
 
-                // [FIX LOGIC] Sử dụng biến calculatedShippingFee và calculatedTotal thay vì vm.*
                 var order = new Order
                 {
                     UserId = me!.Id,
                     OrderDate = DateTime.UtcNow,
                     Status = OrderStatus.Processing,
 
-                    // QUAN TRỌNG: Gán giá trị từ biến tính toán cục bộ để đảm bảo chính xác
                     ShippingFee = calculatedShippingFee,
                     TotalAmount = calculatedTotal,
                     DiscountAmount = calculatedDiscount,
 
                     DeliveryMethod = vm.DeliveryMethod,
-                    PickupBranchId = vm.DeliveryMethod == DeliveryMethod.PickupAtStore ? vm.PickupBranchId : null,
-                    ShippingAddress = vm.DeliveryMethod == DeliveryMethod.HomeDelivery ? vm.ShippingAddress : null,
+                    PickupBranchId = vm.DeliveryMethod == DeliveryMethod.PickupAtStore
+                        ? vm.PickupBranchId
+                        : null,
+                    ShippingAddress = vm.DeliveryMethod == DeliveryMethod.HomeDelivery
+                        ? vm.ShippingAddress
+                        : null,
+
                     ReceiverName = vm.ReceiverName,
                     ReceiverPhone = vm.ReceiverPhone,
                     ReceiverEmail = vm.ReceiverEmail,
+                    CustomerNote = vm.CustomerNote,
+
                     PaymentMethod = vm.PaymentMethod,
-                    PaymentStatus = PaymentStatus.Pending
+                    PaymentStatus = PaymentStatus.Pending,
+
+                    DepositAmount = vm.DepositAmount,
+                    DepositNote = vm.DepositNote,
+                    SelectedBankCode = vm.SelectedBankCode
                 };
 
                 foreach (var ci in items)
@@ -299,65 +344,103 @@ namespace MotorShop.Controllers
                         UnitPrice = prod.Price
                     });
 
-                    // Trừ kho + chạm RowVersion (để concurrency check)
+                    // Trừ kho
                     prod.StockQuantity -= ci.Quantity;
                     prod.UpdatedAt = DateTime.UtcNow;
                     _db.Products.Update(prod);
                 }
 
-                // “Thanh toán mô phỏng”
-                if (vm.PaymentMethod is PaymentMethod.Card or PaymentMethod.BankTransfer)
+                // Xử lý trạng thái thanh toán theo phương thức
+                switch (vm.PaymentMethod)
                 {
-                    order.PaymentStatus = PaymentStatus.Paid;
-                    order.PaymentRef = $"MS{DateTime.UtcNow:yyyyMMddHHmmss}-{Random.Shared.Next(1000, 9999)}";
-                    if (last4 != null) order.CardLast4 = last4;
-                }
-                else
-                {
-                    order.PaymentStatus = PaymentStatus.Pending;
+                    case PaymentMethod.Card:
+                        // Giả lập đã thanh toán 100% qua cổng thẻ
+                        order.PaymentStatus = PaymentStatus.Paid;
+                        order.PaymentRef = BuildPaymentRef("CARD");
+                        order.CardLast4 = last4;
+                        break;
+
+                    case PaymentMethod.BankTransfer:
+                        // Chuyển khoản toàn bộ: chờ khách chuyển => Pending
+                        order.PaymentStatus = PaymentStatus.Pending;
+                        break;
+
+                    case PaymentMethod.PayAtStore:
+                        // Đặt cọc (50%) bằng chuyển khoản + thanh toán phần còn lại tại cửa hàng
+                        order.PaymentStatus = PaymentStatus.Pending;
+                        break;
+
+                    case PaymentMethod.CashOnDelivery:
+                        // Thanh toán khi nhận hàng
+                        order.PaymentStatus = PaymentStatus.Pending;
+                        break;
                 }
 
                 _db.Orders.Add(order);
                 await _db.SaveChangesAsync(ct);
                 await tx.CommitAsync(ct);
 
-                // ===== Email xác nhận (best-effort) =====
+                // 6. Gửi email xác nhận + QR nếu có
                 try
                 {
-                    var bankName = await _db.Banks
-                        .Where(b => b.Code == vm.SelectedBankCode)
-                        .Select(b => b.Name)
-                        .FirstOrDefaultAsync(ct);
+                    string? bankName = null;
+                    if (!string.IsNullOrWhiteSpace(vm.SelectedBankCode))
+                    {
+                        bankName = await _db.Banks
+                            .Where(b => b.Code == vm.SelectedBankCode)
+                            .Select(b => b.Name)
+                            .FirstOrDefaultAsync(ct);
+                    }
 
                     string? branchName = null;
                     if (order.PickupBranchId.HasValue)
+                    {
                         branchName = await _db.Branches
                             .Where(b => b.Id == order.PickupBranchId.Value)
                             .Select(b => b.Name)
                             .FirstOrDefaultAsync(ct);
+                    }
 
-                    var emailHtml = BuildPaymentEmailHtml(order, items, bankName, branchName);
+                    // Tạo QR cho email nếu phương thức dùng QR
+                    string? qrUrlForEmail = null;
+                    if (PaymentUsesQr(order.PaymentMethod))
+                    {
+                        var amount = order.DepositAmount ?? order.TotalAmount;
+                        qrUrlForEmail = BuildQrImageUrl(
+                            amount,
+                            order.ReceiverName ?? string.Empty,
+                            order.Id);
+                    }
+
+                    var emailHtml = BuildPaymentEmailHtml(
+                        order,
+                        items,
+                        bankName,
+                        branchName,
+                        qrUrlForEmail);
+
                     var to = order.ReceiverEmail ?? me.Email ?? "";
                     if (!string.IsNullOrWhiteSpace(to))
                         await _emailSender.SendEmailAsync(to, SD.EmailSubject_PaymentConfirmation, emailHtml);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "Gửi email xác nhận thanh toán thất bại (OrderId={OrderId})", 0);
+                    _logger.LogWarning(ex, "Gửi email xác nhận thanh toán thất bại (OrderId={OrderId})", order.Id);
                 }
 
-                // Clear session/giỏ
+                // 7. Clear giỏ
                 _cart.ClearCheckoutSession();
                 _cart.RemovePurchasedItems(items.Select(i => i.ProductId));
 
-                TempData[SD.Temp_Success] = "Đặt hàng thành công. Chúng tôi đã gửi email xác nhận.";
-                return RedirectToAction("History", "Order");
+                TempData[SD.Temp_Success] = "Đặt hàng thành công. Chúng tôi đã gửi email xác nhận cho bạn.";
+                return RedirectToAction(nameof(Success), new { id = order.Id });
             }
             catch (DbUpdateConcurrencyException ex)
             {
                 await tx.RollbackAsync(ct);
                 _logger.LogError(ex, "Lỗi cạnh tranh dữ liệu khi đặt hàng.");
-                ModelState.AddModelError(string.Empty, "Một số sản phẩm vừa được cập nhật tồn kho. Vui lòng kiểm tra lại giỏ hàng.");
+                ModelState.AddModelError(string.Empty,
+                    "Một số sản phẩm vừa được cập nhật tồn kho. Vui lòng kiểm tra lại giỏ hàng.");
             }
             catch (Exception ex)
             {
@@ -370,8 +453,149 @@ namespace MotorShop.Controllers
             return View(vm);
         }
 
-        // (Tùy chọn cho UI động) — báo giá nhanh khi đổi phương thức/chi nhánh
-        // GET: /Checkout/Quote?method=HomeDelivery&selected=1,2,3
+        // =========================================
+        // TRANG THÔNG BÁO ĐẶT HÀNG THÀNH CÔNG
+        // GET: /Checkout/Success/5
+        // =========================================
+        [HttpGet]
+        public async Task<IActionResult> Success(int id, CancellationToken ct)
+        {
+            var userId = _userManager.GetUserId(User);
+
+            var order = await _db.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .FirstOrDefaultAsync(o => o.Id == id, ct);
+
+            if (order == null || order.UserId != userId)
+            {
+                return RedirectToAction("History", "Order");
+            }
+
+            var lines = order.OrderItems.Select(oi => new CheckoutLineVm
+            {
+                Name = oi.Product?.Name ?? "Sản phẩm",
+                Quantity = oi.Quantity,
+                UnitPrice = oi.UnitPrice,
+                ImageUrl = null
+            }).ToList();
+
+            var subtotal = lines.Sum(l => l.Subtotal);
+
+            var requiresDeposit = order.DepositAmount.HasValue && order.DepositAmount.Value > 0;
+            var depositAmount = order.DepositAmount ?? 0m;
+            var remaining = order.TotalAmount - depositAmount;
+
+            string? branchName = null;
+            if (order.PickupBranchId.HasValue)
+            {
+                branchName = await _db.Branches
+                    .Where(b => b.Id == order.PickupBranchId.Value)
+                    .Select(b => b.Name)
+                    .FirstOrDefaultAsync(ct);
+            }
+
+            // ===== QR THANH TOÁN =====
+            string? paymentQrUrl = null;
+            string? paymentQrDesc = null;
+            if (PaymentUsesQr(order.PaymentMethod))
+            {
+                var amount = requiresDeposit ? depositAmount : order.TotalAmount;
+                paymentQrUrl = BuildQrImageUrl(
+                    amount,
+                    order.ReceiverName ?? string.Empty,
+                    order.Id);
+
+                paymentQrDesc = requiresDeposit
+                    ? $"Quét mã QR để thanh toán tiền đặt cọc khoảng {depositAmount:#,0} ₫."
+                    : $"Quét mã QR để thanh toán toàn bộ đơn hàng khoảng {order.TotalAmount:#,0} ₫.";
+            }
+
+            // ===== QR ĐƠN HÀNG (link tra cứu / chi tiết) =====
+            // URL tuyệt đối tới trang xem chi tiết hoặc tra cứu đơn
+            var orderUrl = Url.Action("Details", "Order",
+                new { id = order.Id },
+                protocol: Request.Scheme);
+
+            var orderQrDesc =
+                $"Quét mã để mở nhanh thông tin đơn hàng #{order.Id} trên MotorShop.";
+
+            var vm = new OrderSuccessViewModel
+            {
+                OrderId = order.Id,
+                OrderDate = order.OrderDate,
+
+                ReceiverName = order.ReceiverName,
+                ReceiverPhone = order.ReceiverPhone,
+                ReceiverEmail = order.ReceiverEmail,
+
+                DeliveryMethod = order.DeliveryMethod,
+                ShippingAddress = order.ShippingAddress,
+                BranchName = branchName,
+
+                Subtotal = subtotal,
+                ShippingFee = order.ShippingFee,
+                DiscountAmount = order.DiscountAmount,
+                Total = order.TotalAmount,
+
+                RequiresDeposit = requiresDeposit,
+                DepositAmount = depositAmount,
+                RemainingAmount = remaining,
+
+                PaymentMethod = order.PaymentMethod,
+                PaymentStatus = order.PaymentStatus,
+                PaymentMethodLabel = GetPaymentMethodLabel(order.PaymentMethod, order.DeliveryMethod),
+
+                // QR THANH TOÁN
+                QrPayload = paymentQrUrl,
+                QrDescription = paymentQrDesc,
+
+                // QR ĐƠN HÀNG
+                OrderQrPayload = orderUrl,
+                OrderQrDescription = orderQrDesc,
+
+                Items = lines
+            };
+
+            return View(vm);
+        }
+
+        // =========================================
+        // POST: /Checkout/ConfirmPayment/5
+        // =========================================
+        [HttpPost]
+        public async Task<IActionResult> ConfirmPayment(int id, CancellationToken ct)
+        {
+            var userId = _userManager.GetUserId(User);
+
+            var order = await _db.Orders
+                .FirstOrDefaultAsync(o => o.Id == id && o.UserId == userId, ct);
+
+            if (order == null)
+            {
+                TempData[SD.Temp_Error] = "Không tìm thấy đơn hàng.";
+                return RedirectToAction("History", "Order");
+            }
+
+            if (order.PaymentStatus != PaymentStatus.Paid)
+            {
+                order.PaymentStatus = PaymentStatus.Paid;
+
+                if (string.IsNullOrWhiteSpace(order.PaymentRef))
+                {
+                    order.PaymentRef = BuildPaymentRef("QR");
+                }
+
+                await _db.SaveChangesAsync(ct);
+            }
+
+            TempData[SD.Temp_Success] = "Thanh toán thành công. Cảm ơn bạn!";
+            return RedirectToAction(nameof(Success), new { id = order.Id });
+        }
+
+        // =========================================
+        // API báo giá nhanh (đổi phương thức / chi nhánh)
+        // =========================================
         [HttpGet]
         [Produces("application/json")]
         public IActionResult Quote(DeliveryMethod method, string? selected)
@@ -380,11 +604,12 @@ namespace MotorShop.Controllers
 
             if (!string.IsNullOrWhiteSpace(selected))
             {
-                var idSet = selected.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-                                    .Select(s => int.TryParse(s, out var x) ? x : (int?)null)
-                                    .Where(x => x.HasValue)
-                                    .Select(x => x!.Value)
-                                    .ToHashSet();
+                var idSet = selected
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    .Select(s => int.TryParse(s, out var x) ? x : (int?)null)
+                    .Where(x => x.HasValue)
+                    .Select(x => x!.Value)
+                    .ToHashSet();
                 items = items.Where(i => idSet.Contains(i.ProductId)).ToList();
             }
 
@@ -394,6 +619,8 @@ namespace MotorShop.Controllers
 
             return Ok(new { success = true, subtotal, shipping, total });
         }
+
+        // ================== HELPERS ==================
 
         private static decimal CalculateShipping(DeliveryMethod method)
             => method == DeliveryMethod.HomeDelivery ? 30000m : 0m;
@@ -416,6 +643,53 @@ namespace MotorShop.Controllers
                 vm.SelectedBankCode = vm.Banks.FirstOrDefault()?.Code;
         }
 
+        private void ApplyPaymentMeta(CheckoutViewModel vm)
+        {
+            vm.RequiresDeposit = vm.DeliveryMethod == DeliveryMethod.PickupAtStore;
+
+            vm.DepositAmount = null;
+            vm.DepositNote = null;
+            vm.TransferQrUrl = null;
+
+            if (vm.RequiresDeposit)
+            {
+                vm.DepositAmount = Math.Round(vm.Total * DepositPercentPickup, 0);
+                vm.DepositNote =
+                    $"Nhận xe tại cửa hàng: vui lòng đặt cọc {DepositPercentPickup:P0} đơn hàng " +
+                    $"(khoảng {vm.DepositAmount.Value:#,0} ₫). Phần còn lại thanh toán tại quầy khi nhận xe.";
+            }
+
+            if (PaymentUsesQr(vm.PaymentMethod) && vm.Total > 0)
+            {
+                var amount = vm.DepositAmount ?? vm.Total;
+                vm.TransferQrUrl = BuildQrImageUrl(
+                    amount,
+                    vm.ReceiverName ?? string.Empty,
+                    null);
+            }
+        }
+
+        private bool PaymentUsesQr(PaymentMethod method)
+            => method == PaymentMethod.BankTransfer
+               || method == PaymentMethod.PayAtStore;
+
+        private string BuildPaymentRef(string prefix)
+            => $"{prefix}{DateTime.UtcNow:yyyyMMddHHmmss}-{Random.Shared.Next(1000, 9999)}";
+
+        private string BuildQrImageUrl(decimal amount, string customerName, int? orderId)
+        {
+            var info = orderId.HasValue
+                ? $"Thanh toan don MS#{orderId} {customerName}"
+                : $"Thanh toan MotorShop {customerName}";
+
+            var encodedInfo = Uri.EscapeDataString(info);
+            var encodedName = Uri.EscapeDataString(_payCfg.AccountName ?? string.Empty);
+            var intAmount = (int)Math.Round(amount, 0);
+
+            return $"https://img.vietqr.io/image/{_payCfg.BankCode}-{_payCfg.AccountNumber}-compact2.png" +
+                   $"?amount={intAmount}&addInfo={encodedInfo}&accountName={encodedName}";
+        }
+
         private static bool LuhnValid(string digits)
         {
             var sum = 0; var alt = false;
@@ -436,7 +710,6 @@ namespace MotorShop.Controllers
         private static bool CardExpiryValid(string? expiry)
         {
             if (string.IsNullOrWhiteSpace(expiry)) return false;
-            // Hỗ trợ "MM/YY" hoặc "MM/YYYY"
             var parts = expiry.Split('/', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
             if (parts.Length != 2) return false;
             if (!int.TryParse(parts[0], out var mm) || mm < 1 || mm > 12) return false;
@@ -451,7 +724,27 @@ namespace MotorShop.Controllers
             catch { return false; }
         }
 
-        private static string BuildPaymentEmailHtml(Order order, List<CartItem> items, string? bankName, string? branchName)
+        private string GetPaymentMethodLabel(PaymentMethod method, DeliveryMethod delivery)
+        {
+            return method switch
+            {
+                PaymentMethod.Card => "Thẻ ngân hàng (Visa/MasterCard/ATM)",
+                PaymentMethod.BankTransfer => "Chuyển khoản / QR ngân hàng",
+                PaymentMethod.CashOnDelivery => "Thanh toán khi nhận hàng (COD)",
+                PaymentMethod.PayAtStore when delivery == DeliveryMethod.PickupAtStore
+                    => "Đặt cọc & thanh toán tại cửa hàng",
+                PaymentMethod.PayAtStore => "Thanh toán tại cửa hàng",
+                _ => method.ToString()
+            };
+        }
+
+        // ============ EMAIL TEMPLATE ============
+        private static string BuildPaymentEmailHtml(
+            Order order,
+            List<CartItem> items,
+            string? bankName,
+            string? branchName,
+            string? qrUrl)
         {
             var sb = new StringBuilder();
             sb.Append($@"
@@ -511,7 +804,23 @@ namespace MotorShop.Controllers
               <tr>
                 <td align='left' style='padding:6px 0;color:#6b7280'>Giảm giá</td>
                 <td align='right' style='padding:6px 0;font-weight:600'>-{order.DiscountAmount.ToString("#,0")} ₫</td>
+              </tr>");
+
+            if (order.DepositAmount.HasValue && order.DepositAmount.Value > 0)
+            {
+                var remain = order.TotalAmount - order.DepositAmount.Value;
+                sb.Append($@"
+              <tr>
+                <td align='left' style='padding:6px 0;color:#6b7280'>Tiền đặt cọc</td>
+                <td align='right' style='padding:6px 0;font-weight:600'>{order.DepositAmount.Value.ToString("#,0")} ₫</td>
               </tr>
+              <tr>
+                <td align='left' style='padding:6px 0;color:#6b7280'>Còn lại (dự kiến)</td>
+                <td align='right' style='padding:6px 0;font-weight:600'>{remain.ToString("#,0")} ₫</td>
+              </tr>");
+            }
+
+            sb.Append($@"
               <tr>
                 <td align='left' style='padding:10px 0;font-size:16px;font-weight:700'>Tổng thanh toán</td>
                 <td align='right' style='padding:10px 0;font-size:16px;font-weight:800;color:#111827'>{order.TotalAmount.ToString("#,0")} ₫</td>
@@ -540,7 +849,28 @@ namespace MotorShop.Controllers
             if (!string.IsNullOrWhiteSpace(order.CardLast4))
                 sb.Append($@"<p style='margin:0;color:#6b7280'>Thẻ: **** **** **** <b>{HtmlEncoder.Default.Encode(order.CardLast4)}</b></p>");
             if (!string.IsNullOrWhiteSpace(bankName))
-                sb.Append($@"<p style='margin:0;color:#6b7280'>Ngân hàng: <b>{HtmlEncoder.Default.Encode(bankName)}</b></p>");
+                sb.Append($@"<p style='margin:0 0 6px;color:#6b7280'>Ngân hàng: <b>{HtmlEncoder.Default.Encode(bankName)}</b></p>");
+
+            if (!string.IsNullOrWhiteSpace(order.DepositNote))
+                sb.Append($@"<p style='margin:4px 0 10px;color:#4b5563;font-size:13px'>{HtmlEncoder.Default.Encode(order.DepositNote)}</p>");
+
+            if (!string.IsNullOrWhiteSpace(qrUrl))
+            {
+                var payNow = (order.DepositAmount ?? order.TotalAmount).ToString("#,0");
+                sb.Append($@"
+            <div style='margin:18px 0 4px;padding:14px;border-radius:12px;background:#eff6ff;border:1px solid #bfdbfe'>
+              <p style='margin:0 0 8px;font-weight:600;color:#1d4ed8'>Mã QR thanh toán đơn hàng</p>
+              <p style='margin:0 0 10px;font-size:13px;color:#4b5563'>
+                Số tiền: <b>{payNow} ₫</b><br/>
+                Vui lòng kiểm tra đúng tên chủ tài khoản, số tiền và nội dung chuyển khoản.
+              </p>
+              <div style='text-align:center'>
+                <img src='{HtmlEncoder.Default.Encode(qrUrl)}'
+                     alt='QR chuyển khoản'
+                     style='max-width:220px;width:100%;border-radius:10px;border:1px solid #d1d5db' />
+              </div>
+            </div>");
+            }
 
             sb.Append($@"
             <div style='margin:24px 0 4px;height:1px;background:#e5e7eb'></div>

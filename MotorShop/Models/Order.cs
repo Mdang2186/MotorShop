@@ -58,6 +58,16 @@ namespace MotorShop.Models
 
         [StringLength(100)]
         public string? TrackingCode { get; set; }
+
+        // Ngân hàng khách đã chọn khi chuyển khoản / đặt cọc
+        [StringLength(50)]
+        public string? SelectedBankCode { get; set; }
+        // ====== THÊM MỚI ======
+        [Range(0, double.MaxValue)]
+        public decimal? DepositAmount { get; set; }
+
+        [StringLength(255)]
+        public string? DepositNote { get; set; }
         public List<OrderItem> OrderItems { get; set; } = new();
     }
 }

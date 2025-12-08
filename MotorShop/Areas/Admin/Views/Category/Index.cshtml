@@ -1,65 +1,202 @@
-﻿@model IEnumerable<MotorShop.Models.Category>
+﻿@model IEnumerable<MotorShop.Areas.Admin.Controllers.CategoryController.CategoryListItemVM>
 @{
     ViewData["Title"] = "Quản lý danh mục";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="md:flex md:items-center md:justify-between mb-6">
-    <div class="min-w-0 flex-1">
-        <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl tracking-tight">Quản lý danh mục</h2>
-        <p class="mt-1 text-sm text-gray-500">Danh sách tất cả danh mục sản phẩm hiện có trên hệ thống.</p>
+@section Head {
+    <style>
+        /* Card 3D Neon */
+        .cat-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-radius: 24px;
+            padding: 24px;
+            border: 1px solid white;
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+        }
+
+            .cat-card:hover {
+                transform: translateY(-8px);
+                box-shadow: 0 20px 40px -5px rgba(99, 102, 241, 0.15);
+                border-color: #c4b5fd;
+            }
+
+        .cat-icon-box {
+            width: 56px;
+            height: 56px;
+            border-radius: 18px;
+            display: grid;
+            place-items: center;
+            font-size: 26px;
+            color: white;
+            background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+            box-shadow: 0 8px 20px -5px rgba(59, 130, 246, 0.4);
+            margin-bottom: 20px;
+        }
+
+        .cat-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .cat-desc {
+            font-size: 13px;
+            color: #64748b;
+            line-height: 1.6;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        /* Hover Actions */
+        .cat-actions {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            opacity: 0;
+            transform: translateX(10px);
+            transition: 0.3s;
+            display: flex;
+            gap: 8px;
+        }
+
+        .cat-card:hover .cat-actions {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .btn-action {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            border: none;
+            display: grid;
+            place-items: center;
+            transition: 0.2s;
+            background: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+            .btn-action:hover {
+                transform: scale(1.1);
+            }
+
+        .btn-edit {
+            color: #3b82f6;
+        }
+
+        .btn-delete {
+            color: #ef4444;
+        }
+
+        /* Stats Badge */
+        .stat-badge {
+            background: #f1f5f9;
+            border-radius: 12px;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #475569;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .stat-count {
+            background: white;
+            padding: 2px 8px;
+            border-radius: 6px;
+            color: #6366f1;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+    </style>
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-end mb-5 fade-in-up">
+    <div>
+        <h2 class="fw-bolder mb-1 h-value">Danh mục sản phẩm</h2>
+        <p class="text-muted mb-0 small">Phân loại và tổ chức kho hàng.</p>
     </div>
-    <div class="mt-4 flex md:ml-4 md:mt-0">
-        <a asp-action="Create" class="inline-flex items-center rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 transition-all duration-200">
-            <i class="fa-solid fa-plus mr-2"></i>
-            Thêm danh mục mới
+
+    <div class="d-flex gap-2">
+        <form asp-action="Index" method="get" class="d-flex bg-white p-1 rounded-pill shadow-sm border">
+            <input type="text" name="q" value="@ViewBag.Q" class="form-control border-0 bg-transparent rounded-pill ps-3" placeholder="Tìm kiếm..." style="font-size: 13px; width: 200px;">
+            <button class="btn btn-primary rounded-circle d-grid place-items-center" style="width: 36px; height: 36px; background: var(--grad-primary); border: none;"><i class="bi bi-search"></i></button>
+        </form>
+
+        <div class="vr my-2 opacity-25"></div>
+
+        <form asp-action="ExportExcel" method="post">
+            <input type="hidden" name="q" value="@ViewBag.Q" />
+            <button class="btn btn-light rounded-circle shadow-sm" style="width: 42px; height: 42px;" title="Xuất Excel"><i class="bi bi-file-earmark-excel text-success"></i></button>
+        </form>
+        <form asp-action="ExportPdf" method="post">
+            <input type="hidden" name="q" value="@ViewBag.Q" />
+            <button class="btn btn-light rounded-circle shadow-sm" style="width: 42px; height: 42px;" title="Xuất PDF"><i class="bi bi-file-earmark-pdf text-danger"></i></button>
+        </form>
+
+        <a asp-action="Create" class="btn btn-primary rounded-pill px-4 fw-bold shadow-lg d-flex align-items-center gap-2 ms-2"
+           style="background: var(--grad-primary); border: none;">
+            <i class="bi bi-plus-lg"></i> Thêm mới
         </a>
     </div>
 </div>
 
-<div class="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-xl overflow-hidden">
-    <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead>
-                <tr class="bg-gray-50">
-                    <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 sm:pl-6">Tên danh mục</th>
-                    <th scope="col" class="px-3 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Mô tả</th>
-                    <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">Thao tác</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200 bg-white">
-                @if (Model != null && Model.Any())
-                {
-                    foreach (var item in Model)
-                    {
-                        <tr class="hover:bg-gray-50 transition-colors duration-150">
-                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                                @item.Name
-                            </td>
-                            <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                                <div class="flex justify-end gap-2">
-                                    <a asp-action="Edit" asp-route-id="@item.Id" class="text-blue-600 bg-blue-50 hover:bg-blue-100 hover:text-blue-800 px-3 py-1.5 rounded-md transition-colors duration-200 flex items-center">
-                                        <i class="fa-regular fa-pen-to-square mr-1.5"></i>Sửa
-                                    </a>
-                                    <a asp-action="Delete" asp-route-id="@item.Id" class="text-red-600 bg-red-50 hover:bg-red-100 hover:text-red-800 px-3 py-1.5 rounded-md transition-colors duration-200 flex items-center">
-                                        <i class="fa-regular fa-trash-can mr-1.5"></i>Xoá
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                }
-                else
-                {
-                    <tr>
-                        <td colspan="3" class="px-6 py-10 text-center text-gray-500 bg-gray-50">
-                            <div class="flex flex-col items-center">
-                                <i class="fa-regular fa-folder-open text-4xl mb-3 text-gray-300"></i>
-                                <p>Chưa có dữ liệu danh mục nào.</p>
-                            </div>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+<div class="row g-4 fade-in-up delay-1">
+    @foreach (var item in Model)
+    {
+        <div class="col-md-6 col-lg-4 col-xl-3">
+            <div class="cat-card">
+                <div class="cat-actions">
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn-action btn-edit" title="Sửa">
+                        <i class="bi bi-pencil-fill"></i>
+                    </a>
+                    <form asp-action="Delete" asp-route-id="@item.Id" method="post" onsubmit="return confirm('Xóa danh mục này?');">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn-action btn-delete" title="Xóa">
+                            <i class="bi bi-trash3-fill"></i>
+                        </button>
+                    </form>
+                </div>
+
+                <div>
+                    <div class="cat-icon-box">
+                        <i class="bi bi-grid-fill"></i>
+                    </div>
+                    <h5 class="cat-title">@item.Name</h5>
+                    <p class="cat-desc">@(string.IsNullOrEmpty(item.Description) ? "Chưa có mô tả." : item.Description)</p>
+                </div>
+
+                <div class="stat-badge mt-auto">
+                    <span><i class="bi bi-box-seam me-1"></i> Sản phẩm</span>
+                    <span class="stat-count">@item.ProductCount</span>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="col-md-6 col-lg-4 col-xl-3">
+        <a asp-action="Create" class="cat-card d-flex align-items-center justify-content-center text-decoration-none bg-light border-dashed"
+           style="border: 2px dashed #cbd5e1; background: rgba(255,255,255,0.4); box-shadow: none; cursor: pointer;">
+            <div class="text-center text-muted">
+                <div class="mb-3 p-3 rounded-circle bg-white shadow-sm d-inline-grid place-items-center" style="width: 60px; height: 60px;">
+                    <i class="bi bi-plus-lg fs-3 text-primary"></i>
+                </div>
+                <div class="fw-bold">Tạo danh mục mới</div>
+            </div>
+        </a>
     </div>
 </div>

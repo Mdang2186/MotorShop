@@ -4,7 +4,6 @@
 @{
     ViewData["Title"] = "Lịch sử mua hàng";
 
-    // Tránh đụng @page directive
     var currentStatus = ViewBag.Status as OrderStatus?;
     int pageIndex = ViewBag.Page ?? 1;
     int totalPages = ViewBag.TotalPages ?? 1;
@@ -14,134 +13,290 @@
 
     (string CssClass, string Icon, string DisplayText) GetStatusDetails(OrderStatus status) => status switch
     {
-        OrderStatus.Pending => ("bg-yellow-100 text-yellow-800", "fas fa-hourglass-half", "Chờ xử lý"),
-        OrderStatus.Processing => ("bg-blue-100 text-blue-800", "fas fa-rotate", "Đang xử lý"),
-        OrderStatus.Confirmed => ("bg-indigo-100 text-indigo-800", "fas fa-check-circle", "Đã xác nhận"),
-        OrderStatus.Shipping => ("bg-sky-100 text-sky-800", "fas fa-truck", "Đang giao"),
-        OrderStatus.Delivered => ("bg-emerald-100 text-emerald-800", "fas fa-clipboard-check", "Đã giao"),
-        OrderStatus.Completed => ("bg-green-100 text-green-800", "fas fa-badge-check", "Hoàn tất"),
-        OrderStatus.Cancelled => ("bg-rose-100 text-rose-800", "fas fa-times-circle", "Đã hủy"),
-        _ => ("bg-gray-100 text-gray-800", "fas fa-question-circle", "Không xác định")
+        OrderStatus.Pending => ("bg-amber-100 text-amber-800 border-amber-300", "fa-regular fa-clock", "Chờ xử lý"),
+        OrderStatus.Processing => ("bg-sky-100 text-sky-800 border-sky-300", "fa-solid fa-rotate-right", "Đang xử lý"),
+        OrderStatus.Confirmed => ("bg-indigo-100 text-indigo-800 border-indigo-300", "fa-solid fa-circle-check", "Đã xác nhận"),
+        OrderStatus.Shipping => ("bg-cyan-100 text-cyan-800 border-cyan-300", "fa-solid fa-truck-fast", "Đang giao"),
+        OrderStatus.Delivered => ("bg-emerald-100 text-emerald-800 border-emerald-300", "fa-solid fa-clipboard-check", "Đã giao"),
+        OrderStatus.Completed => ("bg-green-100 text-green-800 border-green-300", "fa-solid fa-badge-check", "Hoàn tất"),
+        OrderStatus.Cancelled => ("bg-rose-100 text-rose-800 border-rose-300", "fa-solid fa-circle-xmark", "Đã huỷ"),
+        _ => ("bg-slate-100 text-slate-800 border-slate-300", "fa-regular fa-circle-question", "Không xác định")
     };
 }
 
-<div class="bg-white border-b">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="py-8 text-center">
-            <h1 class="text-3xl font-extrabold text-gray-900">@ViewData["Title"]</h1>
-            <p class="mt-2 text-md text-gray-500">Theo dõi tất cả các đơn hàng đã đặt của bạn tại MotorShop.</p>
-        </div>
-    </div>
-</div>
+@section Head {
+    <style>
+        body {
+            background: radial-gradient(circle at top,#e0f2fe 0,#f9fafb 40%,#ffffff 100%);
+        }
 
-<div class="py-12 bg-gray-50">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        .card-glass {
+            background: rgba(255,255,255,.96);
+            backdrop-filter: blur(16px) saturate(160%);
+            border-radius: 20px;
+            border: 1px solid rgba(148,163,184,.28);
+            box-shadow: 0 20px 45px rgba(15,23,42,.12), 0 0 0 1px rgba(255,255,255,.7) inset;
+        }
+
+        .filter-pill {
+            border-radius: 999px;
+            padding: .45rem .9rem;
+            font-size: .8rem;
+            letter-spacing: .02em;
+            border-width: 1px;
+        }
+
+        .filter-pill--active {
+            background: linear-gradient(135deg,#0ea5e9,#6366f1);
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 0 0 1px rgba(56,189,248,.4),0 14px 30px rgba(37,99,235,.45);
+        }
+
+        .filter-pill--normal {
+            background: rgba(255,255,255,.9);
+            color: #0f172a;
+            border-color: rgba(148,163,184,.7);
+        }
+
+            .filter-pill--normal:hover {
+                background: #e5f0ff;
+            }
+
+        .status-chip {
+            border-radius: 999px;
+            padding: .25rem .7rem;
+            font-size: .78rem;
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+            font-weight: 600;
+            box-shadow: 0 0 0 1px rgba(255,255,255,.6) inset;
+        }
+
+        .btn-neon {
+            position: relative;
+            overflow: hidden;
+            border-radius: 999px;
+            border: none;
+            background: linear-gradient(135deg,#0ea5e9,#6366f1,#22c55e);
+            color: #fff;
+            font-weight: 600;
+            box-shadow: 0 16px 35px rgba(37,99,235,.45);
+            transition: transform .15s ease-out,box-shadow .15s ease-out;
+        }
+
+            .btn-neon:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 20px 45px rgba(37,99,235,.6);
+            }
+
+        .btn-outline {
+            border-radius: 999px;
+        }
+
+        .order-id-badge {
+            border-radius: 999px;
+            padding: .2rem .7rem;
+            font-size: .75rem;
+            background: rgba(15,23,42,.03);
+            border: 1px dashed rgba(148,163,184,.7);
+        }
+    </style>
+}
+
+<div class="relative py-10">
+    <div aria-hidden="true" class="pointer-events-none absolute -top-10 -right-10 w-72 h-72 rounded-full blur-3xl bg-sky-200/60"></div>
+    <div aria-hidden="true" class="pointer-events-none absolute -bottom-10 -left-10 w-80 h-80 rounded-full blur-3xl bg-indigo-200/50"></div>
+
+    <div class="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8 text-center">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-50 text-sky-700 text-xs font-medium border border-sky-200 mb-3">
+                <i class="fa-solid fa-motorcycle"></i>
+                Lịch sử mua hàng MotorShop
+            </div>
+            <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900">
+                @ViewData["Title"]
+            </h1>
+            <p class="mt-2 text-sm md:text-base text-slate-500">
+                Xem lại toàn bộ đơn đã đặt, trạng thái giao xe và hoá đơn thanh toán của bạn.
+            </p>
+        </div>
+
         <!-- Filter trạng thái -->
-        <div class="bg-white border rounded-xl p-3 mb-6">
-            <div class="flex flex-wrap gap-2">
-                <a class="px-3 py-1.5 rounded-xl border text-sm @(currentStatus == null ? "bg-gray-900 text-white border-gray-900" : "hover:bg-gray-50")"
-                   asp-action="History" asp-route-page="1" asp-route-pageSize="@pageSize">Tất cả</a>
+        <div class="card-glass mb-8 px-4 py-3 sm:px-5">
+            <div class="flex flex-wrap gap-2 items-center">
+                <span class="text-xs font-semibold text-slate-500 mr-2 uppercase tracking-wide">Lọc theo trạng thái</span>
+
+                <a asp-action="History"
+                   asp-route-page="1"
+                   asp-route-pageSize="@pageSize"
+                   class="filter-pill @(currentStatus == null ? "filter-pill--active" : "filter-pill--normal")">
+                    Tất cả
+                </a>
+
                 @foreach (OrderStatus st in Enum.GetValues(typeof(OrderStatus)))
                 {
                     var active = currentStatus == st;
-                    <a class="px-3 py-1.5 rounded-xl border text-sm @(active ? "bg-gray-900 text-white border-gray-900" : "hover:bg-gray-50")"
-                       asp-action="History" asp-route-status="@st" asp-route-page="1" asp-route-pageSize="@pageSize">@st</a>
+                    var details = GetStatusDetails(st);
+                    <a asp-action="History"
+                       asp-route-status="@st"
+                       asp-route-page="1"
+                       asp-route-pageSize="@pageSize"
+                       class="filter-pill @(active ? "filter-pill--active" : "filter-pill--normal")">
+                        <i class="@details.Icon @(active ? "text-white" : "text-slate-500") mr-1"></i>
+                        @details.DisplayText
+                    </a>
                 }
             </div>
         </div>
 
         @if (Model != null && Model.Any())
         {
-            <div class="flex items-center justify-between mb-4">
-                <div class="text-sm text-gray-500">Trang @pageIndex / @totalPages</div>
+            <div class="flex items-center justify-between mb-4 text-xs text-slate-500">
+                <div>Trang <span class="font-semibold">@pageIndex</span> / @totalPages</div>
+                <div>Hiển thị tối đa @pageSize đơn / trang</div>
             </div>
 
-            <div class="space-y-6">
+            <!-- List Orders -->
+            <div class="space-y-5">
                 @foreach (var order in Model)
                 {
-                    var statusInfo = GetStatusDetails(order.Status);
+                    var info = GetStatusDetails(order.Status);
 
-                    <div class="bg-white border rounded-lg shadow-sm overflow-hidden">
-                        <div class="bg-gray-50 px-6 py-4 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                    <article class="card-glass overflow-hidden">
+                        <!-- Header order -->
+                        <header class="px-5 sm:px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row gap-3 sm:gap-0 sm:items-center justify-between">
                             <div>
-                                <h3 class="font-bold text-lg text-gray-800">Mã đơn hàng: #@order.Id</h3>
-                                <p class="text-sm text-gray-500">Ngày đặt: @order.OrderDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <h3 class="text-lg font-bold text-slate-900">Đơn hàng #@order.Id</h3>
+                                    <span class="order-id-badge text-xs text-slate-600">
+                                        <i class="fa-regular fa-hashtag mr-1"></i>Mã: MS-@order.Id
+                                    </span>
+                                </div>
+                                <p class="text-xs sm:text-sm text-slate-500">
+                                    Đặt lúc: @order.OrderDate.ToLocalTime().ToString("HH:mm dd/MM/yyyy")
+                                </p>
                             </div>
-                            <div class="mt-2 sm:mt-0">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold @statusInfo.CssClass">
-                                    <i class="@statusInfo.Icon mr-2"></i>@statusInfo.DisplayText
+                            <div class="flex flex-col items-start sm:items-end gap-1">
+                                <span class="status-chip border @info.CssClass">
+                                    <i class="@info.Icon"></i>
+                                    @info.DisplayText
+                                </span>
+                                <span class="text-[11px] text-slate-400">
+                                    Cập nhật mới nhất theo thời gian hệ thống
                                 </span>
                             </div>
-                        </div>
+                        </header>
 
-                        <div class="p-6">
-                            <div class="space-y-4">
+                        <!-- Body: items -->
+                        <div class="px-5 sm:px-6 py-4">
+                            <div class="space-y-3">
                                 @foreach (var item in (order.OrderItems ?? new List<MotorShop.Models.OrderItem>()).Take(2))
                                 {
-                                    var img = item.Product?.ImageUrl ?? "https://placehold.co/100x100/e2e8f0/adb5bd?text=N/A";
-                                    var name = item.Product?.Name ?? ("#" + item.ProductId);
-                                    <div class="flex items-center">
-                                        <img src="@img" alt="@name" class="w-16 h-16 rounded-md object-cover mr-4 border">
-                                        <div class="flex-grow">
-                                            <p class="font-semibold text-gray-800">@name</p>
-                                            <p class="text-sm text-gray-500">Số lượng: @item.Quantity</p>
+                                    var img = item.Product?.ImageUrl ?? "https://placehold.co/100x100/e2e8f0/94a3b8?text=MS";
+                                    var name = item.Product?.Name ?? ("Sản phẩm #" + item.ProductId);
+                                    <div class="flex items-center gap-3">
+                                        <div class="relative">
+                                            <img src="@img" alt="@name" class="w-16 h-16 rounded-xl object-cover border border-slate-200 shadow-sm" />
+                                            <span class="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-slate-900 text-white text-[11px] grid place-items-center shadow">
+                                                @item.Quantity
+                                            </span>
                                         </div>
-                                        <p class="text-sm text-gray-700">@item.UnitPrice.ToString("N0") đ</p>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="font-semibold text-sm text-slate-900 truncate">@name</p>
+                                            <p class="text-xs text-slate-500 mt-0.5">
+                                                Đơn giá: @item.UnitPrice.ToString("N0") đ
+                                            </p>
+                                        </div>
+                                        <div class="text-right text-sm font-semibold text-slate-800 whitespace-nowrap">
+                                            @( (item.UnitPrice * item.Quantity).ToString("N0") ) đ
+                                        </div>
                                     </div>
                                 }
+
                                 @if ((order.OrderItems?.Count ?? 0) > 2)
                                 {
-                                    <p class="text-sm text-gray-500 text-center pt-2">… và @(order.OrderItems!.Count - 2) sản phẩm khác.</p>
+                                    <p class="text-xs text-slate-500 text-center pt-1">
+                                        … và @(order.OrderItems!.Count - 2) sản phẩm khác.
+                                    </p>
                                 }
                             </div>
                         </div>
 
-                        <div class="bg-gray-50 px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-                            <p class="text-lg font-bold text-gray-900">
-                                Tổng tiền:
-                                <span class="text-red-600">@order.TotalAmount.ToString("N0") đ</span>
-                            </p>
-                            <div class="flex items-center gap-2">
+                        <!-- Footer: tổng tiền + actions -->
+                        <footer class="px-5 sm:px-6 py-4 border-t border-slate-100 flex flex-col sm:flex-row gap-4 sm:gap-0 sm:items-center justify-between bg-slate-50/70">
+                            <div class="space-y-1">
+                                <p class="text-sm text-slate-500">Tổng thanh toán</p>
+                                <p class="text-xl font-extrabold text-emerald-600">
+                                    @order.TotalAmount.ToString("N0") đ
+                                </p>
+                                @if (order.DepositAmount.HasValue && order.DepositAmount.Value > 0)
+                                {
+                                    var remain = order.TotalAmount - order.DepositAmount.Value;
+                                    <p class="text-xs text-slate-500">
+                                        Đã đặt cọc: <span class="font-semibold">@order.DepositAmount.Value.ToString("N0") đ</span> —
+                                        Còn lại dự kiến: <span class="font-semibold">@remain.ToString("N0") đ</span>
+                                    </p>
+                                }
+                            </div>
+
+                            <div class="flex flex-wrap gap-2 justify-end">
                                 <a asp-action="Details" asp-route-id="@order.Id"
-                                   class="w-full sm:w-auto text-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-semibold transition-colors">
-                                    Xem chi tiết
+                                   class="btn-neon px-4 py-2 text-xs sm:text-sm inline-flex items-center justify-center gap-1">
+                                    <i class="fa-regular fa-eye"></i> Xem chi tiết
                                 </a>
+
                                 <a asp-action="Invoice" asp-route-id="@order.Id" target="_blank"
-                                   class="w-full sm:w-auto text-center px-4 py-2 border rounded-lg hover:bg-gray-50 text-sm">
-                                    Hóa đơn
+                                   class="btn-outline px-4 py-2 text-xs sm:text-sm border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 inline-flex items-center justify-center gap-1 rounded-full">
+                                    <i class="fa-solid fa-file-invoice"></i> Hoá đơn
                                 </a>
+
                                 <form asp-action="Reorder" asp-route-id="@order.Id" method="post" class="inline">
                                     @Html.AntiForgeryToken()
-                                    <button type="submit" class="w-full sm:w-auto text-center px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 text-sm">
-                                        Mua lại
+                                    <button type="submit"
+                                            class="btn-outline px-4 py-2 text-xs sm:text-sm border border-slate-900 text-slate-900 bg-slate-900/90 hover:bg-slate-900 inline-flex items-center justify-center gap-1 rounded-full">
+                                        <i class="fa-solid fa-rotate-right"></i> Mua lại
                                     </button>
                                 </form>
                             </div>
-                        </div>
-                    </div>
+                        </footer>
+                    </article>
                 }
             </div>
 
             <!-- Pagination -->
-            <div class="mt-6 flex items-center justify-center gap-2">
-                <a class="px-3 py-2 rounded-lg border text-sm hover:bg-gray-50 @(pageIndex <= 1 ? "pointer-events-none opacity-40" : "")"
-                   href="@(pageIndex > 1 ? Link(pageIndex - 1) : "#")">Trước</a>
-                <span class="text-sm text-gray-600">Trang @pageIndex / @totalPages</span>
-                <a class="px-3 py-2 rounded-lg border text-sm hover:bg-gray-50 @(pageIndex >= totalPages ? "pointer-events-none opacity-40" : "")"
-                   href="@(pageIndex<totalPages?Link(pageIndex+1):"#")">Sau</a>
+            <div class="mt-8 flex items-center justify-center gap-3 text-sm">
+                <a href="@(pageIndex > 1 ? Link(pageIndex - 1) : "#")"
+                   class="px-3 py-2 rounded-full border border-slate-300 bg-white hover:bg-slate-50 flex items-center gap-1
+                                      @(pageIndex <= 1 ? "pointer-events-none opacity-40" : "")">
+                    <i class="fa-solid fa-chevron-left text-xs"></i> Trước
+                </a>
+                <span class="text-slate-600">
+                    Trang <span class="font-semibold">@pageIndex</span> / @totalPages
+                </span>
+                <a href="@(pageIndex<totalPages? Link(pageIndex + 1) : "#")"
+                   class="px-3 py-2 rounded-full border border-slate-300 bg-white hover:bg-slate-50 flex items-center gap-1
+                                      @(pageIndex >= totalPages ? "pointer-events-none opacity-40" : "")">
+                    Sau <i class="fa-solid fa-chevron-right text-xs"></i>
+                </a>
             </div>
         }
         else
         {
-            <div class="text-center py-20 bg-white border rounded-lg">
-                <div class="flex items-center justify-center h-16 w-16 mx-auto bg-blue-100 rounded-full mb-4">
-                    <i class="fas fa-receipt text-3xl text-blue-600"></i>
+            <!-- Empty state -->
+            <div class="mt-6 card-glass text-center py-16">
+                <div class="flex items-center justify-center h-16 w-16 mx-auto rounded-full bg-sky-100 text-sky-600 mb-4 shadow-inner">
+                    <i class="fa-solid fa-cart-shopping text-2xl"></i>
                 </div>
-                <h2 class="text-xl font-semibold text-gray-900 mb-2">Bạn chưa có đơn hàng nào</h2>
-                <p class="text-gray-500 mb-6">Hãy bắt đầu khám phá và tìm cho mình chiếc xe ưng ý nhé!</p>
+                <h2 class="text-xl font-semibold text-slate-900 mb-2">Bạn chưa có đơn hàng nào</h2>
+                <p class="text-slate-500 mb-6 text-sm">
+                    Hãy bắt đầu khám phá và chọn cho mình chiếc xe ưng ý tại MotorShop.
+                </p>
                 <a asp-controller="Products" asp-action="Index"
-                   class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-300">
-                    Bắt đầu mua sắm
+                   class="btn-neon px-6 py-2.5 inline-flex items-center justify-center gap-2 text-sm">
+                    <i class="fa-solid fa-motorcycle"></i> Bắt đầu mua sắm
                 </a>
             </div>
         }

@@ -1,0 +1,143 @@
+﻿@model MotorShop.Models.Shipper
+@{
+    ViewData["Title"] = "Cập nhật đơn vị vận chuyển";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Head {
+    <style>
+        /* Reuse style from Create but Blue Theme */
+        .form-center-glass {
+            max-width: 600px;
+            margin: 2rem auto;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 20px 60px -10px rgba(59, 130, 246, 0.15);
+            border: 1px solid white;
+        }
+
+        .input-glass {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 14px 20px;
+            font-weight: 600;
+            color: #334155;
+            transition: 0.3s;
+        }
+
+            .input-glass:focus {
+                background: white;
+                border-color: #3b82f6;
+                box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+                outline: none;
+            }
+
+        .form-label-neon {
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: #94a3b8;
+            margin-bottom: 8px;
+            margin-left: 4px;
+            display: block;
+        }
+
+        .switch-card {
+            background: white;
+            border: 1px solid #f1f5f9;
+            border-radius: 16px;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+}
+
+<div class="container fade-in-up">
+    <div class="d-flex align-items-center justify-content-between mb-3" style="max-width: 600px; margin: 0 auto;">
+        <div class="d-flex align-items-center gap-3">
+            <a asp-action="Index" class="btn btn-light rounded-circle shadow-sm d-grid place-items-center" style="width: 45px; height: 45px;">
+                <i class="bi bi-arrow-left text-dark fs-5"></i>
+            </a>
+            <span class="text-muted fw-bold small text-uppercase">Quay lại</span>
+        </div>
+
+        <div class="dropdown">
+            <button class="btn btn-light rounded-pill shadow-sm fw-bold px-3 dropdown-toggle text-secondary" type="button" data-bs-toggle="dropdown">
+                <i class="bi bi-gear-fill me-1"></i> Tùy chọn
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-4 p-2">
+                <li>
+                    <form asp-action="Delete" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('Xóa đối tác này?');">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="dropdown-item rounded-3 text-danger fw-bold"><i class="bi bi-trash3 me-2"></i> Xóa đối tác</button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="form-center-glass">
+        <div class="text-center mb-5">
+            <div class="d-inline-flex p-3 rounded-4 mb-3 text-white shadow-lg" style="background: var(--grad-info);">
+                <i class="bi bi-pencil-square fs-2"></i>
+            </div>
+            <h2 class="fw-bolder mb-1 h-value text-dark">Cập nhật thông tin</h2>
+            <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill">ID: #@Model.Id</span>
+        </div>
+
+        <form asp-action="Edit" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-8">
+                    <label asp-for="Name" class="form-label-neon">Tên đơn vị <span class="text-danger">*</span></label>
+                    <input asp-for="Name" class="form-control input-glass" />
+                    <span asp-validation-for="Name" class="text-danger small fw-bold mt-1 d-block ps-2"></span>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="Code" class="form-label-neon">Mã (Code)</label>
+                    <input asp-for="Code" class="form-control input-glass text-uppercase font-monospace" />
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="Phone" class="form-label-neon">Hotline hỗ trợ</label>
+                <input asp-for="Phone" class="form-control input-glass" />
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="Note" class="form-label-neon">Ghi chú</label>
+                <textarea asp-for="Note" class="form-control input-glass" rows="3"></textarea>
+            </div>
+
+            <div class="switch-card mb-5">
+                <div>
+                    <label class="fw-bold d-block text-dark" for="IsActive">Trạng thái hoạt động</label>
+                    <small class="text-muted" style="font-size: 10px;">Bật/Tắt khả năng chọn shipper này</small>
+                </div>
+                <div class="form-check form-switch m-0">
+                    <input class="form-check-input" type="checkbox" asp-for="IsActive" style="transform: scale(1.2);">
+                </div>
+            </div>
+
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-lg py-3 border-0"
+                        style="background: var(--grad-info);">
+                    <i class="bi bi-floppy2-fill me-2"></i> Lưu thay đổi
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

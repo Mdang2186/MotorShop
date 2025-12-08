@@ -10,10 +10,13 @@ namespace MotorShop.Data.Seeders
     {
         public static async Task SeedAsync(ApplicationDbContext context)
         {
-            // Nếu đã có dữ liệu thì thôi
-            if (await context.BranchInventories.AnyAsync()) return;
+            // Nếu đã có dữ liệu thì bỏ qua
+            if (await context.BranchInventories.AnyAsync())
+                return;
 
+            // Chỉ lấy chi nhánh đang hoạt động
             var branches = await context.Branches
+                .Where(b => b.IsActive)
                 .OrderBy(b => b.Id)
                 .ToListAsync();
 
@@ -21,27 +24,20 @@ namespace MotorShop.Data.Seeders
                 .OrderBy(p => p.Id)
                 .ToListAsync();
 
-            if (!branches.Any() || !products.Any()) return;
+            if (!branches.Any() || !products.Any())
+                return;
 
             var inventories = new List<BranchInventory>();
 
             foreach (var product in products)
             {
-                // Tổng tồn kho hiện tại đang lưu trong Product.StockQuantity
                 var total = product.StockQuantity;
 
-                // Nếu sản phẩm rất ít (<= 3), cho chỉ 1 chi nhánh có hàng
-                if (total <= 3)
+                // Nếu không có tồn kho hoặc âm -> coi như 0
+                if (total <= 0)
                 {
-                    inventories.Add(new BranchInventory
-                    {
-                        BranchId = branches[0].Id,   // Hà Nội 1
-                        ProductId = product.Id,
-                        Quantity = total
-                    });
-
-                    // Các chi nhánh còn lại: hết hàng
-                    foreach (var br in branches.Skip(1))
+                    // Tạo bản ghi 0 cho tất cả chi nhánh để vẫn xem được
+                    foreach (var br in branches)
                     {
                         inventories.Add(new BranchInventory
                         {
@@ -50,31 +46,91 @@ namespace MotorShop.Data.Seeders
                             Quantity = 0
                         });
                     }
+                    continue;
                 }
-                else
+
+                int branchCount = branches.Count;
+
+                // Trường hợp chỉ có 1 chi nhánh -> dồn hết
+                if (branchCount == 1)
                 {
-                    // Chia tồn kho cho 5 chi nhánh, đảm bảo ít nhất 1 chi nhánh hết hàng
-                    int b1 = (int)(total * 0.4m);
-                    int b2 = (int)(total * 0.25m);
-                    int b3 = (int)(total * 0.2m);
-                    int b4 = (int)(total * 0.1m);
-
-                    int used = b1 + b2 + b3 + b4;
-                    int b5 = total - used;
-
-                    // Để “hết hàng” ở một số chi nhánh:
-                    // giả sử chi nhánh Đà Nẵng (index 2) đôi khi hết hàng
-                    if (b3 < 1)
+                    inventories.Add(new BranchInventory
                     {
-                        b3 = 0;
-                        b5 = total - (b1 + b2 + b4);
-                    }
+                        BranchId = branches[0].Id,
+                        ProductId = product.Id,
+                        Quantity = total
+                    });
+                    continue;
+                }
 
-                    inventories.Add(new BranchInventory { BranchId = branches[0].Id, ProductId = product.Id, Quantity = b1 });
-                    inventories.Add(new BranchInventory { BranchId = branches[1].Id, ProductId = product.Id, Quantity = b2 });
-                    inventories.Add(new BranchInventory { BranchId = branches[2].Id, ProductId = product.Id, Quantity = b3 }); // có thể = 0
-                    inventories.Add(new BranchInventory { BranchId = branches[3].Id, ProductId = product.Id, Quantity = b4 });
-                    inventories.Add(new BranchInventory { BranchId = branches[4].Id, ProductId = product.Id, Quantity = b5 });
+                // Trường hợp 2–4 chi nhánh: chia đều tương đối
+                if (branchCount > 1 && branchCount < 5)
+                {
+                    int baseQty = total / branchCount;
+                    int remainder = total % branchCount;
+
+                    for (int i = 0; i < branchCount; i++)
+                    {
+                        int qty = baseQty + (i < remainder ? 1 : 0);
+                        inventories.Add(new BranchInventory
+                        {
+                            BranchId = branches[i].Id,
+                            ProductId = product.Id,
+                            Quantity = qty
+                        });
+                    }
+                    continue;
+                }
+
+                // Trường hợp >= 5 chi nhánh:
+                // Dùng 5 chi nhánh đầu làm “chi nhánh chính”, các chi nhánh còn lại = 0
+                var mainBranches = branches.Take(5).ToList();
+                var otherBranches = branches.Skip(5).ToList();
+
+                int b1 = (int)(total * 0.40m);
+                int b2 = (int)(total * 0.25m);
+                int b3 = (int)(total * 0.20m);
+                int b4 = (int)(total * 0.10m);
+
+                int used = b1 + b2 + b3 + b4;
+                int b5 = total - used;
+
+                // Đảm bảo không bị âm (do làm tròn)
+                if (b5 < 0)
+                {
+                    b5 = 0;
+                }
+
+                // Nếu Chi nhánh 3 bị quá nhỏ thì cho “hết hàng”
+                if (b3 < 1)
+                {
+                    b3 = 0;
+                    used = b1 + b2 + b4;
+                    b5 = total - used;
+                    if (b5 < 0) b5 = 0;
+                }
+
+                var qtyList = new[] { b1, b2, b3, b4, b5 };
+
+                for (int i = 0; i < mainBranches.Count; i++)
+                {
+                    inventories.Add(new BranchInventory
+                    {
+                        BranchId = mainBranches[i].Id,
+                        ProductId = product.Id,
+                        Quantity = qtyList[i]
+                    });
+                }
+
+                // Các chi nhánh khác: chưa có hàng (0)
+                foreach (var br in otherBranches)
+                {
+                    inventories.Add(new BranchInventory
+                    {
+                        BranchId = br.Id,
+                        ProductId = product.Id,
+                        Quantity = 0
+                    });
                 }
             }
 

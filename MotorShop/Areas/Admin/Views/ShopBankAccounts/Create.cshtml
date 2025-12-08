@@ -1,0 +1,257 @@
+﻿@model MotorShop.Models.ShopBankAccount
+@using MotorShop.Models
+
+@{
+    ViewData["Title"] = "Thêm tài khoản mới";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var banks = ViewBag.Banks as IEnumerable<Bank>;
+}
+
+@section Head {
+    <style>
+        /* --- LAYOUT & CARD STYLES (Tái sử dụng từ trang Index) --- */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(15px);
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+            border: 1px solid rgba(255,255,255,0.5);
+            overflow: hidden;
+        }
+
+        .bank-card-preview {
+            width: 100%;
+            max-width: 380px;
+            height: 240px;
+            border-radius: 20px;
+            padding: 25px;
+            color: white;
+            position: relative;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* Default BG */
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            transition: all 0.5s ease;
+            margin: 0 auto;
+        }
+
+        .card-chip {
+            width: 50px;
+            height: 35px;
+            background: linear-gradient(135deg, #fceabb 0%, #f8b500 100%);
+            border-radius: 6px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .preview-number {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 26px;
+            letter-spacing: 2px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            margin-bottom: 15px;
+            word-break: break-all;
+        }
+
+        .preview-name {
+            text-transform: uppercase;
+            font-weight: 600;
+            font-size: 16px;
+            letter-spacing: 1px;
+        }
+
+        .preview-bank {
+            text-align: right;
+            font-style: italic;
+            font-weight: 800;
+            font-size: 20px;
+        }
+
+        /* --- FORM ELEMENTS --- */
+        .form-floating-custom > .form-control {
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            padding: 1rem 1rem;
+            height: auto;
+        }
+
+            .form-floating-custom > .form-control:focus {
+                box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+                border-color: #4f46e5;
+            }
+
+        .form-label-custom {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+            display: block;
+        }
+    </style>
+}
+
+<div class="container py-4 fade-in-up">
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <a asp-action="Index" class="btn btn-light rounded-circle shadow-sm" style="width:45px; height:45px; display:grid; place-items:center;">
+            <i class="fa-solid fa-arrow-left"></i>
+        </a>
+        <h2 class="fw-bolder mb-0">Thêm tài khoản ngân hàng</h2>
+    </div>
+
+    <div class="row g-5">
+        <div class="col-lg-7">
+            <div class="glass-panel p-4 p-md-5">
+                <form asp-action="Create" method="post" id="createBankForm">
+                    @Html.AntiForgeryToken()
+
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger small" role="alert"></div>
+                    <div class="mb-4">
+                        <label class="form-label-custom">Ngân hàng thụ hưởng</label>
+                        <select asp-for="BankId" id="inputBank" class="form-select form-select-lg rounded-3 shadow-sm border-2">
+                            <option value="" data-shortname="BANK NAME">-- Chọn ngân hàng --</option>
+                            @foreach (var bank in banks)
+                            {
+                                <option value="@bank.Id" data-shortname="@bank.ShortName">@bank.Code - @bank.Name</option>
+                            }
+                        </select>
+                        <span asp-validation-for="BankId" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-12">
+                            <label asp-for="AccountNumber" class="form-label-custom">Số tài khoản</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0 rounded-start-3 ps-3"><i class="fa-solid fa-credit-card text-muted"></i></span>
+                                <input asp-for="AccountNumber" id="inputNumber" class="form-control form-control-lg border-start-0 rounded-end-3" placeholder="Ví dụ: 1903..." />
+                            </div>
+                            <span asp-validation-for="AccountNumber" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label asp-for="AccountName" class="form-label-custom">Tên chủ tài khoản (Không dấu)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0 rounded-start-3 ps-3"><i class="fa-solid fa-user text-muted"></i></span>
+                                <input asp-for="AccountName" id="inputName" class="form-control form-control-lg border-start-0 rounded-end-3" placeholder="NGUYEN VAN A" style="text-transform: uppercase;" />
+                            </div>
+                            <span asp-validation-for="AccountName" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label asp-for="Branch" class="form-label-custom">Chi nhánh</label>
+                            <input asp-for="Branch" id="inputBranch" class="form-control rounded-3" placeholder="Vd: Chi nhánh Hà Nội" />
+                            <span asp-validation-for="Branch" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Note" class="form-label-custom">Ghi chú (Nội bộ)</label>
+                            <input asp-for="Note" class="form-control rounded-3" placeholder="Vd: Tài khoản chính" />
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-light rounded-3 mb-4 d-flex justify-content-between align-items-center">
+                        <div class="form-check form-switch ps-0">
+                            <label class="form-check-label fw-bold ms-5" for="switchDefault">Đặt làm mặc định</label>
+                            <input asp-for="IsDefault" class="form-check-input ms-0 fs-5" type="checkbox" role="switch" id="switchDefault" style="margin-right: 12px;">
+                            <div class="small text-muted ms-5">Ưu tiên hiển thị khi khách thanh toán</div>
+                        </div>
+                        <div class="vr mx-3"></div>
+                        <div class="form-check form-switch ps-0 text-end">
+                            <label class="form-check-label fw-bold me-5" for="switchActive">Đang hoạt động</label>
+                            <input asp-for="IsActive" class="form-check-input float-end fs-5" type="checkbox" role="switch" id="switchActive" checked>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill fw-bold shadow-lg" style="background: var(--grad-primary); border:none">
+                        <i class="fa-solid fa-floppy-disk me-2"></i> Lưu tài khoản
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div style="position: sticky; top: 100px;">
+                <h5 class="text-muted text-uppercase fw-bold small mb-3 ps-2">Xem trước hiển thị</h5>
+
+                <div class="bank-card-preview" id="cardPreview">
+                    <div class="d-flex justify-content-between">
+                        <div class="card-chip shadow-sm"></div>
+                        <div class="preview-bank" id="previewBankName">BANK NAME</div>
+                    </div>
+
+                    <div style="margin-top: 30px;">
+                        <div class="small opacity-75 mb-1">Số tài khoản</div>
+                        <div class="preview-number" id="previewNumber">0000 0000 0000</div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-end mt-4">
+                        <div>
+                            <div class="small opacity-75" style="font-size: 10px;">CHỦ TÀI KHOẢN</div>
+                            <div class="preview-name" id="previewName">YOUR NAME</div>
+                        </div>
+                        <div class="small" id="previewBranch">CN HÀ NỘI</div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4 text-muted small fst-italic">
+                    <i class="fa-solid fa-circle-info me-1"></i>
+                    Hình ảnh thẻ chỉ mang tính chất minh họa. Màu sắc sẽ được tạo ngẫu nhiên.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        // --- REAL-TIME PREVIEW LOGIC ---
+        const inputBank = document.getElementById('inputBank');
+        const inputNumber = document.getElementById('inputNumber');
+        const inputName = document.getElementById('inputName');
+        const inputBranch = document.getElementById('inputBranch');
+
+        const previewBank = document.getElementById('previewBankName');
+        const previewNumber = document.getElementById('previewNumber');
+        const previewName = document.getElementById('previewName');
+        const previewBranch = document.getElementById('previewBranch');
+        const cardPreview = document.getElementById('cardPreview');
+
+        // Màu gradient ngẫu nhiên cho thẻ khi tải trang
+        const gradients = [
+            'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+            'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+            'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+            'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            'linear-gradient(135deg, #8E2DE2 0%, #4A00E0 100%)'
+        ];
+        cardPreview.style.background = gradients[Math.floor(Math.random() * gradients.length)];
+
+        // Update Bank Name
+        inputBank.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            // Lấy tên ngắn từ attribute data-shortname (cần chỉnh lại option một chút ở HTML)
+            // Ở code trên tôi đã thêm data-shortname vào option
+            const shortName = selectedOption.getAttribute('data-shortname');
+            previewBank.innerText = shortName || "BANK NAME";
+        });
+
+        // Update Number
+        inputNumber.addEventListener('input', function() {
+            let val = this.value;
+            if(!val) val = "0000 0000 0000";
+            previewNumber.innerText = val;
+        });
+
+        // Update Name (Uppercase)
+        inputName.addEventListener('input', function() {
+            let val = this.value;
+            this.value = val.toUpperCase(); // Force Input Uppercase
+            previewName.innerText = val ? val.toUpperCase() : "YOUR NAME";
+        });
+
+        // Update Branch
+        inputBranch.addEventListener('input', function() {
+            previewBranch.innerText = this.value || "CHI NHÁNH";
+        });
+    </script>
+}

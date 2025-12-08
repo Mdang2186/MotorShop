@@ -1,181 +1,583 @@
 ﻿@model IEnumerable<MotorShop.Models.Order>
 @using MotorShop.Models.Enums
-@using MotorShop.Utilities
-
+@using MotorShop.Areas.Admin.Controllers
+@using static MotorShop.Areas.Admin.Controllers.OrderController
 @{
     ViewData["Title"] = "Quản lý đơn hàng";
-    var currentStatus = ViewBag.Status as OrderStatus?;
-    var pageIndex = (int)(ViewBag.Page ?? 1);
-    var totalPages = (int)(ViewBag.TotalPages ?? 1);
-    var q = Context.Request.Query["q"].ToString();
-    var from = Context.Request.Query["from"].ToString();
-    var to = Context.Request.Query["to"].ToString();
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 
-    var counts = ViewBag.StatusCounts as Dictionary<OrderStatus, int> ?? new Dictionary<OrderStatus, int>();
+    // Ép kiểu dữ liệu an toàn từ ViewBag
+    var statusCounts = ViewBag.StatusCounts as Dictionary<OrderStatus, int> ?? new Dictionary<OrderStatus, int>();
+    var riskDict = ViewBag.RiskDict as Dictionary<int, OrderRiskInfo>;
+    var slaDict = ViewBag.SlaDict as Dictionary<int, OrderSlaInfo>;
+    var savedFilters = ViewBag.SavedFilters as List<SavedOrderFilter>;
 
-    string ActiveClass(OrderStatus? s) => currentStatus == s
-        ? "ring-2 ring-offset-2 ring-blue-500 shadow-md"
-        : "hover:shadow-md hover:border-slate-300";
+    int currentPage = ViewBag.Page ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+    int totalItems = Model.Count();
 }
 
-<div class="space-y-6">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-bold text-slate-900">Quản lý đơn hàng</h1>
-            <p class="mt-1 text-sm text-slate-500">Theo dõi và xử lý các đơn đặt hàng theo quy trình.</p>
+@section Head {
+    <style>
+        /* --- 1. PIPELINE DASHBOARD (Scroll ngang) --- */
+        .pipeline-container {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 4px 4px 15px 4px;
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 transparent;
+        }
+
+        .status-card-3d {
+            min-width: 150px;
+            flex: 1;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid white;
+            border-radius: 20px;
+            padding: 16px;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100px;
+        }
+
+            .status-card-3d:hover, .status-card-3d.active {
+                transform: translateY(-6px);
+                background: white;
+                border-color: var(--card-color, #6366f1);
+                box-shadow: 0 15px 30px -5px var(--shadow-color, rgba(99, 102, 241, 0.2));
+            }
+
+        .count-neon {
+            font-size: 28px;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 5px;
+        }
+
+        .label-neon {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #64748b;
+            letter-spacing: 0.5px;
+        }
+
+        /* Chỉ báo trạng thái */
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+            box-shadow: 0 0 8px currentColor;
+        }
+
+        /* --- 2. FILTER BAR (Glassmorphism) --- */
+        .filter-glass-bar {
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 20px;
+            border: 1px solid white;
+            box-shadow: var(--shadow-card);
+            margin-bottom: 30px;
+        }
+
+        .input-pill {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 10px 16px;
+            font-size: 13px;
+            width: 100%;
+            transition: 0.2s;
+            font-weight: 500;
+        }
+
+            .input-pill:focus {
+                background: white;
+                border-color: #8b5cf6;
+                box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+                outline: none;
+            }
+
+        .label-tiny {
+            font-size: 10px;
+            text-transform: uppercase;
+            font-weight: 800;
+            color: #94a3b8;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        /* --- 3. 3D ORDER TABLE --- */
+        .table-3d {
+            border-collapse: separate;
+            border-spacing: 0 12px;
+            width: 100%;
+        }
+
+        .order-row {
+            background: white;
+            transition: all 0.3s;
+            position: relative;
+            border: 1px solid transparent;
+        }
+
+            .order-row td {
+                padding: 18px 15px;
+                border-top: 1px solid #f1f5f9;
+                border-bottom: 1px solid #f1f5f9;
+                vertical-align: middle;
+            }
+
+                .order-row td:first-child {
+                    border-left: 1px solid #f1f5f9;
+                    border-top-left-radius: 16px;
+                    border-bottom-left-radius: 16px;
+                }
+
+                .order-row td:last-child {
+                    border-right: 1px solid #f1f5f9;
+                    border-top-right-radius: 16px;
+                    border-bottom-right-radius: 16px;
+                }
+
+            .order-row:hover {
+                transform: scale(1.01);
+                z-index: 10;
+                box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08);
+                border-color: rgba(99, 102, 241, 0.2);
+            }
+
+        /* Risk & SLA Rows Highlight */
+        .row-risk {
+            background: #fff1f2;
+            border-color: #fecaca !important;
+        }
+
+            .row-risk:hover {
+                box-shadow: 0 10px 30px -5px rgba(225, 29, 72, 0.15);
+            }
+
+        .row-sla {
+            background: #fff7ed;
+            border-color: #fed7aa !important;
+        }
+
+        /* Components */
+        .avatar-box {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            color: white;
+            display: grid;
+            place-items: center;
+            font-weight: 700;
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+        }
+
+        .badge-status {
+            padding: 6px 12px;
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 1px solid transparent;
+        }
+
+        /* Floating Export */
+        .fab-container {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 99;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn-fab {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            background: white;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            display: grid;
+            place-items: center;
+            font-size: 20px;
+            transition: 0.2s;
+        }
+
+            .btn-fab:hover {
+                transform: translateY(-5px) scale(1.1);
+            }
+
+            .btn-fab.excel {
+                color: #10b981;
+            }
+
+            .btn-fab.pdf {
+                color: #ef4444;
+            }
+    </style>
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-end mb-5 fade-in-up">
+    <div>
+        <h2 class="fw-bolder mb-1 h-value">Quản lý đơn hàng</h2>
+        <div class="d-flex align-items-center gap-2 text-muted small">
+            <i class="bi bi-activity"></i> Theo dõi trạng thái, rủi ro & SLA
         </div>
     </div>
 
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <a href="@Url.Action("Index", new { status = OrderStatus.Pending })" class="bg-white p-3 rounded-xl border border-amber-200 transition-all @ActiveClass(OrderStatus.Pending)">
-            <div class="text-xs font-medium text-amber-800 mb-1">1. Chờ xử lý</div>
-            <div class="text-2xl font-bold text-slate-900">@counts.GetValueOrDefault(OrderStatus.Pending)</div>
-        </a>
-        <a href="@Url.Action("Index", new { status = OrderStatus.Processing })" class="bg-white p-3 rounded-xl border border-sky-200 transition-all @ActiveClass(OrderStatus.Processing)">
-            <div class="text-xs font-medium text-sky-800 mb-1">2. Đang xử lý</div>
-            <div class="text-2xl font-bold text-slate-900">@counts.GetValueOrDefault(OrderStatus.Processing)</div>
-        </a>
-        <a href="@Url.Action("Index", new { status = OrderStatus.Confirmed })" class="bg-white p-3 rounded-xl border border-blue-200 transition-all @ActiveClass(OrderStatus.Confirmed)">
-            <div class="text-xs font-medium text-blue-800 mb-1">3. Đã xác nhận</div>
-            <div class="text-2xl font-bold text-slate-900">@counts.GetValueOrDefault(OrderStatus.Confirmed)</div>
-        </a>
-        <a href="@Url.Action("Index", new { status = OrderStatus.Shipping })" class="bg-white p-3 rounded-xl border border-indigo-200 transition-all @ActiveClass(OrderStatus.Shipping)">
-            <div class="text-xs font-medium text-indigo-800 mb-1">4. Đang giao</div>
-            <div class="text-2xl font-bold text-slate-900">@counts.GetValueOrDefault(OrderStatus.Shipping)</div>
-        </a>
-        <a href="@Url.Action("Index", new { status = OrderStatus.Delivered })" class="bg-white p-3 rounded-xl border border-teal-200 transition-all @ActiveClass(OrderStatus.Delivered)">
-            <div class="text-xs font-medium text-teal-800 mb-1">5. Đã giao hàng</div>
-            <div class="text-2xl font-bold text-slate-900">@counts.GetValueOrDefault(OrderStatus.Delivered)</div>
-        </a>
-        <a href="@Url.Action("Index", new { status = OrderStatus.Completed })" class="bg-white p-3 rounded-xl border border-emerald-200 transition-all @ActiveClass(OrderStatus.Completed)">
-            <div class="text-xs font-medium text-emerald-800 mb-1">6. Hoàn tất</div>
-            <div class="text-2xl font-bold text-slate-900">@counts.GetValueOrDefault(OrderStatus.Completed)</div>
-        </a>
-    </div>
-
-    <div class="bg-white shadow-sm ring-1 ring-black/5 rounded-xl overflow-hidden">
-        <div class="p-4 border-b border-slate-200 bg-slate-50/50">
-            <form method="get" class="grid grid-cols-1 sm:grid-cols-12 gap-4">
-                @if (currentStatus.HasValue)
+    <div class="dropdown">
+        <button class="btn btn-white shadow-sm rounded-pill px-4 fw-bold dropdown-toggle border" type="button" data-bs-toggle="dropdown">
+            <i class="bi bi-bookmark-star-fill text-warning me-2"></i> Bộ lọc đã lưu
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-4 p-2" style="width: 280px;">
+            <li><h6 class="dropdown-header text-uppercase small fw-bold">Danh sách lọc nhanh</h6></li>
+            @if (savedFilters != null && savedFilters.Any())
+            {
+                foreach (var filter in savedFilters)
                 {
-                    <input type="hidden" name="status" value="@currentStatus" />
+                    <li>
+                        <a class="dropdown-item rounded-3 small py-2 d-flex justify-content-between align-items-center"
+                           asp-action="ApplyFilter" asp-route-key="@filter.Key">
+                            <span>@filter.Name</span>
+                            <i class="bi bi-play-fill text-muted"></i>
+                        </a>
+                    </li>
                 }
-                <div class="sm:col-span-4 relative">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 z-10"></i>
-                    <input type="text" name="q" value="@q" placeholder="Tìm kiếm đơn hàng..." class="block w-full rounded-md border-0 py-2 pl-10 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-blue-600 sm:text-sm" />
+            }
+            else
+            {
+                <li><span class="dropdown-item-text small text-muted fst-italic">Chưa có bộ lọc nào.</span></li>
+            }
+            <li><hr class="dropdown-divider"></li>
+            <li>
+                <button type="button" class="dropdown-item rounded-3 small fw-bold text-primary" data-bs-toggle="modal" data-bs-target="#saveFilterModal">
+                    <i class="bi bi-plus-lg me-1"></i> Lưu bộ lọc hiện tại
+                </button>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div class="pipeline-container mb-4 fade-in-up delay-1">
+    <a asp-action="Index" class="status-card-3d @(ViewBag.Status == null ? "active" : "")" style="--card-color: #64748b; --shadow-color: rgba(100,116,139,0.2);">
+        <div class="count-neon" style="color: #64748b">@Model.Count()</div>
+        <div class="label-neon"><i class="bi bi-layers me-1"></i> Tất cả</div>
+    </a>
+
+    @foreach (OrderStatus s in Enum.GetValues(typeof(OrderStatus)))
+    {
+        var count = statusCounts.ContainsKey(s) ? statusCounts[s] : 0;
+
+        // Cấu hình màu cho từng trạng thái
+        string color = s switch
+        {
+            OrderStatus.Pending => "#f59e0b",    // Cam
+            OrderStatus.Confirmed => "#0ea5e9",  // Xanh dương nhạt
+            OrderStatus.Processing => "#8b5cf6", // Tím
+            OrderStatus.Shipping => "#06b6d4",   // Cyan
+            OrderStatus.Delivered => "#10b981",  // Xanh lá
+            OrderStatus.Completed => "#059669",  // Xanh đậm
+            OrderStatus.Cancelled => "#ef4444",  // Đỏ
+            _ => "#64748b"
+        };
+        string icon = s switch
+        {
+            OrderStatus.Pending => "bi-clock-history",
+            OrderStatus.Confirmed => "bi-check2-circle",
+            OrderStatus.Processing => "bi-gear-wide-connected",
+            OrderStatus.Shipping => "bi-truck",
+            OrderStatus.Delivered => "bi-box-seam",
+            OrderStatus.Completed => "bi-check-all",
+            OrderStatus.Cancelled => "bi-x-circle",
+            _ => "bi-circle"
+        };
+
+        <a asp-action="Index" asp-route-status="@s" class="status-card-3d @(ViewBag.Status == s ? "active" : "")"
+           style="--card-color: @color; --shadow-color: @color;">
+            <div class="count-neon" style="color: @color">@count</div>
+            <div class="d-flex align-items-center">
+                <span class="status-dot" style="color: @color; background: @color; box-shadow: 0 0 10px @color;"></span>
+                <span class="label-neon">@s</span>
+            </div>
+            <i class="bi @icon position-absolute top-0 end-0 m-3 fs-4 opacity-25" style="color: @color"></i>
+        </a>
+    }
+</div>
+
+<div class="filter-glass-bar fade-in-up delay-2">
+    <form asp-action="Index" method="get">
+        <div class="row g-3 align-items-end">
+            <div class="col-lg-4 col-md-6">
+                <label class="label-tiny">Tìm kiếm</label>
+                <div class="position-relative">
+                    <i class="bi bi-search position-absolute text-muted" style="left: 14px; top: 50%; transform: translateY(-50%);"></i>
+                    <input type="text" name="q" value="@ViewBag.Q" class="input-pill ps-5" placeholder="Mã đơn, tên khách, SĐT...">
                 </div>
-                <div class="sm:col-span-3">
-                    <input type="date" name="from" value="@from" class="block w-full rounded-md border-0 py-2 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-blue-600 sm:text-sm" />
+            </div>
+
+            <div class="col-lg-2 col-md-3 col-6">
+                <label class="label-tiny">Từ ngày</label>
+                <input type="date" name="from" value="@ViewBag.From" class="input-pill">
+            </div>
+            <div class="col-lg-2 col-md-3 col-6">
+                <label class="label-tiny">Đến ngày</label>
+                <input type="date" name="to" value="@ViewBag.To" class="input-pill">
+            </div>
+
+            <div class="col-lg-2 col-md-4">
+                <div class="h-100 d-flex align-items-center bg-white border rounded-3 px-3" style="height: 42px !important; margin-top: 19px;">
+                    <div class="form-check form-switch m-0">
+                        <input class="form-check-input" type="checkbox" name="onlyCod" value="true" checked="@(ViewBag.OnlyCod == true)" id="chkCod">
+                        <label class="form-check-label small fw-bold text-muted cursor-pointer" for="chkCod">Chỉ COD</label>
+                    </div>
                 </div>
-                <div class="sm:col-span-3">
-                    <input type="date" name="to" value="@to" class="block w-full rounded-md border-0 py-2 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-blue-600 sm:text-sm" />
+            </div>
+
+            <div class="col-lg-2 col-md-8 d-flex gap-2">
+                <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold shadow-sm" style="background: var(--grad-primary); border: none; height: 42px;">
+                    Lọc
+                </button>
+                <a asp-action="Index" class="btn btn-light rounded-circle shadow-sm" style="width: 42px; height: 42px; display: grid; place-items: center;" title="Reset">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="table-responsive fade-in-up delay-3" style="overflow-x: visible;">
+    <table class="table-3d">
+        <thead class="text-uppercase text-muted small fw-bold">
+            <tr>
+                <th class="ps-4">Mã Đơn</th>
+                <th>Khách hàng</th>
+                <th>Thời gian & SLA</th>
+                <th>Thanh toán</th>
+                <th>Tổng tiền / Risk</th>
+                <th class="text-center">Trạng thái</th>
+                <th class="text-end pe-4">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                // Lấy Risk & SLA info an toàn
+                bool isRisk = false; string riskReason = "";
+                bool isOverdue = false; double slaHours = 0;
+
+                if (riskDict != null && riskDict.TryGetValue(item.Id, out var rInfo))
+                {
+                    isRisk = rInfo.IsRisky; riskReason = rInfo.Reason ?? "";
+                }
+                if (slaDict != null && slaDict.TryGetValue(item.Id, out var sInfo))
+                {
+                    isOverdue = sInfo.IsOverdue; slaHours = sInfo.AgeHours;
+                }
+
+                string rowClass = "order-row";
+                if (isRisk) { rowClass += " row-risk"; }
+                else if (isOverdue) { rowClass += " row-sla"; }
+
+                <tr class="@rowClass">
+                    <td class="ps-4">
+                        <a asp-action="Details" asp-route-id="@item.Id" class="fw-bolder text-primary text-decoration-none fs-6">#@item.Id</a>
+                        <div class="small text-muted mt-1"><i class="bi bi-box-seam"></i> @item.OrderItems.Count món</div>
+                    </td>
+                    <td>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="avatar-box">
+                                @(item.ReceiverName?.Substring(0, 1).ToUpper() ?? "U")
+                            </div>
+                            <div>
+                                <div class="fw-bold text-dark">@item.ReceiverName</div>
+                                <div class="small text-muted font-monospace"><i class="bi bi-telephone me-1"></i>@item.ReceiverPhone</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="fw-medium text-dark">@item.OrderDate.ToLocalTime().ToString("dd/MM HH:mm")</div>
+                        @if (isOverdue)
+                        {
+                            <div class="badge bg-warning text-dark border border-warning mt-1 rounded-pill" title="Xử lý chậm">
+                                <i class="bi bi-alarm-fill me-1"></i> +@Math.Round(slaHours, 1)h
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="small text-muted mt-1">@Math.Round((DateTime.UtcNow - item.OrderDate).TotalHours, 1)h trước</div>
+                        }
+                    </td>
+                    <td>
+                        <div class="d-flex flex-column gap-1">
+                            <span class="badge bg-light text-secondary border fw-normal" style="width: fit-content;">@item.PaymentMethod</span>
+                            @if (item.PaymentStatus == PaymentStatus.Paid)
+                            {
+                                <span class="text-success small fw-bold"><i class="bi bi-check-circle-fill"></i> Đã TT</span>
+                            }
+                            else
+                            {
+                                <span class="text-warning small fw-bold"><i class="bi bi-clock-history"></i> Chờ TT</span>
+                            }
+                        </div>
+                    </td>
+                    <td>
+                        <div class="fw-bold fs-6">@item.TotalAmount.ToString("N0") ₫</div>
+                        @if (isRisk)
+                        {
+                            <div class="badge bg-danger text-white mt-1 shadow-sm" title="@riskReason">
+                                <i class="bi bi-shield-exclamation me-1"></i> Rủi ro
+                            </div>
+                        }
+                    </td>
+                    <td class="text-center">
+                        @{
+                            string badgeClass = item.Status switch
+                            {
+                                OrderStatus.Pending => "bg-warning bg-opacity-10 text-warning border-warning",
+                                OrderStatus.Confirmed => "bg-info bg-opacity-10 text-info border-info",
+                                OrderStatus.Shipping => "bg-primary bg-opacity-10 text-primary border-primary",
+                                OrderStatus.Completed => "bg-success bg-opacity-10 text-success border-success",
+                                OrderStatus.Cancelled => "bg-danger bg-opacity-10 text-danger border-danger",
+                                _ => "bg-secondary bg-opacity-10 text-secondary border-secondary"
+                            };
+                        }
+                        <span class="badge-status @badgeClass border border-opacity-25">@item.Status</span>
+                    </td>
+                    <td class="text-end pe-4">
+                        <div class="dropdown">
+                            <button class="btn btn-light btn-sm rounded-circle shadow-sm" data-bs-toggle="dropdown">
+                                <i class="bi bi-three-dots-vertical"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-4 p-2">
+                                <li><a class="dropdown-item rounded-3 fw-bold mb-1" asp-action="Details" asp-route-id="@item.Id"><i class="bi bi-eye text-primary me-2"></i> Chi tiết</a></li>
+                                <li><a class="dropdown-item rounded-3 fw-bold mb-1" asp-action="PrintInvoice" asp-route-id="@item.Id" target="_blank"><i class="bi bi-printer text-dark me-2"></i> In hóa đơn</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                @if (item.Status == OrderStatus.Pending)
+                                {
+                                    <li>
+                                        <form asp-action="UpdateStatus" asp-route-id="@item.Id" method="post">
+                                            <input type="hidden" name="status" value="@OrderStatus.Confirmed" />
+                                            <button class="dropdown-item rounded-3 fw-bold text-success"><i class="bi bi-check-lg me-2"></i> Xác nhận đơn</button>
+                                        </form>
+                                    </li>
+                                    <li>
+                                        <form asp-action="UpdateStatus" asp-route-id="@item.Id" method="post" onsubmit="return confirm('Hủy đơn hàng này?');">
+                                            <input type="hidden" name="status" value="@OrderStatus.Cancelled" />
+                                            <button class="dropdown-item rounded-3 fw-bold text-danger"><i class="bi bi-x-lg me-2"></i> Hủy đơn</button>
+                                        </form>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+            }
+            @if (!Model.Any())
+            {
+                <tr><td colspan="7" class="text-center py-5 text-muted">Không tìm thấy đơn hàng nào.</td></tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@if (totalPages > 1)
+{
+    <div class="d-flex justify-content-center mt-4 pb-5">
+        <nav>
+            <ul class="pagination pagination-sm gap-2 mb-0">
+                @for (int i = 1; i <= totalPages; i++)
+                {
+                    <li class="page-item">
+                        <a class="page-link border-0 rounded-circle fw-bold shadow-sm @(i == currentPage ? "bg-primary text-white" : "text-muted")"
+                           style="width: 35px; height: 35px; display: grid; place-items: center; @(i == currentPage ? "background: var(--grad-primary);" : "")"
+                           href="@Url.Action("Index", new { page = i, q = ViewBag.Q, status = ViewBag.Status, from = ViewBag.From, to = ViewBag.To, onlyCod = ViewBag.OnlyCod })">
+                            @i
+                        </a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    </div>
+}
+
+<div class="fab-container animate-fade-up delay-3">
+    <form asp-action="ExportExcel" method="post">
+        <input type="hidden" name="q" value="@ViewBag.Q" />
+        <input type="hidden" name="status" value="@ViewBag.Status" />
+        <input type="hidden" name="from" value="@ViewBag.From" />
+        <input type="hidden" name="to" value="@ViewBag.To" />
+        <button type="submit" class="btn-fab excel" title="Xuất Excel" data-bs-toggle="tooltip" data-bs-placement="left">
+            <i class="bi bi-file-earmark-excel-fill"></i>
+        </button>
+    </form>
+
+    <form asp-action="ExportPdf" method="post">
+        <input type="hidden" name="q" value="@ViewBag.Q" />
+        <input type="hidden" name="status" value="@ViewBag.Status" />
+        <input type="hidden" name="from" value="@ViewBag.From" />
+        <input type="hidden" name="to" value="@ViewBag.To" />
+        <button type="submit" class="btn-fab pdf" title="Xuất PDF" data-bs-toggle="tooltip" data-bs-placement="left">
+            <i class="bi bi-file-earmark-pdf-fill"></i>
+        </button>
+    </form>
+</div>
+
+<div class="modal fade" id="saveFilterModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow-lg" style="background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bolder">Lưu bộ lọc hiện tại</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="SaveFilter" method="post">
+                <div class="modal-body">
+                    <input type="hidden" name="q" value="@ViewBag.Q" />
+                    <input type="hidden" name="status" value="@ViewBag.Status" />
+                    <input type="hidden" name="from" value="@ViewBag.From" />
+                    <input type="hidden" name="to" value="@ViewBag.To" />
+                    <input type="hidden" name="onlyCod" value="@(ViewBag.OnlyCod.ToString().ToLower())" />
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-uppercase text-muted">Tên bộ lọc</label>
+                        <input type="text" name="name" class="form-control rounded-3 border-light bg-light" placeholder="VD: Đơn chưa thanh toán tháng 10..." required />
+                    </div>
+                    <div class="p-3 bg-light rounded-3 border border-light small">
+                        <div class="d-flex justify-content-between mb-1"><span>Từ khóa:</span> <span class="fw-bold text-dark">@(ViewBag.Q ?? "---")</span></div>
+                        <div class="d-flex justify-content-between mb-1"><span>Trạng thái:</span> <span class="fw-bold text-dark">@(ViewBag.Status?.ToString() ?? "Tất cả")</span></div>
+                        <div class="d-flex justify-content-between"><span>Thời gian:</span> <span class="fw-bold text-dark">@ViewBag.From - @ViewBag.To</span></div>
+                    </div>
                 </div>
-                <div class="sm:col-span-2">
-                    <button type="submit" class="w-full rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition-all">Lọc</button>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill fw-bold" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary rounded-pill fw-bold px-4" style="background: var(--grad-primary); border: none;">Lưu</button>
                 </div>
             </form>
         </div>
-
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-slate-200">
-                <thead class="bg-slate-50">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase text-slate-500">Mã đơn</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase text-slate-500">Thời gian</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase text-slate-500">Khách hàng</th>
-                        <th class="px-6 py-3 text-right text-xs font-semibold uppercase text-slate-500">Tổng tiền</th>
-                        <th class="px-6 py-3 text-center text-xs font-semibold uppercase text-slate-500">Trạng thái</th>
-                        <th class="px-6 py-3 text-right text-xs font-semibold uppercase text-slate-500">Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-200 bg-white">
-                    @foreach (var item in Model)
-                    {
-                        <tr class="hover:bg-slate-50 transition-colors">
-                            <td class="px-6 py-4 whitespace-nowrap font-mono text-sm font-medium text-blue-600">
-                                <a asp-action="Details" asp-route-id="@item.Id" class="hover:underline">#@item.Id</a>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                                @item.OrderDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-slate-900">@(item.User?.FullName ?? item.ReceiverName ?? "Khách lẻ")</div>
-                                <div class="text-xs text-slate-500">@(item.User?.Email ?? item.ReceiverPhone)</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-semibold text-slate-900">
-                                @item.TotalAmount.ToString("N0") ₫
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-center">
-                                @switch (item.Status)
-                                {
-                                    case OrderStatus.Pending:
-                                        <span class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20">Chờ xử lý</span>
-                                        break;
-                                    case OrderStatus.Processing:
-                                        <span class="inline-flex items-center rounded-full bg-sky-50 px-2.5 py-1 text-xs font-medium text-sky-700 ring-1 ring-inset ring-sky-600/20">Đang xử lý</span>
-                                        break;
-                                    case OrderStatus.Confirmed:
-                                        <span class="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">Đã xác nhận</span>
-                                        break;
-                                    case OrderStatus.Shipping:
-                                        <span class="inline-flex items-center rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/10">Đang giao</span>
-                                        break;
-                                    case OrderStatus.Delivered:
-                                        <span class="inline-flex items-center rounded-full bg-teal-50 px-2.5 py-1 text-xs font-medium text-teal-700 ring-1 ring-inset ring-teal-600/20">Đã giao hàng</span>
-                                        break;
-                                    case OrderStatus.Completed:
-                                        <span class="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20">Hoàn tất</span>
-                                        break;
-                                    case OrderStatus.Cancelled:
-                                        <span class="inline-flex items-center rounded-full bg-rose-50 px-2.5 py-1 text-xs font-medium text-rose-700 ring-1 ring-inset ring-rose-600/10">Đã hủy</span>
-                                        break;
-                                    default:
-                                        <span class="text-slate-500 text-xs">@item.Status</span>
-                                        break;
-                                }
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <div class="flex justify-end items-center gap-2">
-                                    @if (item.Status != OrderStatus.Completed && item.Status != OrderStatus.Cancelled)
-                                    {
-                                        <form asp-action="UpdateStatus" method="post" class="inline-block">
-                                            @Html.AntiForgeryToken()
-                                            <input type="hidden" name="id" value="@item.Id" />
-                                            <input type="hidden" name="returnUrl" value="@Context.Request.PathAndQuery()" />
-                                            <select name="status" onchange="if(confirm('Cập nhật trạng thái?')) this.form.submit(); else this.value='';" class="text-xs rounded-md border-slate-300 py-1 pl-2 pr-6 focus:ring-blue-500 cursor-pointer w-28">
-                                                <option value="" selected disabled>Cập nhật...</option>
-                                                @if (item.Status == OrderStatus.Pending)
-                                                {
-                                                    <option value="@OrderStatus.Processing">→ Đang xử lý</option>
-                                                    <option value="@OrderStatus.Cancelled">✕ Hủy đơn</option>
-         }
-                                                else if (item.Status == OrderStatus.Processing)
-                                                {
-                                                    <option value="@OrderStatus.Confirmed">→ Xác nhận</option>
-                                                    <option value="@OrderStatus.Cancelled">✕ Hủy đơn</option>
-         }
-                                                else if (item.Status == OrderStatus.Confirmed)
-                                                {
-                                                    <option value="@OrderStatus.Shipping">→ Giao hàng</option>
-                                                }
-                                                else if (item.Status == OrderStatus.Shipping)
-                                                {
-                                                    <option value="@OrderStatus.Delivered">→ Đã giao</option>
-                                                }
-                                                else if (item.Status == OrderStatus.Delivered)
-                                                {
-                                                    <option value="@OrderStatus.Completed">→ Hoàn tất</option>
-                                                }
-                                            </select>
-                                        </form>
-                                    }
-                                    <a asp-action="Details" asp-route-id="@item.Id" class="text-slate-400 hover:text-blue-600 p-1.5 hover:bg-blue-50 rounded"><i class="fa-solid fa-eye"></i></a>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    </script>
+}

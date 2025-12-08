@@ -1,233 +1,470 @@
 ﻿@model MotorShop.ViewModels.DashboardViewModel
+@using System.Text.Json
+
 @{
-    ViewData["Title"] = "Tổng quan";
+    ViewData["Title"] = "Dashboard Overview";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+
+    string FormatMoney(decimal v) => v.ToString("N0") + " ₫";
 }
 
-<div class="space-y-6">
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+@section Head {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* --- 3D CARDS & NEON EFFECTS --- */
+        .dashboard-container {
+            animation: fadeUp 0.6s ease-out;
+        }
+
+        @@keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card-3d {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-radius: 24px;
+            padding: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .card-3d:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 20px 40px -5px rgba(99, 102, 241, 0.15);
+                border-color: rgba(99, 102, 241, 0.3);
+            }
+
+        /* Icon Box Neon */
+        .icon-neon {
+            width: 50px;
+            height: 50px;
+            border-radius: 16px;
+            display: grid;
+            place-items: center;
+            font-size: 24px;
+            color: white;
+            box-shadow: 0 8px 20px -5px rgba(0,0,0,0.3);
+        }
+
+        /* Gradient Text */
+        .text-gradient {
+            background: linear-gradient(135deg, #1e293b 0%, #475569 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        /* Filter Bar */
+        .filter-bar {
+            background: white;
+            padding: 8px 12px;
+            border-radius: 50px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+            display: inline-flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .input-pill {
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 13px;
+            outline: none;
+            transition: 0.2s;
+        }
+
+            .input-pill:focus {
+                border-color: #6366f1;
+                background: white;
+            }
+
+        /* Table Styles */
+        .table-modern th {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #94a3b8;
+            font-weight: 700;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .table-modern td {
+            padding: 12px 0;
+            border-bottom: 1px solid #f8fafc;
+            font-size: 13px;
+            vertical-align: middle;
+        }
+
+        .table-modern tr:last-child td {
+            border-bottom: none;
+        }
+
+        .avatar-circle {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-weight: bold;
+            font-size: 12px;
+            color: white;
+        }
+    </style>
+}
+
+<div class="dashboard-container">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-end mb-5">
         <div>
-            <h1 class="text-2xl font-bold text-slate-900">Xin chào, Administrator! 👋</h1>
-            <p class="text-sm text-slate-500 mt-1">Đây là tình hình kinh doanh hôm nay.</p>
-        </div>
-        <div class="flex items-center gap-3 bg-white px-4 py-2 rounded-lg border border-slate-200 shadow-sm text-sm font-medium text-slate-700">
-            <i class="fa-regular fa-calendar"></i>
-            <span>@DateTime.Now.ToString("dd tháng MM, yyyy")</span>
-        </div>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-            <div class="flex justify-between">
-                <span class="text-sm font-semibold text-slate-500 uppercase tracking-wider">Doanh thu ngày</span>
-                <span class="p-2 bg-green-100 text-green-600 rounded-lg"><i class="fa-solid fa-sack-dollar"></i></span>
-            </div>
-            <div class="flex items-baseline mt-4">
-                <h3 class="text-3xl font-bold text-slate-900">@Model.TodayRevenue.ToString("#,0")</h3>
-                <span class="ml-1 text-slate-500">₫</span>
-            </div>
-            <div class="mt-4 flex items-center text-sm text-green-600 font-medium">
-                <i class="fa-solid fa-arrow-trend-up mr-1.5"></i> +12.5% <span class="text-slate-400 font-normal ml-2">so với hôm qua</span>
-            </div>
+            <h2 class="fw-bolder mb-1 h3">Dashboard</h2>
+            <p class="text-muted mb-0 small">Báo cáo hoạt động kinh doanh thời gian thực.</p>
         </div>
 
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-            <div class="flex justify-between">
-                <span class="text-sm font-semibold text-slate-500 uppercase tracking-wider">Đơn hàng mới</span>
-                <span class="p-2 bg-blue-100 text-blue-600 rounded-lg"><i class="fa-solid fa-cart-shopping"></i></span>
-            </div>
-            <div class="mt-4">
-                <h3 class="text-3xl font-bold text-slate-900">@Model.NewOrdersToday</h3>
-            </div>
-            <div class="mt-4">
-                <a href="@Url.Action("Index", "Order", new { status = MotorShop.Models.Enums.OrderStatus.Pending })"
-                   class="inline-flex items-center text-sm font-medium text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full">
-                    @Model.PendingOrders đơn chờ xử lý <i class="fa-solid fa-chevron-right ml-1 text-xs"></i>
-                </a>
-            </div>
-        </div>
+        <div class="d-flex gap-3 align-items-center">
+            <form asp-action="Index" method="get" class="filter-bar">
+                <input type="date" name="from" value="@(Model.From?.ToString("yyyy-MM-dd"))" class="input-pill" />
+                <span class="text-muted small">to</span>
+                <input type="date" name="to" value="@(Model.To?.ToString("yyyy-MM-dd"))" class="input-pill" />
+                <button type="submit" class="btn btn-primary rounded-circle shadow-sm" style="width: 36px; height: 36px; padding: 0; background: linear-gradient(135deg, #6366f1, #8b5cf6); border: none;">
+                    <i class="bi bi-arrow-right"></i>
+                </button>
+            </form>
 
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-            <div class="flex justify-between">
-                <span class="text-sm font-semibold text-slate-500 uppercase tracking-wider">Khách mới</span>
-                <span class="p-2 bg-purple-100 text-purple-600 rounded-lg"><i class="fa-solid fa-user-plus"></i></span>
-            </div>
-            <div class="mt-4">
-                <h3 class="text-3xl font-bold text-slate-900">@Model.NewCustomersToday</h3>
-            </div>
-            <div class="mt-4 text-sm text-slate-500">
-                Cập nhật realtime
-            </div>
-        </div>
-
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-            <div class="flex justify-between">
-                <span class="text-sm font-semibold text-slate-500 uppercase tracking-wider">Tổng sản phẩm</span>
-                <span class="p-2 bg-orange-100 text-orange-600 rounded-lg"><i class="fa-solid fa-box-archive"></i></span>
-            </div>
-            <div class="mt-4">
-                <h3 class="text-3xl font-bold text-slate-900">@Model.TotalProducts</h3>
-            </div>
-            <div class="mt-4 text-sm">
-                <a asp-controller="Product" asp-action="Index" class="text-blue-600 hover:text-blue-700 font-medium flex items-center">
-                    Quản lý kho <i class="fa-solid fa-arrow-right-long ml-2"></i>
-                </a>
+            <div class="dropdown">
+                <button class="btn btn-light rounded-circle shadow-sm" data-bs-toggle="dropdown" style="width: 40px; height: 40px;"><i class="bi bi-download"></i></button>
+                <ul class="dropdown-menu shadow-lg border-0 rounded-4 p-2">
+                    <li>
+                        <form asp-action="ExportSummaryExcel" method="post">
+                            <input type="hidden" name="from" value="@Model.From" /><input type="hidden" name="to" value="@Model.To" />
+                            <button class="dropdown-item rounded-3"><i class="bi bi-file-earmark-excel text-success me-2"></i> Excel Report</button>
+                        </form>
+                    </li>
+                    <li>
+                        <form asp-action="ExportSummaryPdf" method="post">
+                            <input type="hidden" name="from" value="@Model.From" /><input type="hidden" name="to" value="@Model.To" />
+                            <button class="dropdown-item rounded-3"><i class="bi bi-file-earmark-pdf text-danger me-2"></i> PDF Report</button>
+                        </form>
+                    </li>
+                </ul>
             </div>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div class="lg:col-span-1 flex flex-col gap-4">
-            <div class="bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl p-6 text-white shadow-lg">
-                <h3 class="text-lg font-bold mb-4">Thao tác nhanh</h3>
-                <div class="space-y-3">
-                    <a asp-controller="Order" asp-action="Index" class="flex items-center w-full p-3 bg-white/10 hover:bg-white/20 rounded-xl transition-colors backdrop-blur-sm">
-                        <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mr-3">
-                            <i class="fa-solid fa-file-invoice text-sm"></i>
-                        </div>
-                        <span class="font-medium">Xử lý đơn hàng</span>
-                    </a>
-                    <a asp-controller="Product" asp-action="Create" class="flex items-center w-full p-3 bg-white/10 hover:bg-white/20 rounded-xl transition-colors backdrop-blur-sm">
-                        <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mr-3">
-                            <i class="fa-solid fa-plus text-sm"></i>
-                        </div>
-                        <span class="font-medium">Thêm sản phẩm</span>
-                    </a>
-                    <button onclick="alert('Tính năng đang phát triển')" class="flex items-center w-full p-3 bg-white/10 hover:bg-white/20 rounded-xl transition-colors backdrop-blur-sm text-left">
-                        <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mr-3">
-                            <i class="fa-solid fa-file-export text-sm"></i>
-                        </div>
-                        <span class="font-medium">Xuất báo cáo</span>
-                    </button>
+    <div class="row g-4 mb-5">
+        <div class="col-xl-3 col-md-6">
+            <div class="card-3d">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <div class="text-muted small fw-bold text-uppercase mb-2">Doanh thu</div>
+                        <h3 class="text-gradient mb-0">@FormatMoney(Model.TotalRevenueInRange)</h3>
+                        <div class="mt-2 badge bg-success-subtle text-success rounded-pill"><i class="bi bi-graph-up"></i> Thu nhập thực</div>
+                    </div>
+                    <div class="icon-neon" style="background: linear-gradient(135deg, #8b5cf6, #d946ef);"><i class="bi bi-currency-dollar"></i></div>
                 </div>
-            </div>
-            <div class="bg-amber-50 border border-amber-100 rounded-2xl p-5">
-                <div class="flex items-center gap-3 mb-2 text-amber-800 font-semibold">
-                    <i class="fa-solid fa-triangle-exclamation"></i> Cần chú ý
-                </div>
-                <p class="text-sm text-amber-700">Có 5 sản phẩm sắp hết hàng. <a href="#" class="underline font-medium hover:text-amber-900">Xem ngay</a></p>
             </div>
         </div>
 
-        <div class="lg:col-span-3 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-            <div class="flex items-center justify-between mb-6">
-                <div>
-                    <h3 class="text-lg font-bold text-slate-900">Doanh thu 7 ngày gần nhất</h3>
-                    <p class="text-sm text-slate-500">Theo dõi hiệu quả kinh doanh theo thời gian thực.</p>
+        <div class="col-xl-3 col-md-6">
+            <div class="card-3d">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <div class="text-muted small fw-bold text-uppercase mb-2">Đơn hàng</div>
+                        <h3 class="text-gradient mb-0">@Model.TotalOrdersInRange</h3>
+                        <div class="mt-2 small text-muted">
+                            <span class="text-success fw-bold">@Model.SuccessfulOrdersInRange</span> thành công
+                        </div>
+                    </div>
+                    <div class="icon-neon" style="background: linear-gradient(135deg, #3b82f6, #06b6d4);"><i class="bi bi-bag-check"></i></div>
                 </div>
-                <select class="text-sm border-slate-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 py-2 pl-3 pr-10">
-                    <option>7 ngày qua</option>
-                    <option>Tháng này</option>
-                </select>
             </div>
-            <div class="h-[350px]">
-                <canvas id="revenueChart"></canvas>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card-3d">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <div class="text-muted small fw-bold text-uppercase mb-2">Khách mới</div>
+                        <h3 class="text-gradient mb-0">@Model.NewCustomersInRange</h3>
+                        <div class="mt-2 badge bg-info-subtle text-info rounded-pill">+@Model.NewCustomersInRange user</div>
+                    </div>
+                    <div class="icon-neon" style="background: linear-gradient(135deg, #f59e0b, #fbbf24);"><i class="bi bi-people"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card-3d">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <div class="text-muted small fw-bold text-uppercase mb-2">Đơn hủy</div>
+                        <h3 class="text-gradient mb-0">@Model.CancelledOrdersInRange</h3>
+                        <div class="mt-2 badge bg-danger-subtle text-danger rounded-pill">Cần chú ý</div>
+                    </div>
+                    <div class="icon-neon" style="background: linear-gradient(135deg, #ef4444, #f43f5e);"><i class="bi bi-x-octagon"></i></div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div class="px-6 py-5 border-b border-slate-200 flex items-center justify-between bg-slate-50/50">
-            <h3 class="text-lg font-bold text-slate-900">Đơn hàng vừa đặt</h3>
-            <a asp-controller="Order" asp-action="Index" class="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center">
-                Xem tất cả <i class="fa-solid fa-arrow-right ml-1.5"></i>
-            </a>
+    <div class="row g-4 mb-5">
+        <div class="col-lg-8">
+            <div class="card-3d">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="fw-bold m-0">Biểu đồ doanh thu</h5>
+                    <span class="badge bg-light text-dark border">Line Chart</span>
+                </div>
+                <div style="height: 300px;">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
         </div>
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-slate-200">
-                <thead class="bg-slate-50">
-                    <tr>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Mã đơn</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Khách hàng</th>
-                        <th class="px-6 py-4 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Tổng tiền</th>
-                        <th class="px-6 py-4 text-center text-xs font-semibold text-slate-500 uppercase tracking-wider">Trạng thái</th>
-                        <th class="px-6 py-4 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Thời gian</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-200 bg-white">
-                    @foreach (var order in Model.RecentOrders)
-                    {
-                        <tr class="hover:bg-slate-50 transition-colors">
-                            <td class="px-6 py-4 whitespace-nowrap font-mono text-sm font-medium text-blue-600">
-                                #@order.Id
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center">
-                                    <div class="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold mr-3 text-xs">
-                                        @((order.User?.FullName ?? order.ReceiverName ?? "K")[0])
-                                    </div>
-                                    <span class="text-sm font-medium text-slate-900">@(order.User?.FullName ?? order.ReceiverName)</span>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right font-semibold text-slate-900">
-                                @order.TotalAmount.ToString("#,0") ₫
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-center">
-                                @switch (order.Status)
+
+        <div class="col-lg-4">
+            <div class="card-3d">
+                <h5 class="fw-bold mb-4">Trạng thái đơn</h5>
+                <div style="height: 220px; position: relative;">
+                    <canvas id="statusChart"></canvas>
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+                        <div class="h3 fw-bold m-0">@Model.TotalOrdersInRange</div>
+                        <small class="text-muted text-uppercase" style="font-size: 10px;">Tổng đơn</small>
+                    </div>
+                </div>
+                <div class="mt-4 text-center small text-muted">Tỷ lệ đơn hàng theo trạng thái xử lý</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-6">
+            <div class="card-3d">
+                <h6 class="text-muted fw-bold text-uppercase small mb-3">Số lượng đơn / ngày</h6>
+                <div style="height: 200px;">
+                    <canvas id="orderCountChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card-3d">
+                <h6 class="text-muted fw-bold text-uppercase small mb-3">Doanh thu theo danh mục</h6>
+                <div style="height: 200px;">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card-3d h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold m-0">Top sản phẩm bán chạy</h5>
+                    <a href="/Admin/Product" class="text-decoration-none small fw-bold">Xem kho</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-borderless table-modern mb-0">
+                        <thead>
+                            <tr>
+                                <th>Sản phẩm</th>
+                                <th class="text-end">Đã bán</th>
+                                <th class="text-end">Doanh thu</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.TopProducts.Any())
+                            {
+                                foreach (var p in Model.TopProducts)
                                 {
-                                    case MotorShop.Models.Enums.OrderStatus.Pending:
-                                        <span class="inline-flex items-center rounded-full bg-amber-50 px-2 py-1 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20">Chờ xử lý</span>
-                                        break;
-                                    case MotorShop.Models.Enums.OrderStatus.Confirmed:
-                                        <span class="inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">Đã xác nhận</span>
-                                        break;
-                                    // ... các case khác
-                                    default:
-                                        <span class="inline-flex items-center rounded-full bg-slate-50 px-2 py-1 text-xs font-medium text-slate-700 ring-1 ring-inset ring-slate-600/10">@order.Status</span>
-                                        break;
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-3">
+                                                <img src="@p.ImageUrl" class="rounded-3 border" style="width: 40px; height: 40px; object-fit: cover;" onerror="this.src='/images/no-img.png'" />
+                                                <div>
+                                                    <div class="fw-bold text-dark small text-truncate" style="max-width: 200px;">@p.ProductName</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="text-end fw-bold text-primary">@p.Quantity</td>
+                                        <td class="text-end text-muted">@FormatMoney(p.Revenue)</td>
+                                    </tr>
                                 }
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm text-slate-500">
-                                @order.OrderDate.ToLocalTime().ToString("HH:mm")
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                            }
+                            else
+                            {
+                                <tr><td colspan="3" class="text-center text-muted py-3">Chưa có dữ liệu</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card-3d h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold m-0">Khách hàng VIP</h5>
+                    <span class="badge bg-warning text-dark"><i class="bi bi-star-fill"></i> Top Chi Tiêu</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-borderless table-modern mb-0">
+                        <thead>
+                            <tr>
+                                <th>Khách hàng</th>
+                                <th class="text-end">Đơn hàng</th>
+                                <th class="text-end">Tổng chi tiêu</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.VipCustomers.Any())
+                            {
+                                foreach (var c in Model.VipCustomers)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="avatar-circle" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                                                    @c.FullName?.Substring(0, 1).ToUpper()
+                                                </div>
+                                                <div>
+                                                    <div class="fw-bold text-dark small">@c.FullName</div>
+                                                    <div class="text-muted" style="font-size: 10px;">@c.Email</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="text-end fw-bold">@c.TotalOrders</td>
+                                        <td class="text-end fw-bold text-success">@FormatMoney(c.TotalSpent)</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr><td colspan="3" class="text-center text-muted py-3">Chưa có dữ liệu</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    @{
+        // Serialize Data for ChartJS
+        var revLabels = JsonSerializer.Serialize(Model.RevenueChartLabels);
+        var revData = JsonSerializer.Serialize(Model.RevenueChartData);
+        var orderLabels = JsonSerializer.Serialize(Model.OrderCountChartLabels);
+        var orderData = JsonSerializer.Serialize(Model.OrderCountChartData);
+        var catLabels = JsonSerializer.Serialize(Model.RevenueByCategoryLabels);
+        var catData = JsonSerializer.Serialize(Model.RevenueByCategoryData);
+        var statusLabels = JsonSerializer.Serialize(Model.OrderStatusLabels);
+        var statusData = JsonSerializer.Serialize(Model.OrderStatusCounts);
+    }
+
     <script>
-        // Cấu hình biểu đồ với tông màu xanh dương hiện đại
-        Chart.defaults.font.family = "'Inter', sans-serif";
+        Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
         Chart.defaults.color = '#64748b';
 
-        new Chart(document.getElementById('revenueChart'), {
+        // --- 1. Revenue Line Chart ---
+        const ctxRev = document.getElementById('revenueChart').getContext('2d');
+        const gradRev = ctxRev.createLinearGradient(0, 0, 0, 300);
+        gradRev.addColorStop(0, 'rgba(139, 92, 246, 0.5)');
+        gradRev.addColorStop(1, 'rgba(139, 92, 246, 0.0)');
+
+        new Chart(ctxRev, {
             type: 'line',
             data: {
-                labels: @Html.Raw(Json.Serialize(Model.RevenueChartLabels)),
+                labels: @Html.Raw(revLabels),
                 datasets: [{
-                    label: 'Doanh thu (Triệu VNĐ)',
-                    data: @Html.Raw(Json.Serialize(Model.RevenueChartData)),
-                    borderColor: '#2563eb', // Blue-600
-                    backgroundColor: (context) => {
-                        const ctx = context.chart.ctx;
-                        const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-                        gradient.addColorStop(0, 'rgba(37, 99, 235, 0.2)');
-                        gradient.addColorStop(1, 'rgba(37, 99, 235, 0)');
-                        return gradient;
-                    },
+                    label: 'Doanh thu',
+                    data: @Html.Raw(revData),
+                    borderColor: '#8b5cf6',
+                    backgroundColor: gradRev,
                     borderWidth: 3,
-                    tension: 0.3,
-                    fill: true,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: '#8b5cf6',
                     pointRadius: 4,
-                    pointBackgroundColor: '#ffffff',
-                    pointBorderColor: '#2563eb',
-                    pointBorderWidth: 2,
-                    pointHoverRadius: 6
+                    fill: true,
+                    tension: 0.4
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, backgroundColor: '#1e293b', titleColor: '#fff', bodyColor: '#fff', borderColor: '#334155', borderWidth: 1 } },
+                plugins: { legend: { display: false } },
                 scales: {
-                    y: { beginAtZero: true, grid: { color: '#f1f5f9', drawBorder: false }, ticks: { callback: (val) => val + 'M' } },
+                    y: { grid: { borderDash: [5, 5] }, ticks: { callback: v => v.toLocaleString('vi-VN') + 'đ' } },
                     x: { grid: { display: false } }
-                },
-                interaction: { intersect: false, mode: 'index' }
+                }
+            }
+        });
+
+        // --- 2. Order Count Bar Chart ---
+        const ctxOrder = document.getElementById('orderCountChart').getContext('2d');
+        const gradBlue = ctxOrder.createLinearGradient(0,0,0,200);
+        gradBlue.addColorStop(0, '#3b82f6'); gradBlue.addColorStop(1, '#93c5fd');
+
+        new Chart(ctxOrder, {
+            type: 'bar',
+            data: {
+                labels: @Html.Raw(orderLabels),
+                datasets: [{ label: 'Số đơn', data: @Html.Raw(orderData), backgroundColor: gradBlue, borderRadius: 6 }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } }
+            }
+        });
+
+        // --- 3. Status Doughnut ---
+        new Chart(document.getElementById('statusChart'), {
+            type: 'doughnut',
+            data: {
+                labels: @Html.Raw(statusLabels),
+                datasets: [{
+                    data: @Html.Raw(statusData),
+                    backgroundColor: ['#3b82f6', '#22c55e', '#ef4444', '#f59e0b', '#64748b'],
+                    borderWidth: 0, hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false, cutout: '70%',
+                plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 15 } } }
+            }
+        });
+
+        // --- 4. Category Bar Chart ---
+        const ctxCat = document.getElementById('categoryChart').getContext('2d');
+        const gradTeal = ctxCat.createLinearGradient(0,0,0,200);
+        gradTeal.addColorStop(0, '#14b8a6'); gradTeal.addColorStop(1, '#5eead4');
+
+        new Chart(ctxCat, {
+            type: 'bar',
+            data: {
+                labels: @Html.Raw(catLabels),
+                datasets: [{ label: 'Doanh thu', data: @Html.Raw(catData), backgroundColor: gradTeal, borderRadius: 6 }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { display: false }, x: { grid: { display: false } } }
             }
         });
     </script>

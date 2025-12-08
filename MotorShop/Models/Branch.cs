@@ -11,30 +11,35 @@ namespace MotorShop.Models
         public int Id { get; set; }
 
         [Required, StringLength(120)]
-        public string Name { get; set; } = null!;           // Ví dụ: "MotorShop Hà Nội - Hoàn Kiếm"
+        public string Name { get; set; } = null!;
 
         [StringLength(80)]
-        public string? Code { get; set; }                   // Ví dụ: "HN-HK" (slug/mã nội bộ)
+        public string? Code { get; set; }
 
         [Required, StringLength(255)]
-        public string Address { get; set; } = null!;        // Địa chỉ hiển thị
+        public string Address { get; set; } = null!;
 
         [StringLength(50)]
-        public string? Phone { get; set; }                  // Hotline chi nhánh (nếu có)
+        public string? Phone { get; set; }
 
         [StringLength(120)]
-        public string? OpeningHours { get; set; }           // "08:00–20:00 (T2–CN)"
+        public string? OpeningHours { get; set; }
 
         [StringLength(255)]
-        public string? MapUrl { get; set; }                 // Link Google Maps (tuỳ chọn)
+        public string? MapUrl { get; set; }
 
-        public bool IsActive { get; set; } = true;          // Đang hoạt động hay không
+        public bool IsActive { get; set; } = true;
 
-        // Tuỳ chọn: toạ độ để map/SEO (không bắt buộc)
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }
 
-        // Điều hướng: các đơn hàng chọn nhận tại chi nhánh này
+        // Đơn hàng nhận xe tại chi nhánh này
         public ICollection<Order> PickupOrders { get; set; } = new List<Order>();
+
+        /// <summary>
+        /// Tồn kho các sản phẩm tại chi nhánh này.
+        /// </summary>
+        public ICollection<BranchInventory> Inventories { get; set; } = new List<BranchInventory>();
     }
+
 }

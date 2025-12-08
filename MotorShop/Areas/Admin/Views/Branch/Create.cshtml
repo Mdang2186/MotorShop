@@ -1,0 +1,172 @@
+﻿@model MotorShop.Models.Branch
+@{
+    ViewData["Title"] = "Thêm chi nhánh mới";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Head {
+        <style>
+            /* Center Form Container */
+            .form-center-glass {
+                max-width: 800px; margin: 2rem auto;
+                background: rgba(255, 255, 255, 0.8);
+                backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+                border: 1px solid rgba(255, 255, 255, 1);
+                border-radius: 30px; padding: 40px;
+                box-shadow: 0 20px 60px -10px rgba(99, 102, 241, 0.15);
+                position: relative; overflow: hidden;
+            }
+
+            /* Background Blob Decoration */
+            .form-center-glass::before {
+                content: ''; position: absolute; top: -80px; right: -80px;
+                width: 200px; height: 200px; border-radius: 50%;
+                background: var(--grad-info); opacity: 0.1; filter: blur(50px);
+            }
+
+            /* Section Header */
+            .form-section-title {
+                font-size: 12px; font-weight: 800; text-transform: uppercase;
+                color: #94a3b8; letter-spacing: 1px; margin-bottom: 15px;
+                display: flex; align-items: center; gap: 10px;
+            }
+            .form-section-title i { font-size: 16px; color: #6366f1; }
+            .form-section-title::after {
+                content: ''; flex: 1; height: 1px; background: #e2e8f0; margin-left: 10px;
+            }
+
+            /* Inputs */
+            .input-glass {
+                background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px;
+                padding: 12px 18px; font-weight: 600; color: #334155; transition: all 0.3s;
+            }
+            .input-glass:focus {
+                background: white; border-color: #8b5cf6;
+                box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1); outline: none;
+            }
+        
+            .form-label-neon {
+                font-size: 11px; font-weight: 800; text-transform: uppercase;
+                color: #64748b; margin-bottom: 6px; display: block; margin-left: 4px;
+            }
+
+            /* Switch Card */
+            .switch-card {
+                background: white; border: 1px solid #f1f5f9; border-radius: 16px;
+                padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+            }
+            .form-switch .form-check-input {
+                width: 3em; height: 1.5em; cursor: pointer; background-color: #cbd5e1; border: none;
+                background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='white'/%3e%3c/svg%3e");
+            }
+            .form-switch .form-check-input:checked {
+                background-color: #10b981; box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+            }
+        </style>
+}
+
+<div class="container fade-in-up">
+    <div class="d-flex align-items-center gap-3 mb-3" style="max-width: 800px; margin: 0 auto;">
+        <a asp-action="Index" class="btn btn-light rounded-circle shadow-sm d-grid place-items-center" style="width: 45px; height: 45px;">
+            <i class="bi bi-arrow-left text-dark fs-5"></i>
+        </a>
+        <span class="text-muted fw-bold small text-uppercase">Quay lại danh sách</span>
+    </div>
+
+    <div class="form-center-glass">
+        <div class="text-center mb-5">
+            <div class="d-inline-flex p-3 rounded-4 mb-3 text-white shadow-lg" 
+                 style="background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);">
+                <i class="bi bi-shop-window fs-2"></i>
+            </div>
+            <h2 class="fw-bolder mb-1 h-value text-dark">Thêm Showroom Mới</h2>
+            <p class="text-muted small">Mở rộng mạng lưới kinh doanh của bạn.</p>
+        </div>
+
+        <form asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="form-section-title"><i class="bi bi-info-circle-fill"></i> Thông tin cơ bản</div>
+            <div class="row g-3 mb-4">
+                <div class="col-md-8">
+                    <label asp-for="Name" class="form-label-neon">Tên chi nhánh <span class="text-danger">*</span></label>
+                    <input asp-for="Name" class="form-control input-glass" placeholder="VD: MotorShop Hà Nội - Cầu Giấy" autofocus />
+                    <span asp-validation-for="Name" class="text-danger small fw-bold mt-1 d-block ps-2"></span>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="Code" class="form-label-neon">Mã nội bộ</label>
+                    <input asp-for="Code" class="form-control input-glass text-uppercase font-monospace" placeholder="VD: HN-CG" />
+                    <span asp-validation-for="Code" class="text-danger small fw-bold mt-1 d-block ps-2"></span>
+                </div>
+            </div>
+
+            <div class="form-section-title"><i class="bi bi-geo-alt-fill text-danger"></i> Liên hệ & Địa điểm</div>
+            <div class="row g-3 mb-4">
+                <div class="col-12">
+                    <label asp-for="Address" class="form-label-neon">Địa chỉ hiển thị <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-0 rounded-start-3 ps-3"><i class="bi bi-pin-map-fill text-danger"></i></span>
+                        <input asp-for="Address" class="form-control input-glass rounded-end-3" placeholder="Số nhà, đường, quận/huyện, tỉnh/thành phố..." />
+                    </div>
+                    <span asp-validation-for="Address" class="text-danger small fw-bold mt-1 d-block ps-2"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="Phone" class="form-label-neon">Hotline</label>
+                    <input asp-for="Phone" class="form-control input-glass" placeholder="09xx..." />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="OpeningHours" class="form-label-neon">Giờ mở cửa</label>
+                    <input asp-for="OpeningHours" class="form-control input-glass" placeholder="VD: 08:00 - 20:00 (T2-CN)" />
+                </div>
+            </div>
+
+            <div class="form-section-title"><i class="bi bi-map-fill text-success"></i> Cấu hình bản đồ</div>
+            <div class="row g-3 mb-4">
+                <div class="col-12">
+                    <label asp-for="MapUrl" class="form-label-neon">Link Google Maps (Embed/Share)</label>
+                    <input asp-for="MapUrl" class="form-control input-glass" placeholder="https://goo.gl/maps/..." />
+                </div>
+                
+                <div class="col-md-6">
+                    <label asp-for="Latitude" class="form-label-neon">Vĩ độ (Latitude)</label>
+                    <input asp-for="Latitude" class="form-control input-glass font-monospace" placeholder="VD: 21.028511" type="number" step="any" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Longitude" class="form-label-neon">Kinh độ (Longitude)</label>
+                    <input asp-for="Longitude" class="form-control input-glass font-monospace" placeholder="VD: 105.804817" type="number" step="any" />
+                </div>
+                <div class="col-12">
+                    <div class="alert alert-light border small text-muted d-flex align-items-center gap-2 py-2 mb-0">
+                        <i class="bi bi-lightbulb-fill text-warning"></i>
+                        <span>Mẹo: Bạn có thể lấy tọa độ bằng cách click chuột phải trên Google Maps -> chọn "What's here?".</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="switch-card mt-4">
+                <div>
+                    <label class="fw-bold d-block text-dark" for="IsActive">Trạng thái hoạt động</label>
+                    <small class="text-muted" style="font-size: 10px;">Bật để hiển thị chi nhánh này trên website</small>
+                </div>
+                <div class="form-check form-switch m-0">
+                    <input class="form-check-input" type="checkbox" asp-for="IsActive" checked style="transform: scale(1.2);">
+                </div>
+            </div>
+
+            <div class="d-grid gap-3 mt-5">
+                <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-lg py-3 border-0" 
+                        style="background: var(--grad-primary);">
+                    <i class="bi bi-check2-circle me-2"></i> Lưu Chi Nhánh
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

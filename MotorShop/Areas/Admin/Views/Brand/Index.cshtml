@@ -1,0 +1,466 @@
+﻿@model MotorShop.Areas.Admin.Controllers.BrandController.BrandIndexVM
+@{
+    ViewData["Title"] = "Quản lý thương hiệu";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+
+    // Pagination vars
+    int currentPage = Model.Page;
+    int totalPages = Model.TotalPages;
+
+    // Helper hiển thị ảnh
+    string GetImageSrc(string? logoUrl, string? slug)
+    {
+        if (!string.IsNullOrEmpty(logoUrl)) return logoUrl;
+        return Url.Content($"~/images/brands/{slug}.png");
+    }
+}
+
+@section Head {
+    <style>
+        /* --- 1. KPI STAT CARDS (3D NEON) --- */
+        .brand-stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card-3d {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid white;
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+            .stat-card-3d:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 20px 40px -5px rgba(99, 102, 241, 0.15);
+                border-color: #c4b5fd;
+            }
+
+        .stat-icon-box {
+            width: 60px;
+            height: 60px;
+            border-radius: 18px;
+            display: grid;
+            place-items: center;
+            font-size: 28px;
+            color: white;
+            box-shadow: 0 8px 20px -5px rgba(0,0,0,0.15);
+        }
+
+        .stat-info h3 {
+            font-size: 28px;
+            font-weight: 800;
+            margin: 0;
+            line-height: 1;
+            color: #1e293b;
+        }
+
+        .stat-info p {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #64748b;
+            margin: 0;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-card-3d::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: currentColor;
+            opacity: 0.1;
+            filter: blur(20px);
+        }
+
+        /* --- 2. FILTER BAR --- */
+        .filter-glass {
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 12px;
+            border: 1px solid white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .search-input-neon {
+            border: none;
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 10px 16px 10px 40px;
+            font-weight: 600;
+            color: #334155;
+            width: 100%;
+            transition: 0.2s;
+        }
+
+            .search-input-neon:focus {
+                background: white;
+                box-shadow: inset 0 0 0 2px #8b5cf6;
+                outline: none;
+            }
+
+        .filter-toggle-btn {
+            border: 1px solid #e2e8f0;
+            background: white;
+            color: #64748b;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 13px;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+
+            .filter-toggle-btn:hover {
+                background: #f1f5f9;
+            }
+
+            .filter-toggle-btn.active {
+                background: #eff6ff;
+                border-color: #3b82f6;
+                color: #3b82f6;
+                box-shadow: 0 4px 10px rgba(59, 130, 246, 0.1);
+            }
+
+        /* --- 3. TABLE 3D --- */
+        .table-container {
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 24px;
+            padding: 5px;
+            border: 1px solid rgba(255,255,255,0.8);
+        }
+
+        .table-separate {
+            border-collapse: separate;
+            border-spacing: 0 10px;
+            width: 100%;
+        }
+
+        .brand-row {
+            background: white;
+            transition: all 0.3s;
+            border-radius: 16px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.01);
+        }
+
+            .brand-row td {
+                padding: 16px;
+                vertical-align: middle;
+                border-top: 1px solid transparent;
+                border-bottom: 1px solid transparent;
+            }
+
+                .brand-row td:first-child {
+                    border-top-left-radius: 16px;
+                    border-bottom-left-radius: 16px;
+                    border-left: 1px solid transparent;
+                }
+
+                .brand-row td:last-child {
+                    border-top-right-radius: 16px;
+                    border-bottom-right-radius: 16px;
+                    border-right: 1px solid transparent;
+                }
+
+            .brand-row:hover {
+                transform: translateY(-3px) scale(1.005);
+                box-shadow: 0 10px 30px -5px rgba(99, 102, 241, 0.15);
+                z-index: 10;
+                position: relative;
+            }
+
+        .logo-box-3d {
+            width: 60px;
+            height: 60px;
+            border-radius: 14px;
+            background: #fff;
+            border: 1px solid #f1f5f9;
+            padding: 4px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            display: grid;
+            place-items: center;
+            overflow: hidden;
+        }
+
+            .logo-box-3d img {
+                max-width: 100%;
+                max-height: 100%;
+                object-fit: contain;
+            }
+
+        .logo-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #e2e8f0, #f8fafc);
+            color: #94a3b8;
+            display: grid;
+            place-items: center;
+            font-weight: 800;
+            font-size: 20px;
+        }
+
+        .status-switch button {
+            border: none;
+            background: transparent;
+            padding: 0;
+            transition: 0.2s;
+        }
+
+            .status-switch button:hover {
+                transform: scale(1.2);
+            }
+
+        /* Actions */
+        .btn-action {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            border: none;
+            display: grid;
+            place-items: center;
+            transition: 0.2s;
+            background: #f8fafc;
+            color: #64748b;
+        }
+
+            .btn-action:hover {
+                transform: scale(1.15);
+                background: white;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            }
+
+        .btn-edit:hover {
+            color: #3b82f6;
+        }
+
+        .btn-delete:hover {
+            color: #ef4444;
+        }
+    </style>
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-end mb-5 fade-in-up">
+    <div>
+        <h2 class="fw-bolder mb-1 h-value">Thương hiệu</h2>
+        <p class="text-muted mb-0 small">Quản lý các đối tác và nhà cung cấp.</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary rounded-pill px-4 fw-bold shadow-lg d-flex align-items-center gap-2"
+       style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); border: none;">
+        <i class="bi bi-plus-lg"></i> Thêm mới
+    </a>
+</div>
+
+<div class="brand-stat-grid fade-in-up delay-1">
+    <div class="stat-card-3d" style="color: #3b82f6;">
+        <div class="stat-icon-box" style="background: linear-gradient(135deg, #3b82f6, #06b6d4);">
+            <i class="bi bi-grid-fill"></i>
+        </div>
+        <div class="stat-info">
+            <h3>@Model.TotalBrands</h3>
+            <p>Tổng số</p>
+        </div>
+    </div>
+
+    <div class="stat-card-3d" style="color: #10b981;">
+        <div class="stat-icon-box" style="background: linear-gradient(135deg, #10b981, #34d399);">
+            <i class="bi bi-check-circle-fill"></i>
+        </div>
+        <div class="stat-info">
+            <h3>@Model.ActiveCount</h3>
+            <p>Đang hiện</p>
+        </div>
+    </div>
+
+    <div class="stat-card-3d" style="color: #64748b;">
+        <div class="stat-icon-box" style="background: linear-gradient(135deg, #94a3b8, #cbd5e1);">
+            <i class="bi bi-eye-slash-fill"></i>
+        </div>
+        <div class="stat-info">
+            <h3>@Model.InactiveCount</h3>
+            <p>Đang ẩn</p>
+        </div>
+    </div>
+</div>
+
+<div class="filter-glass mb-4 fade-in-up delay-2">
+    <form asp-action="Index" method="get" class="d-flex flex-grow-1 gap-3 align-items-center flex-wrap" id="filterForm">
+        <div class="position-relative" style="flex-grow: 1; min-width: 200px;">
+            <i class="bi bi-search position-absolute text-muted" style="left: 14px; top: 50%; transform: translateY(-50%); font-size: 16px;"></i>
+            <input type="text" name="q" value="@Model.Search" class="search-input-neon" placeholder="Tìm tên thương hiệu...">
+        </div>
+
+        <label class="filter-toggle-btn @(Model.OnlyActive == true ? "active" : "")">
+            <input type="checkbox" name="onlyActive" value="true" checked="@(Model.OnlyActive == true)" onchange="document.getElementById('filterForm').submit()" style="display:none;" />
+            <i class="bi bi-toggle-on text-lg"></i> <span class="ms-1">Chỉ hiện Active</span>
+        </label>
+    </form>
+
+    <div class="vr opacity-25 mx-1"></div>
+
+    <form asp-action="ExportExcel" method="post" class="d-inline">
+        <input type="hidden" name="q" value="@Model.Search" />
+        <input type="hidden" name="onlyActive" value="@(Model.OnlyActive == true ? "true" : "false")" />
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn btn-light rounded-circle shadow-sm" title="Xuất Excel" style="width: 40px; height: 40px;">
+            <i class="bi bi-file-earmark-excel text-success fs-5"></i>
+        </button>
+    </form>
+
+    <form asp-action="ExportPdf" method="post" class="d-inline">
+        <input type="hidden" name="q" value="@Model.Search" />
+        <input type="hidden" name="onlyActive" value="@(Model.OnlyActive == true ? "true" : "false")" />
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn btn-light rounded-circle shadow-sm" title="Xuất PDF" style="width: 40px; height: 40px;">
+            <i class="bi bi-file-earmark-pdf text-danger fs-5"></i>
+        </button>
+    </form>
+</div>
+
+<div class="table-container fade-in-up delay-3">
+    <div class="table-responsive" style="overflow-x: visible;">
+        <table class="table-separate align-middle">
+            <thead>
+                <tr class="text-uppercase text-muted small fw-bold" style="letter-spacing: 1px;">
+                    <th class="ps-4 py-3">Thương hiệu</th>
+                    <th>Đường dẫn (Slug)</th>
+                    <th>Sản phẩm</th>
+                    <th class="text-center">Trạng thái</th>
+                    <th class="text-center">Ngày tạo</th>
+                    <th class="text-end pe-4">Tác vụ</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Items)
+                {
+                    <tr class="brand-row">
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="logo-box-3d">
+                                    <img src="@GetImageSrc(item.LogoUrl, item.Slug)"
+                                         alt="@item.Name"
+                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';" />
+
+                                    <div class="logo-placeholder" style="display:none;">
+                                        @item.Name.Substring(0, 1).ToUpper()
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark" style="font-size: 15px;">@item.Name</div>
+                                    <div class="small text-muted">ID: #@item.Id</div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td>
+                            <span class="badge bg-light text-secondary font-monospace fw-normal border">/@(item.Slug ?? "---")</span>
+                        </td>
+
+                        <td>
+                            @if (item.ProductCount > 0)
+                            {
+                                <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2">@item.ProductCount SP</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted small fst-italic">Trống</span>
+                            }
+                        </td>
+
+                        <td class="text-center status-switch">
+                            <form asp-action="ToggleActive" asp-route-id="@item.Id" method="post">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="border-0 bg-transparent p-0 transition hover:scale-110" title="Nhấn để đổi trạng thái">
+                                    @if (item.IsActive)
+                                    {
+                                        <i class="bi bi-check-circle-fill text-success fs-3"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-x-circle-fill text-muted fs-3 opacity-50"></i>
+                                    }
+                                </button>
+                            </form>
+                        </td>
+
+                        <td class="text-center text-muted small fw-bold">
+                            @item.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy")
+                        </td>
+
+                        <td class="text-end pe-4">
+                            <div class="d-flex justify-content-end gap-2">
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn-action btn-edit text-info" title="Chi tiết">
+                                    <i class="bi bi-eye-fill"></i>
+                                </a>
+
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn-action btn-edit" title="Chỉnh sửa">
+                                    <i class="bi bi-pencil-fill"></i>
+                                </a>
+
+                                <form asp-action="Delete" asp-route-id="@item.Id" method="post" onsubmit="return confirm('Xóa thương hiệu @item.Name?');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn-action btn-delete" title="Xóa">
+                                        <i class="bi bi-trash3-fill"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+
+                @if (!Model.Items.Any())
+                {
+                    <tr>
+                        <td colspan="6" class="text-center py-5">
+                            <div class="d-inline-block p-3 rounded-circle bg-light mb-2">
+                                <i class="bi bi-inbox fs-1 text-muted opacity-25"></i>
+                            </div>
+                            <p class="text-muted fw-bold mb-0">Không tìm thấy thương hiệu nào.</p>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (Model.TotalPages > 1)
+    {
+        <div class="d-flex justify-content-center mt-4">
+            <nav>
+                <ul class="pagination pagination-sm gap-1 mb-0 shadow-sm p-1 rounded-pill bg-white border">
+                    @for (int i = 1; i <= Model.TotalPages; i++)
+                    {
+                        <li class="page-item @(i == currentPage ? "active" : "")">
+                            <a class="page-link rounded-circle border-0 fw-bold @(i == currentPage ? "bg-primary text-white" : "text-muted")"
+                               style="width: 35px; height: 35px; display: grid; place-items: center; @(i == currentPage ? "background: linear-gradient(135deg, #6366f1, #8b5cf6);" : "")"
+                               href="@Url.Action("Index", new { page = i, q = Model.Search, onlyActive = Model.OnlyActive })">
+                                @i
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        </div>
+    }
+</div>

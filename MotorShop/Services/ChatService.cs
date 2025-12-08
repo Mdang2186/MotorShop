@@ -62,7 +62,7 @@ namespace MotorShop.Services
                 .ToListAsync();
         }
 
-        public async Task<ChatMessage> AddMessageAsync(int threadId, string senderId, bool isFromStaff, string content)
+        public async Task<ChatMessage> AddMessageAsync(int threadId, string? senderId, bool isFromStaff, string content)
         {
             var thread = await _db.ChatThreads.FirstOrDefaultAsync(t => t.Id == threadId);
             if (thread == null)
@@ -81,7 +81,7 @@ namespace MotorShop.Services
             thread.LastMessageAt = msg.SentAt;
             thread.LastMessagePreview = content.Length > 50 ? content.Substring(0, 50) + "..." : content;
 
-            if (isFromStaff && string.IsNullOrEmpty(thread.StaffId))
+            if (isFromStaff && string.IsNullOrEmpty(thread.StaffId) && !string.IsNullOrEmpty(senderId))
                 thread.StaffId = senderId;
 
             _db.ChatMessages.Add(msg);
@@ -89,8 +89,11 @@ namespace MotorShop.Services
 
             await _db.SaveChangesAsync();
 
-            // Load thông tin Sender để trả về cho SignalR hiển thị avatar/tên
-            await _db.Entry(msg).Reference(m => m.Sender).LoadAsync();
+            // Load thông tin Sender để trả về cho SignalR hiển thị avatar/tên (chỉ nếu có Sender)
+            if (!string.IsNullOrEmpty(msg.SenderId))
+            {
+                await _db.Entry(msg).Reference(m => m.Sender).LoadAsync();
+            }
 
             return msg;
         }

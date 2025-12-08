@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using MotorShop.Models;
 using System.Globalization;
 using System.Text;
-using MotorShop.Models.Entities; 
+using MotorShop.Models.Entities;
 
 namespace MotorShop.Data
 {
@@ -16,24 +16,28 @@ namespace MotorShop.Data
         public DbSet<Product> Products => Set<Product>();
         public DbSet<Brand> Brands => Set<Brand>();
         public DbSet<Category> Categories => Set<Category>();
+
         public DbSet<Order> Orders => Set<Order>();
         public DbSet<OrderItem> OrderItems => Set<OrderItem>();
+
         public DbSet<AiConversation> AiConversations { get; set; } = null!;
         public DbSet<AiMessage> AiMessages { get; set; } = null!;
-        public ICollection<BranchInventory> Inventories { get; set; } = new List<BranchInventory>();
 
         public DbSet<ProductImage> ProductImages => Set<ProductImage>();
         public DbSet<ProductSpecification> ProductSpecifications => Set<ProductSpecification>();
+
         public DbSet<ChatThread> ChatThreads { get; set; } = null!;
         public DbSet<ChatMessage> ChatMessages { get; set; } = null!;
+
         public DbSet<BranchInventory> BranchInventories { get; set; } = null!;
 
         public DbSet<Tag> Tags => Set<Tag>();
         public DbSet<ProductTag> ProductTags => Set<ProductTag>();
+        public DbSet<ShopBankAccount> ShopBankAccounts => Set<ShopBankAccount>();
 
         public DbSet<Branch> Branches => Set<Branch>();
-        public DbSet<Bank> Banks => Set<Bank>();      // ⚠️ Đảm bảo Models/Bank.cs có namespace MotorShop.Models
-        public DbSet<Shipper> Shippers => Set<Shipper>(); 
+        public DbSet<Bank> Banks => Set<Bank>();
+        public DbSet<Shipper> Shippers => Set<Shipper>();
 
         protected override void OnModelCreating(ModelBuilder b)
         {
@@ -42,12 +46,13 @@ namespace MotorShop.Data
             // ===== Money precision =====
             b.Entity<Product>().Property(p => p.Price).HasPrecision(18, 2);
             b.Entity<Product>().Property(p => p.OriginalPrice).HasPrecision(18, 2);
+
             b.Entity<Order>().Property(o => o.TotalAmount).HasPrecision(18, 2);
             b.Entity<Order>().Property(o => o.ShippingFee).HasPrecision(18, 2);
             b.Entity<Order>().Property(o => o.DiscountAmount).HasPrecision(18, 2);
+
             b.Entity<OrderItem>().Property(i => i.UnitPrice).HasPrecision(18, 2);
 
-            // ===== Product =====
             // ===== Product =====
             b.Entity<Product>(e =>
             {
@@ -58,7 +63,7 @@ namespace MotorShop.Data
                 e.Property(x => x.IsPublished).HasDefaultValue(true);
                 e.Property(x => x.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
 
-                // 🔹 Mô tả sản phẩm: full blog HTML, không giới hạn độ dài
+                // Mô tả full HTML
                 e.Property(x => x.Description)
                  .HasColumnType("nvarchar(max)")
                  .IsRequired(false);
@@ -66,17 +71,20 @@ namespace MotorShop.Data
                 // Concurrency token
                 e.Property(x => x.RowVersion).IsRowVersion();
             });
-            b.Entity<BranchInventory>(b =>
-            {
-                b.HasIndex(x => new { x.BranchId, x.ProductId }).IsUnique();
 
-                b.HasOne(x => x.Branch)
-                    .WithMany() // nếu bạn thêm ICollection<BranchInventory> vào Branch thì .WithMany(b => b.Inventories)
+            // ===== BranchInventory =====
+            b.Entity<BranchInventory>(e =>
+            {
+                // Một sản phẩm tại một chi nhánh chỉ có 1 dòng tồn
+                e.HasIndex(x => new { x.BranchId, x.ProductId }).IsUnique();
+
+                e.HasOne(x => x.Branch)
+                    .WithMany(br => br.Inventories)    // nhớ thêm ICollection<BranchInventory> Inventories vào Branch
                     .HasForeignKey(x => x.BranchId)
                     .OnDelete(DeleteBehavior.Cascade);
 
-                b.HasOne(x => x.Product)
-                    .WithMany() // sau này nếu muốn: .WithMany(p => p.BranchInventories)
+                e.HasOne(x => x.Product)
+                    .WithMany(p => p.BranchInventories) // nhớ thêm ICollection<BranchInventory> BranchInventories vào Product
                     .HasForeignKey(x => x.ProductId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
@@ -95,25 +103,24 @@ namespace MotorShop.Data
                 e.Property(x => x.Slug).HasMaxLength(120);
                 e.HasIndex(x => x.Slug).IsUnique(false);
             });
-            b.Entity<AiConversation>(b =>
+
+            // ===== AI Conversation / Message =====
+            b.Entity<AiConversation>(e =>
             {
-                b.Property(c => c.Title)
-                    .HasMaxLength(200);
+                e.Property(c => c.Title).HasMaxLength(200);
+                e.Property(c => c.LastUserMessage).HasMaxLength(1000);
 
-                b.Property(c => c.LastUserMessage)
-                    .HasMaxLength(1000);
-
-                b.HasMany(c => c.Messages)
+                e.HasMany(c => c.Messages)
                     .WithOne(m => m.Conversation)
                     .HasForeignKey(m => m.ConversationId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
-            b.Entity<AiMessage>(b =>
+            b.Entity<AiMessage>(e =>
             {
-                b.Property(m => m.Content)
-                    .HasMaxLength(4000);
+                e.Property(m => m.Content).HasMaxLength(4000);
             });
+
             // ===== Tag & ProductTag =====
             b.Entity<Tag>(e =>
             {
@@ -125,8 +132,13 @@ namespace MotorShop.Data
             b.Entity<ProductTag>(e =>
             {
                 e.HasKey(pt => new { pt.ProductId, pt.TagId });
-                e.HasOne(pt => pt.Product).WithMany(p => p.ProductTags).HasForeignKey(pt => pt.ProductId);
-                e.HasOne(pt => pt.Tag).WithMany(t => t.ProductTags).HasForeignKey(pt => pt.TagId);
+                e.HasOne(pt => pt.Product)
+                    .WithMany(p => p.ProductTags)
+                    .HasForeignKey(pt => pt.ProductId);
+
+                e.HasOne(pt => pt.Tag)
+                    .WithMany(t => t.ProductTags)
+                    .HasForeignKey(pt => pt.TagId);
             });
 
             // ===== Order / OrderItem =====
@@ -159,12 +171,9 @@ namespace MotorShop.Data
                     .HasForeignKey(pi => pi.ProductId)
                     .OnDelete(DeleteBehavior.Cascade);
 
-                // Mỗi Product không trùng SortOrder
                 e.HasIndex(pi => new { pi.ProductId, pi.SortOrder }).IsUnique();
 
                 e.Property(pi => pi.ImageUrl).HasMaxLength(500).IsRequired();
-
-                // Đồng bộ với model: cho phép null, dài 255
                 e.Property(pi => pi.Caption).HasMaxLength(255).IsRequired(false);
             });
 
@@ -177,15 +186,13 @@ namespace MotorShop.Data
                     .OnDelete(DeleteBehavior.Cascade);
 
                 e.HasIndex(ps => new { ps.ProductId, ps.SortOrder });
-
-                // Tránh trùng spec theo tên trong cùng 1 sản phẩm
                 e.HasIndex(ps => new { ps.ProductId, ps.Name }).IsUnique();
 
                 e.Property(ps => ps.Name).HasMaxLength(150).IsRequired();
                 e.Property(ps => ps.Value).HasMaxLength(1000);
             });
 
-            // ===== Branch & Shipper =====
+            // ===== Branch & Shipper trên Order =====
             b.Entity<Order>()
                 .HasOne(o => o.PickupBranch)
                 .WithMany(br => br.PickupOrders)
@@ -198,12 +205,38 @@ namespace MotorShop.Data
                 .HasForeignKey(o => o.ShipperId)
                 .OnDelete(DeleteBehavior.SetNull);
 
-            // ===== Bank (Entity) =====
+            // ===== Bank =====
             b.Entity<Bank>(e =>
             {
                 e.HasIndex(x => x.ShortName).IsUnique(false);
                 e.HasIndex(x => x.Bin).IsUnique(false);
-                e.HasIndex(x => x.Code).IsUnique(false); // muốn duy nhất thì .IsUnique(true)
+                e.HasIndex(x => x.Code).IsUnique(false);
+            });
+            // ===== ShopBankAccount =====
+            b.Entity<ShopBankAccount>(e =>
+            {
+                e.HasOne(x => x.Bank)
+                    .WithMany()
+                    .HasForeignKey(x => x.BankId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                e.Property(x => x.AccountNumber)
+                    .HasMaxLength(30)
+                    .IsRequired();
+
+                e.Property(x => x.AccountName)
+                    .HasMaxLength(120)
+                    .IsRequired();
+
+                e.Property(x => x.Branch)
+                    .HasMaxLength(120);
+
+                e.Property(x => x.Note)
+                    .HasMaxLength(300);
+
+                // Một ngân hàng chỉ có tối đa 1 tài khoản mặc định
+                e.HasIndex(x => new { x.BankId, x.IsDefault })
+                    .HasFilter("[IsDefault] = 1");
             });
 
             // ===== ApplicationUser =====
@@ -211,36 +244,33 @@ namespace MotorShop.Data
                 .Property(x => x.CreatedAt)
                 .HasDefaultValueSql("GETUTCDATE()");
 
-            // ===== ApplicationUser =====
-            b.Entity<ApplicationUser>()
-                .Property(x => x.CreatedAt)
-                .HasDefaultValueSql("GETUTCDATE()");
-
             // ===== Chat =====
-            b.Entity<ChatThread>()
-       .HasOne(t => t.Customer)
-       .WithMany()
-       .HasForeignKey(t => t.CustomerId)
-       .OnDelete(DeleteBehavior.Restrict);
+            b.Entity<ChatThread>(e =>
+            {
+                e.HasOne(t => t.Customer)
+                    .WithMany()
+                    .HasForeignKey(t => t.CustomerId)
+                    .OnDelete(DeleteBehavior.Restrict);
 
-            b.Entity<ChatThread>()
-                .HasOne(t => t.Staff)
-                .WithMany()
-                .HasForeignKey(t => t.StaffId)
-                .OnDelete(DeleteBehavior.Restrict);
+                e.HasOne(t => t.Staff)
+                    .WithMany()
+                    .HasForeignKey(t => t.StaffId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
 
-            b.Entity<ChatMessage>()
-                .HasOne(m => m.Thread)
-                .WithMany(t => t.Messages)
-                .HasForeignKey(m => m.ThreadId)
-                .OnDelete(DeleteBehavior.Cascade);
+            b.Entity<ChatMessage>(e =>
+            {
+                e.HasOne(m => m.Thread)
+                    .WithMany(t => t.Messages)
+                    .HasForeignKey(m => m.ThreadId)
+                    .OnDelete(DeleteBehavior.Cascade);
 
-            b.Entity<ChatMessage>()
-                .HasOne(m => m.Sender)
-                .WithMany()
-                .HasForeignKey(m => m.SenderId)
-                .OnDelete(DeleteBehavior.Restrict);
-
+                e.HasOne(m => m.Sender)
+                    .WithMany()
+                    .HasForeignKey(m => m.SenderId)
+                    .IsRequired(false) // Allow Null Sender
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
         }
 
         // ====== Auto audit + slug ======
@@ -271,17 +301,20 @@ namespace MotorShop.Data
                                 p.CreatedAt = utcNow;
                             p.UpdatedAt = utcNow;
 
-                            if (string.IsNullOrWhiteSpace(p.Slug) || entry.Property(nameof(Product.Name)).IsModified)
+                            if (string.IsNullOrWhiteSpace(p.Slug) ||
+                                entry.Property(nameof(Product.Name)).IsModified)
                                 p.Slug = ToSlug(p.Name);
                             break;
 
                         case Brand br:
-                            if (string.IsNullOrWhiteSpace(br.Slug) || entry.Property(nameof(Brand.Name)).IsModified)
+                            if (string.IsNullOrWhiteSpace(br.Slug) ||
+                                entry.Property(nameof(Brand.Name)).IsModified)
                                 br.Slug = ToSlug(br.Name);
                             break;
 
                         case Category cat:
-                            if (string.IsNullOrWhiteSpace(cat.Slug) || entry.Property(nameof(Category.Name)).IsModified)
+                            if (string.IsNullOrWhiteSpace(cat.Slug) ||
+                                entry.Property(nameof(Category.Name)).IsModified)
                                 cat.Slug = ToSlug(cat.Name);
                             break;
                     }

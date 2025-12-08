@@ -49,11 +49,14 @@
     <Compile Include="Models\ProductSpecification.cs" />
     <Compile Include="Models\ProductTag.cs" />
     <Compile Include="Models\Shipper.cs" />
+    <Compile Include="Models\ShopBankAccount.cs" />
     <Compile Include="Models\Tag.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Bogus" Version="35.6.5" />
+    <PackageReference Include="ClosedXML" Version="0.105.0" />
+    <PackageReference Include="iTextSharp.LGPLv2.Core" Version="3.7.12" />
     <PackageReference Include="MailKit" Version="4.14.1" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.10" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="9.0.10" />

@@ -1,0 +1,386 @@
+﻿@model IEnumerable<MotorShop.Models.ShopBankAccount>
+
+@{
+    ViewData["Title"] = "Ví doanh nghiệp";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Head {
+    <style>
+        /* Nền trang nhẹ nhàng để làm nổi bật thẻ trắng/màu */
+        body {
+            background-color: #f0f2f5;
+        }
+
+        /* --- STYLING CHO THẺ NGÂN HÀNG --- */
+        .bank-card-wrapper {
+            perspective: 1000px;
+            margin-bottom: 40px; /* Tạo khoảng cách cho thanh action */
+        }
+
+        .bank-card {
+            position: relative;
+            height: 230px;
+            border-radius: 24px;
+            padding: 25px;
+            color: white;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            z-index: 1;
+        }
+
+        .bank-card-wrapper:hover .bank-card {
+            transform: translateY(-10px) rotateX(2deg);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+        }
+
+        /* Gradient màu sắc giống ảnh mẫu */
+        .bg-mint {
+            background: linear-gradient(110deg, #4ade80 0%, #2dd4bf 100%);
+        }
+
+        .bg-sunset {
+            background: linear-gradient(110deg, #fb7185 0%, #f472b6 30%, #fbbf24 100%);
+        }
+
+        .bg-ocean {
+            background: linear-gradient(110deg, #3b82f6 0%, #8b5cf6 100%);
+        }
+
+        .bg-night {
+            background: linear-gradient(110deg, #1e293b 0%, #0f172a 100%);
+        }
+
+        /* Họa tiết chìm */
+        .card-texture {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: radial-gradient(at 80% 0%, rgba(255,255,255,0.2) 0px, transparent 50%), radial-gradient(at 0% 100%, rgba(255,255,255,0.2) 0px, transparent 50%);
+            opacity: 0.8;
+            pointer-events: none;
+        }
+
+        /* Chip điện tử */
+        .card-chip {
+            width: 50px;
+            height: 38px;
+            background: linear-gradient(135deg, #fcd34d 0%, #f59e0b 100%);
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.2);
+            position: relative;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+            .card-chip::before {
+                content: '';
+                position: absolute;
+                top: 50%;
+                left: 0;
+                right: 0;
+                height: 1px;
+                background: rgba(0,0,0,0.15);
+            }
+
+            .card-chip::after {
+                content: '';
+                position: absolute;
+                left: 50%;
+                top: 0;
+                bottom: 0;
+                width: 1px;
+                background: rgba(0,0,0,0.15);
+            }
+
+        /* Nội dung text */
+        .text-shadow-sm {
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .font-mono {
+            font-family: 'Consolas', 'Monaco', monospace;
+            letter-spacing: 2px;
+        }
+
+        /* --- THANH CHỨC NĂNG (ACTION BAR) --- */
+        .action-dock {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 85%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 8px 15px;
+            border-radius: 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.15);
+            z-index: 10;
+            border: 1px solid rgba(255,255,255,0.5);
+            transition: all 0.3s ease;
+        }
+
+        .bank-card-wrapper:hover .action-dock {
+            bottom: -35px; /* Đẩy xuống nhẹ khi hover thẻ */
+            width: 90%;
+        }
+
+        /* Nút bấm chức năng */
+        .dock-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border: none;
+            background: #f8fafc;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+        }
+
+            .dock-btn:hover {
+                transform: translateY(-3px);
+                color: white;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            }
+
+            /* Màu hover riêng cho từng nút */
+            .dock-btn.btn-qr:hover {
+                background: #3b82f6;
+                box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+            }
+
+            .dock-btn.btn-edit:hover {
+                background: #f59e0b;
+                box-shadow: 0 5px 15px rgba(245, 158, 11, 0.4);
+            }
+
+            .dock-btn.btn-del:hover {
+                background: #ef4444;
+                box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);
+            }
+
+            /* Tooltip đơn giản */
+            .dock-btn::before {
+                content: attr(data-tooltip);
+                position: absolute;
+                bottom: 100%;
+                left: 50%;
+                transform: translateX(-50%) translateY(-5px);
+                background: #1e293b;
+                color: white;
+                padding: 4px 8px;
+                border-radius: 6px;
+                font-size: 11px;
+                white-space: nowrap;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.2s;
+                margin-bottom: 8px;
+            }
+
+            .dock-btn:hover::before {
+                opacity: 1;
+            }
+
+        /* Badge trạng thái */
+        .status-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 6px 14px;
+            background: rgba(255,255,255,0.25);
+            backdrop-filter: blur(4px);
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+    </style>
+}
+
+<div class="d-flex justify-content-between align-items-end mb-5 px-2 fade-in-up">
+    <div>
+        <h6 class="text-uppercase text-muted fw-bold small ls-1 mb-1">Tài chính</h6>
+        <h2 class="fw-bolder mb-0 display-6 text-dark">
+            Ví Doanh Nghiệp
+        </h2>
+    </div>
+    <a asp-action="Create" class="btn btn-dark rounded-pill px-4 py-2 fw-bold shadow-lg d-flex align-items-center gap-2">
+        <i class="fa-solid fa-plus"></i>
+        <span>Thêm thẻ mới</span>
+    </a>
+</div>
+
+<div class="row g-5 px-2">
+    @if (!Model.Any())
+    {
+        <div class="col-12 text-center py-5">
+            <div class="bg-white rounded-circle d-inline-flex p-4 shadow-sm mb-3">
+                <i class="fa-regular fa-credit-card fs-1 text-muted opacity-50"></i>
+            </div>
+            <h5 class="text-secondary fw-bold">Chưa có tài khoản nào</h5>
+            <p class="text-muted small">Thêm tài khoản ngân hàng để bắt đầu nhận thanh toán.</p>
+        </div>
+    }
+
+    @foreach (var acc in Model)
+    {
+        var bankCode = acc.Bank?.Code ?? "";
+        var shortName = acc.Bank?.ShortName ?? "BANK";
+
+        // Logic chọn màu thẻ: Xen kẽ hoặc random
+        string[] bgClasses = { "bg-mint", "bg-sunset", "bg-ocean", "bg-night" };
+        var bgClass = acc.IsActive ? bgClasses[acc.Id % bgClasses.Length] : "bg-secondary opacity-75";
+
+        // Tạo QR Link
+        var encodedInfo = System.Net.WebUtility.UrlEncode("Thanh toan MotorShop");
+        var encodedName = System.Net.WebUtility.UrlEncode(acc.AccountName ?? "");
+        var qrUrl = !string.IsNullOrWhiteSpace(bankCode)
+        ? $"https://img.vietqr.io/image/{bankCode}-{acc.AccountNumber}-compact2.png?addInfo={encodedInfo}&accountName={encodedName}"
+        : "";
+
+        <div class="col-xl-4 col-md-6 fade-in-up">
+            <div class="bank-card-wrapper position-relative">
+
+                <div class="bank-card @bgClass">
+                    <div class="card-texture"></div>
+
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="card-chip"></div>
+                        <div class="text-end">
+                            <h4 class="fw-bolder mb-0 fst-italic text-shadow-sm">@shortName</h4>
+                            <div class="small opacity-75 fw-light">@acc.Branch</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-2">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="fs-4 fw-bold font-mono text-shadow-sm">
+                                @FormatCardNumber(acc.AccountNumber)
+                            </div>
+                            <button class="btn btn-link p-0 text-white opacity-50 hover-opacity-100"
+                                    onclick="copyToClipboard('@acc.AccountNumber')"
+                                    title="Sao chép">
+                                <i class="fa-regular fa-clone"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-end mt-1">
+                        <div>
+                            <div class="small opacity-75" style="font-size: 10px; letter-spacing: 1px;">CHỦ TÀI KHOẢN</div>
+                            <div class="fw-bold text-uppercase text-shadow-sm">@acc.AccountName</div>
+                        </div>
+                        @if (acc.IsDefault)
+                        {
+                            <div class="text-white fs-4" title="Tài khoản mặc định"><i class="fa-solid fa-circle-check"></i></div>
+                        }
+                    </div>
+
+                    @if (!acc.IsActive)
+                    {
+                        <div class="status-badge bg-dark text-white border-0">Đã khóa</div>
+                    }
+                </div>
+
+                <div class="action-dock">
+                    <button type="button" class="dock-btn btn-qr"
+                            onclick="showQrModal('@qrUrl', '@shortName - @acc.AccountNumber')"
+                            data-tooltip="Mã QR">
+                        <i class="fa-solid fa-qrcode"></i>
+                    </button>
+
+                    <a asp-action="Edit" asp-route-id="@acc.Id" class="dock-btn btn-edit text-decoration-none" data-tooltip="Chỉnh sửa">
+                        <i class="fa-solid fa-pen"></i>
+                    </a>
+
+                    <a asp-action="Delete" asp-route-id="@acc.Id" class="dock-btn btn-del text-decoration-none" data-tooltip="Xóa thẻ">
+                        <i class="fa-solid fa-trash"></i>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    }
+</div>
+
+<div class="modal fade" id="qrModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden">
+            <div class="modal-header bg-dark text-white border-0 py-3 justify-content-center position-relative">
+                <h6 class="modal-title fw-bold" id="qrModalTitle">Quét mã thanh toán</h6>
+                <button type="button" class="btn-close btn-close-white position-absolute end-0 me-3" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center p-4 bg-white">
+                <div class="spinner-border text-primary mb-3" id="qrLoading" role="status"></div>
+                <img id="qrImage" src="" class="img-fluid rounded shadow-sm d-none" onload="this.classList.remove('d-none'); document.getElementById('qrLoading').classList.add('d-none');" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1050">
+    <div id="copyToast" class="toast align-items-center text-bg-dark border-0 rounded-pill" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body px-4 fw-bold">
+                <i class="fa-solid fa-check-circle text-success me-2"></i> Đã sao chép số tài khoản!
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    public string FormatCardNumber(string number)
+    {
+        if (string.IsNullOrEmpty(number)) return "#### #### ####";
+        // Format giả lập: 4 số cách nhau
+        if (number.Length > 4 && !number.Contains(" "))
+        {
+            // Logic đơn giản, thực tế có thể dùng Regex
+            return number;
+        }
+        return number;
+    }
+}
+
+@section Scripts {
+    <script>
+        function showQrModal(url, title) {
+            if(!url) {
+                // Toast báo lỗi thay vì alert
+                alert('Chưa cấu hình mã ngân hàng!');
+                return;
+            }
+            document.getElementById('qrModalTitle').innerText = title;
+            document.getElementById('qrImage').src = url;
+            document.getElementById('qrImage').classList.add('d-none');
+            document.getElementById('qrLoading').classList.remove('d-none');
+
+            var myModal = new bootstrap.Modal(document.getElementById('qrModal'));
+            myModal.show();
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                const toastEl = document.getElementById('copyToast');
+                const toast = new bootstrap.Toast(toastEl);
+                toast.show();
+            });
+        }
+    </script>
+}

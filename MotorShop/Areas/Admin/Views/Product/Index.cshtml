@@ -1,104 +1,610 @@
-﻿@model List<MotorShop.Models.Product>
+﻿@model IEnumerable<MotorShop.Models.Product>
 @{
-    ViewData["Title"] = "Sản phẩm";
+    ViewData["Title"] = "Danh sách sản phẩm";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 
-    // Lấy lại các filter hiện tại để giữ nguyên khi chuyển trang
-    var q = (string?)ViewBag.Q ?? string.Empty;
-    var sort = (string?)ViewBag.Sort ?? "new";
-    var brandId = Context.Request.Query["brandId"].ToString();
-    var categoryId = Context.Request.Query["categoryId"].ToString();
-
-    int page = (int)(ViewBag.Page ?? 1);
-    int totalPages = (int)(ViewBag.TotalPages ?? 1);
+    // Xử lý phân trang
+    int currentPage = ViewBag.Page ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+    int totalItems = ViewBag.TotalItems ?? 0;
 }
 
-<h1 class="text-2xl font-semibold mb-4">Sản phẩm</h1>
+@section Head {
+    <style>
+        /* --- 1. CORE ANIMATIONS --- */
+        @@keyframes fadeInUp {
+            from
 
-<form method="get" class="grid grid-cols-1 md:grid-cols-5 gap-3 mb-4">
-    <input name="q" value="@q" class="border rounded-md px-3 py-2" placeholder="Tìm theo tên..." />
-
-    <select name="brandId" asp-items="ViewBag.Brands" class="border rounded-md px-3 py-2">
-        <option value="">-- Brand --</option>
-    </select>
-
-    <select name="categoryId" asp-items="ViewBag.Categories" class="border rounded-md px-3 py-2">
-        <option value="">-- Category --</option>
-    </select>
-
-    <select name="sort" class="border rounded-md px-3 py-2">
-        <option value="new" selected="@(sort == "new")">Mới nhất</option>
-        <option value="price_asc" selected="@(sort == "price_asc")">Giá tăng dần</option>
-        <option value="price_desc" selected="@(sort == "price_desc")">Giá giảm dần</option>
-        <option value="stock" selected="@(sort == "stock")">Tồn kho</option>
-    </select>
-
-    <button class="px-3 py-2 rounded-md bg-slate-900 text-white">Lọc</button>
-</form>
-
-<div class="mb-3">
-    <a asp-action="Create" class="px-3 py-2 rounded-md bg-blue-600 text-white">
-        <i class="fa fa-plus mr-1"></i>Thêm sản phẩm
-    </a>
-</div>
-
-<div class="overflow-x-auto bg-white rounded-xl shadow">
-    <table class="min-w-full text-sm">
-        <thead>
-            <tr class="text-left text-slate-500">
-                <th class="p-3">#</th>
-                <th>Tên</th>
-                <th>Brand</th>
-                <th>Category</th>
-                <th>Giá</th>
-                <th>Tồn</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var p in Model)
-            {
-                <tr class="border-t">
-                    <td class="p-3">@p.Id</td>
-                    <td>
-                        <div class="flex items-center gap-3">
-                            @if (!string.IsNullOrWhiteSpace(p.ImageUrl))
-                            {
-                                <img src="@p.ImageUrl" class="w-12 h-12 object-cover rounded" />
-                            }
-                            <div>
-                                <div class="font-medium">@p.Name</div>
-                                <div class="text-slate-500 text-xs">Năm: @p.Year</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td>@p.Brand?.Name</td>
-                    <td>@p.Category?.Name</td>
-                    <td>@p.Price.ToString("N0") đ</td>
-                    <td>@p.StockQuantity</td>
-                    <td class="text-right pr-3">
-                        <a asp-action="Edit" asp-route-id="@p.Id" class="text-blue-600 hover:underline">Sửa</a>
-                        <span class="mx-1">·</span>
-                        <a asp-action="Delete" asp-route-id="@p.Id" class="text-red-600 hover:underline">Xoá</a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</div>
-
-@if (totalPages > 1)
-{
-    <div class="flex justify-end gap-1 mt-3">
-        @for (var i = 1; i <= totalPages; i++)
         {
-            <a class="px-3 py-1 rounded border @(i == page ? "bg-slate-900 text-white" : "bg-white")"
-               asp-route-page="@i"
-               asp-route-q="@q"
-               asp-route-brandId="@(brandId)"
-               asp-route-categoryId="@(categoryId)"
-               asp-route-sort="@(sort)">
-                @i
-            </a>
+            opacity: 0;
+            transform: translateY(20px);
         }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        }
+
+        .animate-fade-up {
+            animation: fadeInUp 0.5s ease-out forwards;
+            opacity: 0;
+        }
+
+        .delay-1 {
+            animation-delay: 0.1s;
+        }
+
+        .delay-2 {
+            animation-delay: 0.2s;
+        }
+
+        .delay-3 {
+            animation-delay: 0.3s;
+        }
+
+        /* --- 2. GLASSMORPHISM CONTAINER --- */
+        .glass-container {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.05);
+            padding: 20px;
+        }
+
+        /* --- 3. FLOATING FILTER BAR --- */
+        .filter-bar {
+            background: white;
+            border-radius: 16px;
+            padding: 8px 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 1px solid #f1f5f9;
+        }
+
+        .search-input {
+            border: none;
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 10px 16px 10px 40px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #334155;
+            width: 100%;
+            transition: all 0.3s;
+        }
+
+            .search-input:focus {
+                background: white;
+                box-shadow: inset 0 0 0 2px #8b5cf6;
+                outline: none;
+            }
+
+        .filter-select {
+            border: 1px solid transparent;
+            background-color: #f8fafc;
+            border-radius: 12px;
+            padding: 9px 36px 9px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.2s;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+        }
+
+            .filter-select:hover, .filter-select:focus {
+                background-color: white;
+                border-color: #cbd5e1;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            }
+
+        /* --- 4. 3D PRODUCT ROW (THE CORE) --- */
+        .table-separate {
+            border-collapse: separate;
+            border-spacing: 0 12px; /* Khoảng cách giữa các hàng */
+        }
+
+        .product-row {
+            background: white;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+            /* Hiệu ứng bo góc cho hàng */
+            .product-row td:first-child {
+                border-top-left-radius: 16px;
+                border-bottom-left-radius: 16px;
+            }
+
+            .product-row td:last-child {
+                border-top-right-radius: 16px;
+                border-bottom-right-radius: 16px;
+            }
+
+            /* Hiệu ứng Hover 3D Neon */
+            .product-row:hover {
+                transform: translateY(-4px) scale(1.01);
+                box-shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.15), 0 8px 10px -6px rgba(99, 102, 241, 0.1);
+                z-index: 10;
+            }
+
+            .product-row td {
+                padding: 16px;
+                border-top: 1px solid #f1f5f9;
+                border-bottom: 1px solid #f1f5f9;
+                vertical-align: middle;
+            }
+
+                .product-row td:first-child {
+                    border-left: 1px solid #f1f5f9;
+                }
+
+                .product-row td:last-child {
+                    border-right: 1px solid #f1f5f9;
+                }
+
+        /* --- 5. COMPONENT STYLES --- */
+        .img-3d-box {
+            width: 64px;
+            height: 64px;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 2px solid white;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .img-3d-box img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                transition: transform 0.5s;
+            }
+
+        .product-row:hover .img-3d-box img {
+            transform: scale(1.1);
+        }
+
+        .price-tag {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 800;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 15px;
+        }
+
+        /* Status Badges */
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+            .status-pill.active {
+                background: #ecfdf5;
+                color: #059669;
+                border: 1px solid #a7f3d0;
+            }
+
+                .status-pill.active .dot {
+                    background: #10b981;
+                    box-shadow: 0 0 8px #34d399;
+                }
+
+            .status-pill.inactive {
+                background: #fef2f2;
+                color: #dc2626;
+                border: 1px solid #fecaca;
+            }
+
+                .status-pill.inactive .dot {
+                    background: #ef4444;
+                    box-shadow: 0 0 8px #f87171;
+                }
+
+            .status-pill.warn {
+                background: #fffbeb;
+                color: #d97706;
+                border: 1px solid #fde68a;
+            }
+
+                .status-pill.warn .dot {
+                    background: #f59e0b;
+                    box-shadow: 0 0 8px #fbbf24;
+                }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        /* Action Buttons */
+        .btn-icon-soft {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            border: none;
+            background: #f8fafc;
+            color: #64748b;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+            .btn-icon-soft:hover {
+                transform: translateY(-2px);
+                color: #6366f1;
+                background: white;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            }
+
+        /* Floating Export */
+        .floating-actions {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 50;
+        }
+
+        .btn-float {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            background: white;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+            color: #334155;
+            display: grid;
+            place-items: center;
+            font-size: 20px;
+            transition: all 0.3s;
+        }
+
+            .btn-float:hover {
+                transform: translateY(-4px) scale(1.1);
+            }
+
+            .btn-float.excel:hover {
+                color: #10b981;
+            }
+
+            .btn-float.pdf:hover {
+                color: #ef4444;
+            }
+
+        /* Custom Pagination */
+        .pagination .page-link {
+            border: none;
+            margin: 0 3px;
+            border-radius: 8px;
+            font-weight: 600;
+            color: #64748b;
+            width: 36px;
+            height: 36px;
+            display: grid;
+            place-items: center;
+        }
+
+        .pagination .page-item.active .page-link {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+        }
+    </style>
+}
+
+<div class="container-fluid px-0">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-end mb-5 animate-fade-up">
+        <div>
+            <h1 class="fw-bolder mb-1 text-dark" style="font-size: 2rem; letter-spacing: -1px;">Sản phẩm</h1>
+            <p class="text-muted mb-0 font-monospace small">
+                <i class="bi bi-database me-1"></i> Tổng: <span class="fw-bold text-dark">@totalItems</span> items
+            </p>
+        </div>
+
+        <div class="d-flex gap-3">
+            <a asp-action="Create" class="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow-lg d-flex align-items-center gap-2"
+               style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); border: none; transition: transform 0.2s;">
+                <i class="bi bi-plus-lg fs-5"></i>
+                <span>Thêm Mới</span>
+            </a>
+        </div>
     </div>
+
+    <div class="mb-4 animate-fade-up delay-1">
+        <form asp-action="Index" method="get" class="filter-bar">
+            <div class="position-relative flex-grow-1">
+                <i class="bi bi-search position-absolute text-muted" style="left: 14px; top: 50%; transform: translateY(-50%); font-size: 16px;"></i>
+                <input type="text" name="q" value="@ViewBag.Q" class="search-input" placeholder="Tìm kiếm tên sản phẩm, mã SKU...">
+            </div>
+
+            <div class="vr mx-1 opacity-25"></div>
+
+            <select name="categoryId" asp-items="ViewBag.CategoryId" class="filter-select" style="min-width: 160px;">
+                <option value="">-- Danh mục --</option>
+            </select>
+
+            <select name="status" class="filter-select" style="min-width: 150px;">
+                <option value="">-- Trạng thái --</option>
+                <option value="active" selected="@(ViewBag.Status == "active")">Đang bán</option>
+                <option value="outofstock" selected="@(ViewBag.Status == "outofstock")">Hết hàng</option>
+                <option value="inactive" selected="@(ViewBag.Status == "inactive")">Ngừng KD</option>
+            </select>
+
+            <button type="submit" class="btn btn-primary rounded-circle shadow-sm d-grid place-items-center"
+                    style="width: 42px; height: 42px; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); border: none;">
+                <i class="bi bi-arrow-right"></i>
+            </button>
+        </form>
+    </div>
+
+    @if (Model.Any())
+    {
+        <div class="table-responsive animate-fade-up delay-2" style="overflow-x: visible;">
+            <table class="table table-borderless align-middle table-separate">
+                <thead>
+                    <tr class="text-uppercase text-muted small fw-bold" style="letter-spacing: 1px;">
+                        <th class="ps-4">Sản phẩm</th>
+                        <th>Thông tin</th>
+                        <th>Giá bán</th>
+                        <th>Tồn kho</th>
+                        <th class="text-center">Trạng thái</th>
+                        <th class="text-end pe-4">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr class="product-row">
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="img-3d-box">
+                                        @if (!string.IsNullOrEmpty(item.PrimaryImageUrl))
+                                        {
+                                            <img src="@item.PrimaryImageUrl" alt="Product Image" loading="lazy" />
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-box-seam text-secondary fs-4"></i>
+                                        }
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-dark text-truncate" style="max-width: 220px;" title="@item.Name">
+                                            @item.Name
+                                        </div>
+                                        <div class="text-muted small font-monospace mt-1">
+                                            <i class="bi bi-upc-scan me-1"></i>@(item.SKU ?? "---")
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td>
+                                <div class="d-flex flex-column gap-1">
+                                    <span class="badge bg-light text-dark border fw-normal">
+                                        <i class="bi bi-folder2-open me-1 text-muted"></i>@item.Category?.Name
+                                    </span>
+                                    <span class="badge bg-light text-dark border fw-normal">
+                                        <i class="bi bi-tag me-1 text-muted"></i>@(item.Brand?.Name ?? "N/A")
+                                    </span>
+                                </div>
+                            </td>
+
+                            <td>
+                                <div class="price-tag">@item.Price.ToString("N0") ₫</div>
+                                @if (item.OriginalPrice > item.Price)
+                                {
+                                    <div class="text-muted text-decoration-line-through small" style="font-size: 11px;">
+                                        @item.OriginalPrice?.ToString("N0") ₫
+                                    </div>
+                                }
+                            </td>
+
+                            <td>
+                                @if (item.StockQuantity > 10)
+                                {
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="progress flex-grow-1 bg-light" style="height: 6px; width: 60px; border-radius: 4px;">
+                                            <div class="progress-bar bg-success" style="width: 80%"></div>
+                                        </div>
+                                        <span class="fw-bold text-dark small">@item.StockQuantity</span>
+                                    </div>
+                                }
+                                else if (item.StockQuantity > 0)
+                                {
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="progress flex-grow-1 bg-light" style="height: 6px; width: 60px; border-radius: 4px;">
+                                            <div class="progress-bar bg-warning" style="width: 30%"></div>
+                                        </div>
+                                        <span class="fw-bold text-warning small">@item.StockQuantity</span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill">Hết hàng</span>
+                                }
+                            </td>
+
+                            <td class="text-center">
+                                <div class="d-flex flex-column gap-2 align-items-center">
+                                    @if (item.IsActive)
+                                    {
+                                        <span class="status-pill active"><span class="dot"></span> Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="status-pill inactive"><span class="dot"></span> Stop</span>
+                                    }
+
+                                    <form asp-action="TogglePublished" asp-route-id="@item.Id" method="post" class="d-inline-block">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="border-0 bg-transparent p-0 opacity-75 hover-opacity-100 transition"
+                                                title="@(item.IsPublished ? "Đang hiển thị trên web" : "Đang ẩn khỏi web")">
+                                            @if (item.IsPublished)
+                                            {
+                                                <i class="bi bi-eye-fill text-primary"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="bi bi-eye-slash-fill text-muted"></i>
+                                            }
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+
+                            <td class="text-end pe-4">
+                                <div class="dropdown">
+                                    <button class="btn btn-icon-soft" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-4 p-2 animate slideIn" style="min-width: 200px;">
+                                        <li>
+                                            <h6 class="dropdown-header text-uppercase small fw-bold">Thao tác</h6>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item rounded-3 mb-1 fw-medium" asp-action="Details" asp-route-id="@item.Id">
+                                                <i class="bi bi-card-heading me-2 text-info"></i> Xem chi tiết
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item rounded-3 mb-1 fw-medium" asp-action="Edit" asp-route-id="@item.Id">
+                                                <i class="bi bi-pencil-square me-2 text-primary"></i> Chỉnh sửa
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item rounded-3 mb-1 fw-medium" asp-action="Images" asp-route-id="@item.Id">
+                                                <i class="bi bi-images me-2 text-warning"></i> Thư viện ảnh
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item rounded-3 mb-1 fw-medium" asp-action="Specs" asp-route-id="@item.Id">
+                                                <i class="bi bi-list-check me-2 text-dark"></i> Thông số KT
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider bg-light my-2"></li>
+                                        <li>
+                                            <form asp-action="ToggleActive" asp-route-id="@item.Id" method="post">
+                                                @Html.AntiForgeryToken()
+                                                <button class="dropdown-item rounded-3 mb-1 fw-medium text-secondary">
+                                                    <i class="bi bi-power me-2"></i> @(item.IsActive ? "Ngừng kinh doanh" : "Kích hoạt lại")
+                                                </button>
+                                            </form>
+                                        </li>
+                                        <li>
+                                            <form asp-action="Delete" asp-route-id="@item.Id" method="post">
+                                                <a class="dropdown-item rounded-3 fw-bold text-danger bg-danger-subtle mt-1" asp-action="Delete" asp-route-id="@item.Id">
+                                                    <i class="bi bi-trash3 me-2"></i> Xóa sản phẩm
+                                                </a>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (totalPages > 1)
+        {
+            <div class="d-flex justify-content-center mt-4 animate-fade-up delay-3">
+                <nav>
+                    <ul class="pagination pagination-sm gap-1 mb-0 shadow-sm p-1 rounded-pill bg-white border">
+                        <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                            <a class="page-link" href="@Url.Action("Index", new { page = currentPage - 1, q = ViewBag.Q, categoryId = ViewBag.CategoryId.SelectedValue, status = ViewBag.Status })">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+
+                        @for (int i = 1; i <= totalPages; i++)
+                        {
+                            <li class="page-item @(i == currentPage ? "active" : "")">
+                                <a class="page-link" href="@Url.Action("Index", new { page = i, q = ViewBag.Q, categoryId = ViewBag.CategoryId.SelectedValue, status = ViewBag.Status })">
+                                    @i
+                                </a>
+                            </li>
+                        }
+
+                        <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                            <a class="page-link" href="@Url.Action("Index", new { page = currentPage + 1, q = ViewBag.Q, categoryId = ViewBag.CategoryId.SelectedValue, status = ViewBag.Status })">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="glass-container text-center py-5 mt-4 animate-fade-up delay-2">
+            <div class="bg-light rounded-circle d-inline-flex p-4 mb-3">
+                <i class="bi bi-search fs-1 text-muted opacity-50"></i>
+            </div>
+            <h5 class="fw-bold text-dark">Không tìm thấy sản phẩm nào</h5>
+            <p class="text-muted">Thử thay đổi bộ lọc hoặc thêm sản phẩm mới.</p>
+            <a asp-action="Create" class="btn btn-outline-primary rounded-pill fw-bold mt-2">
+                Thêm sản phẩm mới
+            </a>
+        </div>
+    }
+</div>
+
+<div class="floating-actions animate-fade-up delay-3">
+    <form asp-action="ExportExcel" method="post">
+        <input type="hidden" name="q" value="@ViewBag.Q" />
+        <input type="hidden" name="categoryId" value="@ViewBag.CategoryId.SelectedValue" />
+        <input type="hidden" name="status" value="@ViewBag.Status" />
+        <button type="submit" class="btn-float excel" title="Xuất Excel" data-bs-toggle="tooltip" data-bs-placement="left">
+            <i class="bi bi-file-earmark-excel-fill"></i>
+        </button>
+    </form>
+
+    <form asp-action="ExportPdf" method="post">
+        <input type="hidden" name="q" value="@ViewBag.Q" />
+        <input type="hidden" name="categoryId" value="@ViewBag.CategoryId.SelectedValue" />
+        <input type="hidden" name="status" value="@ViewBag.Status" />
+        <button type="submit" class="btn-float pdf" title="Xuất PDF" data-bs-toggle="tooltip" data-bs-placement="left">
+            <i class="bi bi-file-earmark-pdf-fill"></i>
+        </button>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        // Kích hoạt Tooltip Bootstrap
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    </script>
 }

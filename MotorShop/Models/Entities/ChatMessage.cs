@@ -10,8 +10,8 @@ namespace MotorShop.Models.Entities
         public int ThreadId { get; set; }
         public ChatThread Thread { get; set; } = null!;
 
-        public string SenderId { get; set; } = null!;
-        public ApplicationUser Sender { get; set; } = null!;
+        public string? SenderId { get; set; }
+        public ApplicationUser? Sender { get; set; }
 
         public string Content { get; set; } = null!;
         public bool IsFromStaff { get; set; }
