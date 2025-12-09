@@ -1,21 +1,831 @@
-﻿@{
-    ViewData["Title"] = "Trợ lý AI - MotorShop";
-    // Giữ nguyên Layout mặc định để có Header/Footer
-    Layout = "_Layout";
-    ViewData["HideFooter"] = true;
+﻿﻿@{
+ViewData["Title"] = "Apple Vision AI - MotorShop";
+ViewData["HideFooter"] = true;
 }
 
 @section Head {
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="~/css/ai.css" />
+
+    <style>
+        /* --- 1. SETTINGS & RESET --- */
+       :root { 
+    --ios-text: #1d1d1f;
+    --ios-sub: #86868b;
+    --ios-blue: #0071e3;
 }
 
-<div class="ai-page-wrapper">
+/* KHÔNG thay font / nền / màu của toàn site nữa,
+   để header dùng đúng style chung */
+body {
+            margin: 0;
+            overflow: hidden;
+}
 
-    <canvas id="magnetic-canvas"></canvas>
+/* Chỉ áp dụng font + màu nền iOS cho khu vực AI */
+.ios-stage {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: calc(100vh - 64px); /* dòng này file anh đã có rồi, giữ nguyên */
+    width: 100%;
+
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif;
+    background: var(--ios-bg);
+    color: var(--ios-text);
+    cursor: default;
+}
+
+        /* --- 2. CANVAS BACKGROUND (HIỆU ỨNG SÓNG NƯỚC) --- */
+        #magnetic-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+        }
+
+        /* --- 3. LAYOUT STAGE --- */
+       
+
+        /* --- 4. CHAT ZONE (CĂN GIỮA TUYỆT ĐỐI) --- */
+        .chat-zone {
+            flex: 1;
+            width: 100%;
+            /* [QUAN TRỌNG] Tạo khung trục giữa 1000px */
+            max-width: 1000px;
+            margin: 0 auto;
+            overflow-y: auto;
+            padding: 40px 20px 140px 20px; /* Padding đáy lớn để tránh Input Dock */
+            scroll-behavior: smooth;
+            /* Mask mờ cạnh trên dưới cho mượt */
+            mask-image: linear-gradient(to bottom, transparent 0%, black 2%, black 98%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 2%, black 98%, transparent 100%);
+        }
+
+            .chat-zone::-webkit-scrollbar {
+                display: none;
+            }
+
+        /* --- 5. HERO SECTION (MÀN HÌNH CHÀO) --- */
+        .hero-box {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            animation: breathe 4s ease-in-out infinite alternate;
+        }
+
+        .apple-logo-glow {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(180deg, #0071e3, #60a5fa);
+            border-radius: 24px;
+            display: grid;
+            place-items: center;
+            color: white;
+            font-size: 40px;
+            margin-bottom: 20px;
+            box-shadow: 0 20px 60px -10px rgba(0, 113, 227, 0.4);
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: linear-gradient(180deg, #1d1d1f, #86868b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .hero-sub {
+            font-size: 1.2rem;
+            color: var(--ios-sub);
+            max-width: 500px;
+            margin-bottom: 40px;
+        }
+
+        /* --- 6. SUGGESTION CARDS (THẺ GỢI Ý TRÔI NỔI) --- */
+        .suggestion-container {
+            width: 100%;
+            max-width: 650px;
+            perspective: 1000px;
+        }
+
+        .gravity-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .gravity-card {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 20px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+        }
+
+            .gravity-card:hover {
+                transform: translateY(-8px) scale(1.02);
+                background: rgba(255, 255, 255, 0.9);
+                box-shadow: 0 20px 40px -5px rgba(0, 113, 227, 0.15);
+                z-index: 10;
+            }
+
+        .g-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #e0f2fe, #f0f9ff);
+            color: #0071e3;
+            display: grid;
+            place-items: center;
+            font-size: 1.25rem;
+        }
+
+        .g-info {
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+        }
+
+        .g-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+
+        .g-sub {
+            font-size: 0.75rem;
+            color: #86868b;
+            margin-top: 2px;
+        }
+
+        /* --- 7. MESSAGE LAYOUT (CĂN TRÁI - PHẢI) --- */
+        .msg-row {
+            display: flex;
+            width: 100%;
+            margin-bottom: 30px;
+            animation: slideUp 0.4s ease-out;
+        }
+
+            /* [USER] Căn phải */
+            .msg-row.user {
+                justify-content: flex-end;
+            }
+
+            /* [AI] Căn trái */
+            .msg-row.bot, .msg-row.results {
+                justify-content: flex-start;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+        /* Bong bóng chat */
+        .bubble {
+            padding: 14px 24px;
+            border-radius: 20px;
+            font-size: 1.05rem;
+            line-height: 1.5;
+            max-width: 80%;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+        }
+
+            .bubble.bot {
+                background: white;
+                color: var(--ios-text);
+                border-bottom-left-radius: 4px;
+            }
+
+            .bubble.user {
+                background: var(--ios-blue);
+                color: white;
+                border-bottom-right-radius: 4px;
+                text-align: right;
+            }
+
+            /* Tiêu đề kết quả (Trong suốt, căn trái) */
+            .bubble.transparent {
+                background: transparent !important;
+                box-shadow: none !important;
+                padding: 0 0 15px 0;
+                color: var(--ios-sub);
+                font-weight: 500;
+                text-align: left;
+                width: 100%;
+            }
+
+        /* --- 8. PRODUCT GRID (LƯỚI SẢN PHẨM) --- */
+        .ios-grid {
+            display: grid;
+            /* Thẻ nhỏ gọn min 220px */
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+            width: 100%;
+        }
+
+        .widget-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            cursor: pointer;
+            position: relative;
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05);
+        }
+
+            .widget-card:hover {
+                transform: translateY(-8px);
+                box-shadow: 0 30px 60px -15px rgba(0,0,0,0.15);
+            }
+
+        .widget-img-box {
+            height: 160px;
+            background: #f5f5f7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .widget-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+
+        .widget-card:hover .widget-img {
+            transform: scale(1.08);
+        }
+
+        .widget-price {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255,255,255,0.95);
+            padding: 4px 12px;
+            border-radius: 99px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .widget-info {
+            padding: 16px;
+        }
+
+        .widget-name {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 4px;
+            color: #1d1d1f;
+        }
+
+        .widget-desc {
+            font-size: 0.8rem;
+            color: #86868b;
+        }
+
+        /* --- 9. INPUT DOCK (THANH NHẬP LIỆU) --- */
+        .invisible-dock {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%); /* Căn giữa màn hình */
+            width: 100%;
+            max-width: 1000px; /* Bằng độ rộng khung chat để thẳng hàng */
+            display: flex;
+            justify-content: center;
+            z-index: 50;
+            pointer-events: none;
+            padding: 0 20px;
+        }
+
+        /* [UPDATED] KHUNG NỀN ĐẶC (SOLID WHITE) */
+        .glass-capsule {
+            pointer-events: auto;
+            width: 100%;
+            max-width: 700px; /* Giới hạn độ rộng thanh search */
+            background: #ffffff; /* Nền trắng đặc */
+            border: 1px solid rgba(0, 0, 0, 0.1); /* Viền mỏng */
+            border-radius: 99px;
+            padding: 10px 10px 10px 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1); /* Bóng đậm hơn */
+            transition: 0.4s;
+        }
+
+            .glass-capsule:focus-within {
+                background: #ffffff;
+                transform: translateY(-5px);
+                box-shadow: 0 30px 80px rgba(0,0,0,0.15);
+            }
+
+        .ghost-input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            outline: none;
+            font-size: 1.1rem;
+        }
+
+        .btn-ios-send {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #1d1d1f;
+            color: white;
+            border: none;
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+            .btn-ios-send:hover {
+                background: var(--ios-blue);
+                transform: scale(1.1);
+            }
+
+        @@keyframes breathe {
+            0% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0.8;
+            }
+        }
+
+        @@keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .glass-capsule {
+                width: 100%;
+            }
+
+            .gravity-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chat-zone {
+                padding: 20px 5% 120px 5%;
+            }
+        }
+
+        /* --- [NEW] 10. RIGHT SIDEBAR (PANEL CHI TIẾT) --- */
+        .product-sidebar {
+            /* Giữ nguyên các thuộc tính cũ */
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 420px; /* Rộng hơn chút để thoải mái */
+            max-width: 90vw;
+            background: #ffffff;
+            z-index: 200;
+            box-shadow: -10px 0 40px rgba(0,0,0,0.1);
+            transform: translateX(110%);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); /* Apple easing */
+            display: flex;
+            flex-direction: column;
+        }
+
+            .product-sidebar.active {
+                transform: translateX(0); /* Hiện ra */
+            }
+
+        .sidebar-header {
+            flex-shrink: 0; /* Không bị co lại */
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            z-index: 10;
+        }
+
+        .sidebar-heading {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+
+        /* 3. Body: Phần nội dung cuộn được */
+        .sidebar-scroll-area {
+            flex: 1; /* Chiếm phần còn lại */
+            overflow-y: auto;
+            padding: 0; /* Padding xử lý bên trong để ảnh full viền */
+            scrollbar-width: thin;
+            padding-bottom: 100px; /* Chừa chỗ cho Sticky Footer */
+        }
+
+        /* Ảnh Hero: Tràn viền tạo cảm giác cao cấp */
+        .hero-image-container {
+            position: relative;
+            width: 100%;
+            height: 280px;
+            background: #f5f5f7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .btn-close-sidebar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #f5f5f7;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #1d1d1f;
+            transition: 0.2s;
+            display: grid;
+            place-items: center;
+        }
+
+            .btn-close-sidebar:hover {
+                background: #e5e5e7;
+            }
+
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .sidebar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+
+            .sidebar-img:hover {
+                transform: scale(1.05);
+            }
+        /* Badges trên ảnh */
+        .floating-badge {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(4px);
+            padding: 6px 12px;
+            border-radius: 99px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Nội dung chính */
+        .info-container {
+            padding: 24px;
+        }
+
+        .product-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            line-height: 1.2;
+            color: #1d1d1f;
+            margin-bottom: 8px;
+        }
+
+        .price-wrapper {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .current-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0071e3;
+        }
+
+        .old-price {
+            font-size: 1rem;
+            text-decoration: line-through;
+            color: #86868b;
+        }
+
+        .discount-tag {
+            background: #ff3b30;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* AI Insight Box - Điểm nhấn */
+        .ai-insight-box {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e6f2ff 100%);
+            border: 1px solid #dbeafe;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .ai-icon-float {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #0071e3;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-size: 12px;
+            box-shadow: 0 4px 10px rgba(0,113,227,0.3);
+        }
+
+        /* Grid Thông số - Hiện đại & Sạch */
+        .specs-grid-modern {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .spec-card {
+            background: #fbfbfd;
+            border: 1px solid #f5f5f7;
+            border-radius: 12px;
+            padding: 12px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            transition: 0.2s;
+        }
+
+            .spec-card:hover {
+                border-color: #0071e3;
+                background: #fdfdfd;
+            }
+
+        .spec-icon {
+            color: #86868b;
+            font-size: 1rem;
+            margin-bottom: 4px;
+        }
+
+        .spec-label {
+            font-size: 0.7rem;
+            color: #86868b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .spec-val {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+
+        /* Mô tả văn bản */
+        .desc-content {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #424245;
+        }
+
+            .desc-content ul {
+                padding-left: 1.2rem;
+                margin: 10px 0;
+            }
+
+            .desc-content li {
+                margin-bottom: 6px;
+            }
+
+        /* 4. Sticky Footer: Thanh hành động cố định ở đáy */
+        .sidebar-sticky-footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 16px 24px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px); /* Hiệu ứng kính */
+            border-top: 1px solid rgba(0,0,0,0.05);
+            display: flex;
+            gap: 12px;
+            z-index: 20;
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.03);
+        }
+
+        .btn-secondary {
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            background: #f5f5f7;
+            border: none;
+            color: #1d1d1f;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: grid;
+            place-items: center;
+        }
+
+            .btn-secondary:hover {
+                background: #e5e5e7;
+            }
+
+        .btn-primary-action {
+            flex: 1;
+            height: 50px;
+            background: #0071e3;
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 113, 227, 0.3);
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+            .btn-primary-action:hover {
+                background: #0077ed;
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(0, 113, 227, 0.4);
+            }
+
+        .sidebar-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0071e3;
+            margin-bottom: 8px;
+        }
+
+        .sidebar-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            line-height: 1.2;
+            margin-bottom: 16px;
+            color: #1d1d1f;
+        }
+
+        .sidebar-desc {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #86868b;
+            margin-bottom: 30px;
+        }
+
+        .sidebar-action {
+            padding: 20px;
+            border-top: 1px solid #f5f5f7;
+        }
+
+        .btn-buy-now {
+            width: 100%;
+            padding: 16px;
+            border-radius: 14px;
+            background: #0071e3;
+            color: white;
+            border: none;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+            .btn-buy-now:hover {
+                background: #0077ed;
+                transform: scale(1.02);
+            }
+
+        .sidebar-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.3);
+            z-index: 190;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s;
+        }
+
+            .sidebar-backdrop.active {
+                opacity: 1;
+                pointer-events: auto;
+            }
+        /* --- [NEW] STYLE CHO THÔNG SỐ KỸ THUẬT & MÔ TẢ --- */
+        .sidebar-section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1d1d1f;
+            margin: 24px 0 12px 0;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #f5f5f7;
+        }
+
+        .spec-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Chia 2 cột */
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .spec-item {
+            background: #fbfbfd;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid #f5f5f7;
+        }
+
+        .spec-label {
+            font-size: 0.75rem;
+            color: #86868b;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .spec-value {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #1d1d1f;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .description-box {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #424245;
+            background: #fff;
+        }
+
+            /* Style cho các thẻ con trong Description (nếu có HTML từ Seeder) */
+            .description-box p {
+                margin-bottom: 10px;
+            }
+
+            .description-box ul {
+                padding-left: 20px;
+                margin-bottom: 10px;
+            }
+
+            .description-box li {
+                margin-bottom: 4px;
+            }
+    </style>
+}
+
+<canvas id="magnetic-canvas"></canvas>
+
+<div class="ios-stage">
 
     <div id="side-backdrop" class="sidebar-backdrop" onclick="closeSidebar()"></div>
+
     <div id="product-sidebar" class="product-sidebar">
         <div class="sidebar-header">
             <span class="sidebar-heading">Chi tiết sản phẩm</span>
@@ -34,87 +844,86 @@
             </div>
 
             <div class="info-container">
-                <div id="sb-category-small" class="category-tag">Xe Tay Ga</div>
+                <div id="sb-category-small" style="font-size: 0.8rem; font-weight: 600; color: #86868b; text-transform: uppercase; margin-bottom: 4px;">Xe Tay Ga</div>
                 <h2 id="sb-name" class="product-title">Tên sản phẩm</h2>
 
                 <div class="price-wrapper">
                     <span id="sb-price" class="current-price">0 đ</span>
-                    <span id="sb-stock" class="stock-status">Sẵn hàng</span>
+                    <span id="sb-original-price" class="old-price hidden"></span>
+                    <span id="sb-discount-tag" class="discount-tag hidden">-0%</span>
                 </div>
 
                 <div class="ai-insight-box">
                     <div class="ai-icon-float"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
-                    <div class="ai-label">AI GỢI Ý VÌ:</div>
-                    <div id="sb-reason" class="ai-reason-text"></div>
+                    <div style="font-size: 0.8rem; font-weight: 700; color: #0071e3; margin-bottom: 4px;">AI GỢI Ý VÌ:</div>
+                    <div id="sb-reason" style="font-style: italic; color: #475569; font-size: 0.95rem;"></div>
                 </div>
 
                 <div class="sidebar-section-title">Thông số nổi bật</div>
                 <div class="specs-grid-modern">
                     <div class="spec-card">
-                        <span class="spec-label">Năm SX</span>
+                        <i class="fa-regular fa-calendar spec-icon"></i>
+                        <span class="spec-label">Năm sản xuất</span>
                         <span id="sb-year" class="spec-val">2024</span>
                     </div>
                     <div class="spec-card">
+                        <i class="fa-solid fa-barcode spec-icon"></i>
                         <span class="spec-label">Mã SKU</span>
                         <span id="sb-sku" class="spec-val">...</span>
                     </div>
                     <div class="spec-card">
+                        <i class="fa-solid fa-layer-group spec-icon"></i>
+                        <span class="spec-label">Tình trạng</span>
+                        <span id="sb-stock" class="spec-val" style="color: #34c759;">Còn hàng</span>
+                    </div>
+                    <div class="spec-card">
+                        <i class="fa-solid fa-motorcycle spec-icon"></i>
                         <span class="spec-label">Loại xe</span>
                         <span id="sb-category-val" class="spec-val">...</span>
                     </div>
                 </div>
 
                 <div class="sidebar-section-title">Mô tả chi tiết</div>
-                <div id="sb-desc" class="desc-content"></div>
+                <div id="sb-desc" class="desc-content">
+                </div>
             </div>
         </div>
 
         <div class="sidebar-sticky-footer">
+
             <button id="sb-btn-link" class="btn-primary-action">
                 Xem chi tiết & Mua ngay <i class="fa-solid fa-arrow-right-long"></i>
             </button>
         </div>
     </div>
 
+    <button onclick="location.reload()" style="position: absolute; top: 16px; right: 16px; z-index: 20; width: 40px; height: 40px; border-radius: 50%; background: transparent; border: none; cursor: pointer; color: #94a3b8; font-size: 1.2rem;" title="Làm mới">
+        <i class="fa-solid fa-rotate-right"></i>
+    </button>
+
     <div id="scroll-wrapper" class="chat-zone">
-
         <div id="hero-view" class="hero-box">
-            <div class="hero-icon-box">
-                <div class="inner-icon"></div>
-            </div>
-
-            <h1 class="hero-title">Trợ lý AI MotorShop</h1>
-            <p class="hero-sub">Sử dụng công nghệ trí tuệ nhân tạo để tìm chiếc xe hoàn<br>hảo cho phong cách của bạn.</p>
+            <div class="apple-logo-glow"><i class="fa-solid fa-cube"></i></div>
+            <h1 class="hero-title">MotorShop AI</h1>
+            <p class="hero-sub">Trải nghiệm tìm kiếm xe tương lai.<br>Chạm nhẹ để bắt đầu.</p>
 
             <div class="suggestion-container">
                 <div class="gravity-grid">
-                    <button class="gravity-card" onclick="usePrompt('Tôi cần tìm xe tay ga cho nữ văn phòng, cốp rộng')">
+                    <button class="gravity-card" onclick="usePrompt('Xe Honda Vision màu trắng bản cá tính')">
+                        <div class="g-icon"><i class="fa-solid fa-tag"></i></div>
+                        <div class="g-info"><span class="g-title">Honda Giá Tốt</span><span class="g-sub">Phân khúc phổ thông</span></div>
+                    </button>
+                    <button class="gravity-card" onclick="usePrompt('Tìm xe tay ga cho nữ thiết kế đẹp, nhẹ, cốp rộng dưới 40 triệu')">
                         <div class="g-icon"><i class="fa-solid fa-person-dress"></i></div>
-                        <div class="g-info">
-                            <span class="g-title">Xe cho nữ văn phòng</span>
-                            <span class="g-sub">Đẹp, nhẹ & tiện dụng</span>
-                        </div>
+                        <div class="g-info"><span class="g-title">Xe Cho Nữ</span><span class="g-sub">Đẹp, Nhẹ & Cốp rộng</span></div>
                     </button>
-                    <button class="gravity-card" onclick="usePrompt('Gợi ý xe côn tay thể thao đi phượt tốt nhất')">
+                    <button class="gravity-card" onclick="usePrompt('Xe côn tay thể thao Exciter hoặc Winner X')">
                         <div class="g-icon"><i class="fa-solid fa-motorcycle"></i></div>
-                        <div class="g-info">
-                            <span class="g-title">Xe côn tay đi phượt</span>
-                            <span class="g-sub">Exciter, Winner X...</span>
-                        </div>
+                        <div class="g-info"><span class="g-title">Xe Côn Tay</span><span class="g-sub">Thể thao & Tốc độ</span></div>
                     </button>
-                    <button class="gravity-card" onclick="usePrompt('So sánh ưu nhược điểm của Vision và Janus')">
-                        <div class="g-icon"><i class="fa-solid fa-scale-balanced"></i></div>
-                        <div class="g-info">
-                            <span class="g-title">So sánh xe</span>
-                            <span class="g-sub">Phân tích ưu nhược điểm</span>
-                        </div>
-                    </button>
-                    <button class="gravity-card" onclick="usePrompt('Xu hướng xe máy mới nhất năm 2024')">
-                        <div class="g-icon"><i class="fa-solid fa-calendar-check"></i></div>
-                        <div class="g-info">
-                            <span class="g-title">Xu hướng mới nhất</span>
-                            <span class="g-sub">Cập nhật thị trường</span>
-                        </div>
+                    <button class="gravity-card" onclick="usePrompt('Các mẫu xe máy điện Vinfast pin LFP mới nhất')">
+                        <div class="g-icon"><i class="fa-solid fa-bolt"></i></div>
+                        <div class="g-info"><span class="g-title">Vinfast EV</span><span class="g-sub">Xu hướng xe điện</span></div>
                     </button>
                 </div>
             </div>
@@ -122,19 +931,225 @@
 
         <div id="chat-content"></div>
 
-        <div id="loading-spinner" class="hidden" style="display: none; padding: 30px 0; text-align: center;">
-            <i class="fa-solid fa-circle-notch fa-spin text-blue-500 text-2xl"></i>
-            <p class="text-xs text-slate-400 mt-2">Đang suy nghĩ...</p>
+        <div id="loading-spinner" class="hidden" style="display: none; padding: 40px 0; text-align: center;">
+            <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 1.5rem; color: #0071e3;"></i>
         </div>
     </div>
 
     <div class="invisible-dock">
         <div class="glass-capsule">
-            <i class="fa-solid fa-wand-magic-sparkles text-slate-400"></i>
+            <i class="fa-solid fa-magnifying-glass" style="color: #94a3b8; font-size: 1.1rem;"></i>
             <input id="ai-input" type="text" class="ghost-input" placeholder="Hỏi tôi bất cứ điều gì..." autocomplete="off">
             <button id="ai-send" class="btn-ios-send"><i class="fa-solid fa-arrow-up"></i></button>
         </div>
     </div>
 </div>
 
-<script src="~/js/ai.js"></script>
+@section Scripts {
+    <script>
+                // === 1. GENTLE WATER RIPPLE (Sóng nhẹ) ===
+                const canvas = document.getElementById('magnetic-canvas');
+                const ctx = canvas.getContext('2d');
+                let w, h, particles = [];
+                const config = { spacing: 24, baseSize: 1.5, waveSpeed: 0.03, amplitude: 10, color: '0, 113, 227' };
+                let mouse = { x: -1000, y: -1000 };
+                let time = 0;
+                window.addEventListener('mousemove', (e) => { mouse.x = e.clientX; mouse.y = e.clientY; });
+                window.addEventListener('mouseout', () => { mouse.x = -1000; mouse.y = -1000; });
+                function initCanvas() {
+                    w = canvas.width = window.innerWidth;
+                    h = canvas.height = window.innerHeight; particles = [];
+                    for (let x = 0; x < w; x += config.spacing) {
+                        for (let y = 0; y < h; y += config.spacing) {
+                            particles.push({ x: x, y: y, originX: x, originY: y });
+                        }
+                    }
+                }
+
+                function animate() {
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                    ctx.fillRect(0, 0, w, h);
+                    time += config.waveSpeed;
+                    for (let i = 0; i < particles.length; i++) {
+                        let p = particles[i];
+                        let dx = mouse.x - p.originX, dy = mouse.y - p.originY;
+                        let dist = Math.sqrt(dx*dx + dy*dy);
+                        let waveInteraction = 0, size = config.baseSize, opacity = 0.05;
+                        if (dist < 900) {
+                            let decay = (1 - dist / 900);
+                            let wave = Math.sin(dist / 80 - time);
+                            waveInteraction = wave * config.amplitude * decay;
+                            size = config.baseSize + (wave * 0.8 * decay);
+                            opacity = 0.05 + (wave * 0.1 * decay);
+                        }
+                        if(size < 0.5) size = 0.5;
+                        ctx.fillStyle = `rgba(${config.color}, ${opacity})`;
+                        ctx.beginPath(); ctx.arc(p.originX, p.originY + waveInteraction, size, 0, Math.PI * 2); ctx.fill();
+                    }
+                    requestAnimationFrame(animate);
+                }
+                window.addEventListener('resize', initCanvas); initCanvas(); animate();
+
+                // === 2. CHAT LOGIC ===
+                const ui = {
+                    input: document.getElementById('ai-input'),
+                    sendBtn: document.getElementById('ai-send'),
+                    hero: document.getElementById('hero-view'),
+                    chat: document.getElementById('chat-content'),
+                    scroll: document.getElementById('scroll-wrapper'),
+                    loader: document.getElementById('loading-spinner')
+                };
+                let currentConversationId = null;
+                let currentProductList = []; // [NEW] Lưu danh sách sản phẩm
+
+                async function sendMessage() {
+                    const txt = ui.input.value.trim();
+                    if(!txt) return;
+
+                    ui.hero.style.display = 'none';
+                    ui.input.value = '';
+
+                    // User Msg (Right Aligned)
+                    const userDiv = document.createElement('div');
+                    userDiv.className = 'msg-row user';
+                    userDiv.innerHTML = `<div class="bubble user">${txt}</div>`;
+                    ui.chat.appendChild(userDiv);
+
+                    ui.loader.style.display = 'block';
+                    scrollToBottom();
+
+                    try {
+                        const res = await fetch('/ai/chat', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ message: txt, conversationId: currentConversationId })
+                        });
+                        const data = await res.json();
+                        if(data.conversationId) currentConversationId = data.conversationId;
+
+                        ui.loader.style.display = 'none';
+                        const botDiv = document.createElement('div');
+                        let html = `<div style="width:100%">`;
+
+                        const isSearchResult = data.items && data.items.length > 0;
+                        if (isSearchResult) {
+                            currentProductList = data.items; // [NEW] Cập nhật list sản phẩm
+
+                            botDiv.className = 'msg-row bot results';
+                            if(data.insight) html += `<div style="font-size: 0.75rem; font-weight: 700; color: #0071e3; text-transform: uppercase; margin-bottom: 8px;"><i class="fa-solid fa-lightbulb"></i> ${data.insight}</div>`;
+                            html += `<div class="bubble transparent">Đây là các mẫu xe phù hợp:</div>`;
+
+                            html += `<div class="ios-grid">`;
+                            // [UPDATED] Render card với onclick gọi showSidebar
+                            data.items.forEach((p, index) => {
+                                const price = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(p.price);
+                                html += `
+                                <div class="widget-card" onclick="showSidebar(${index})">
+                                    <div class="widget-img-box">
+                                        <img src="${p.imageUrl || '/images/default-moto.png'}" class="widget-img">
+                                        <div class="widget-price">${price}</div>
+                                    </div>
+                                    <div class="widget-info">
+                                        <div class="widget-name">${p.name}</div>
+                                        <div class="widget-desc" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${p.reason}</div>
+                                    </div>
+                                </div>`;
+                            });
+                            html += `</div>`;
+
+                        } else {
+                            botDiv.className = 'msg-row bot';
+                            let content = "";
+                            if(data.insight) content += `<b>${data.insight}</b><br>`;
+                            content += "Không tìm thấy xe phù hợp hoặc tôi chưa hiểu ý bạn.";
+                            html += `<div class="bubble bot">${content}</div>`;
+                        }
+
+                        html += `</div>`;
+                        botDiv.innerHTML = html;
+                        ui.chat.appendChild(botDiv);
+                        scrollToBottom();
+
+                    } catch (err) {
+                        console.error(err);
+                        ui.loader.style.display = 'none';
+                    }
+                }
+
+                function scrollToBottom() { ui.scroll.scrollTop = ui.scroll.scrollHeight; }
+                window.usePrompt = (t) => { ui.input.value = t; sendMessage(); }
+                ui.sendBtn.addEventListener('click', sendMessage);
+                ui.input.addEventListener('keydown', (e) => { if(e.key === 'Enter') sendMessage(); });
+                document.addEventListener("DOMContentLoaded", () => {
+                    const p = new URLSearchParams(window.location.search);
+                    if(p.get('q')) { ui.input.value = p.get('q'); sendMessage(); }
+                });
+
+                // === 3. [NEW] SIDEBAR LOGIC ===
+                const sidebar = document.getElementById('product-sidebar');
+                const backdrop = document.getElementById('side-backdrop');
+
+               // === 3. UPDATE SIDEBAR LOGIC ===
+        function showSidebar(index) {
+            const p = currentProductList[index];
+            if (!p) return;
+
+            // --- 1. Xử lý Ảnh & Brand ---
+            document.getElementById('sb-image').src = p.imageUrl || '/images/default-moto.png';
+            const brandName = p.brandName || "MotorShop";
+            document.getElementById('sb-brand-text').innerText = brandName;
+            document.getElementById('sb-category-small').innerText = p.categoryName || "Xe máy";
+            document.getElementById('sb-name').innerText = p.name;
+
+            // --- 2. Xử lý Giá & Giảm giá (Logic UX) ---
+            const formatter = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' });
+            const currentPrice = p.price;
+            // Giả sử logic: Nếu có originalPrice và nó lớn hơn price thì là đang giảm giá
+            // (Lưu ý: API Controller của bạn cần trả về thêm OriginalPrice nếu muốn dùng tính năng này,
+            //  hiện tại chúng ta dùng tạm Price làm giá chính).
+
+            document.getElementById('sb-price').innerText = formatter.format(currentPrice);
+
+            // Ẩn tạm các thẻ giảm giá (mở lại nếu bạn map thêm trường OriginalPrice từ BE)
+            document.getElementById('sb-original-price').style.display = 'none';
+            document.getElementById('sb-discount-tag').style.display = 'none';
+
+            // --- 3. Xử lý Thông số (Icons) ---
+            document.getElementById('sb-year').innerText = p.year || "Mới";
+            document.getElementById('sb-sku').innerText = p.sku || "N/A";
+            document.getElementById('sb-category-val').innerText = p.categoryName || "Xe máy";
+
+            // Tình trạng kho màu sắc
+            const stockEl = document.getElementById('sb-stock');
+            if (p.stockQuantity > 0) {
+                stockEl.innerText = 'Sẵn sàng giao';
+                stockEl.style.color = '#34c759'; // Xanh lá
+            } else {
+                stockEl.innerText = 'Tạm hết';
+                stockEl.style.color = '#ff3b30'; // Đỏ
+            }
+
+            // --- 4. AI Insight & Description ---
+            document.getElementById('sb-reason').innerText = `"${p.reason || 'Sản phẩm phù hợp với nhu cầu của bạn.'}"`;
+
+            const defaultDesc = `<p>Sản phẩm chính hãng <strong>${p.name}</strong> từ thương hiệu ${brandName}.</p>`;
+            document.getElementById('sb-desc').innerHTML = p.description || defaultDesc;
+
+            // --- 5. Action Button ---
+            const btn = document.getElementById('sb-btn-link');
+            btn.onclick = () => window.open(`/products/${p.productId}`, '_blank');
+
+            // --- 6. Active Sidebar ---
+            sidebar.classList.add('active');
+            backdrop.classList.add('active');
+        }
+                function closeSidebar() {
+                    sidebar.classList.remove('active');
+                    backdrop.classList.remove('active');
+                }
+
+                document.addEventListener('keydown', (e) => {
+                    if(e.key === 'Escape') closeSidebar();
+                });
+    </script>
+}
