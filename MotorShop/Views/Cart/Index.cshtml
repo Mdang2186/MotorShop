@@ -1,307 +1,293 @@
 ﻿@using MotorShop.ViewModels.Cart
+@using System.Globalization
 @model IReadOnlyList<CartItemVm>
 
 @{
     ViewData["Title"] = "Giỏ hàng";
     var hasItems = Model != null && Model.Count > 0;
-    string Vnd(decimal v) => v.ToString("#,0") + " ₫";
+
+    // 1. Định dạng hiển thị (Tiếng Việt)
+    var cultureVi = CultureInfo.GetCultureInfo("vi-VN");
+    string Vnd(decimal v) => v.ToString("N0", cultureVi) + " ₫";
+
+    // 2. Định dạng dữ liệu thô cho JS (Không dấu chấm phẩy) -> FIX LỖI NaN
+    var cultureRaw = CultureInfo.InvariantCulture;
+
     var subtotal = hasItems ? Model.Sum(x => x.UnitPrice * x.Quantity) : 0m;
 }
 
-<section class="min-h-screen bg-[radial-gradient(600px_400px_at_15%_10%,#e0f2fe_0%,transparent_60%),radial-gradient(600px_400px_at_85%_8%,#e9f5ff_0%,transparent_62%),linear-gradient(180deg,#ffffff_0%,#f3f7ff_100%)] py-10">
+<section class="min-h-screen bg-[#F8F9FA] py-8 font-sans text-slate-800">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        <div class="mb-6 flex flex-col md:flex-row md:items-end md:justify-between gap-2">
+        <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-50 text-sky-700 text-xs font-semibold border border-sky-200 mb-2">
-                    <i class="fa-solid fa-cart-shopping"></i>
-                    Giỏ hàng MotorShop
-                </div>
-                <h1 class="text-3xl font-extrabold tracking-tight text-slate-900">Giỏ hàng của bạn</h1>
-                <p class="text-slate-500 mt-1 text-sm">Chọn sản phẩm muốn thanh toán, chỉnh số lượng hoặc xoá bớt.</p>
+                <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-3">
+                    <span class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-lg shadow-blue-200">
+                        <i class="fa-solid fa-basket-shopping text-lg"></i>
+                    </span>
+                    Giỏ hàng của bạn
+                </h1>
+                @if (hasItems)
+                {
+                    <p class="text-slate-500 text-sm mt-2 ml-1">
+                        Hiện có <span class="font-bold text-blue-600" id="cartLineCountTop">@Model.Count</span> sản phẩm.
+                    </p>
+                }
             </div>
-            @if (hasItems)
-            {
-                <div class="text-xs text-slate-500">
-                    Tổng <span class="font-semibold" id="cartLineCountTop">@Model.Count</span> dòng sản phẩm trong giỏ.
-                </div>
-            }
+
+            <a asp-controller="Products" asp-action="Index" class="group inline-flex items-center gap-2 text-sm font-bold text-slate-600 hover:text-blue-600 transition-colors bg-white px-5 py-2.5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md">
+                <i class="fa-solid fa-arrow-left group-hover:-translate-x-1 transition-transform"></i> Tiếp tục mua sắm
+            </a>
         </div>
 
         @if (!hasItems)
         {
-            <div class="bg-white/95 backdrop-blur border border-slate-100 shadow-2xl rounded-2xl p-10 text-center">
-                <div class="w-16 h-16 bg-sky-500/10 text-sky-600 rounded-2xl grid place-items-center mx-auto mb-4 shadow">
-                    <i class="fa-solid fa-cart-shopping text-2xl"></i>
+            <div class="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-16 text-center max-w-2xl mx-auto mt-10">
+                <div class="w-32 h-32 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 relative">
+                    <i class="fa-solid fa-cart-plus text-5xl text-slate-300"></i>
                 </div>
-                <h3 class="text-xl font-semibold text-slate-900 mb-1">Giỏ hàng đang trống</h3>
-                <p class="text-slate-500 mb-6">Khám phá các mẫu xe mới nhất và thêm vào giỏ nhé.</p>
+                <h3 class="text-2xl font-bold text-slate-900 mb-3">Giỏ hàng trống trơn!</h3>
+                <p class="text-slate-500 mb-8">Bạn chưa chọn sản phẩm nào.</p>
                 <a asp-controller="Products" asp-action="Index"
-                   class="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-sky-500 via-indigo-500 to-emerald-500 text-white font-semibold shadow-[0_18px_35px_rgba(37,99,235,.45)] hover:brightness-110">
-                    <i class="fa-solid fa-motorcycle"></i> Xem sản phẩm
+                   class="inline-flex items-center justify-center px-8 py-3.5 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 transition-all shadow-lg hover:-translate-y-1">
+                    Khám phá sản phẩm ngay
                 </a>
             </div>
         }
         else
         {
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- LIST -->
-                <div class="lg:col-span-2">
-                    <div class="bg-white/95 backdrop-blur border border-slate-100 shadow-2xl rounded-2xl overflow-hidden">
-                        <!-- Header list -->
-                        <div class="px-4 sm:px-6 py-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100">
-                            <div class="flex items-center gap-3">
-                                <label class="inline-flex items-center gap-2 text-sm text-slate-700">
-                                    <input id="chkAll" type="checkbox" class="h-4 w-4 rounded-md border-slate-300 text-sky-600 focus:ring-sky-500" checked />
-                                    <span>
-                                        Chọn tất cả
-                                        <span class="text-xs text-slate-400">(tích để thanh toán)</span>
-                                    </span>
-                                </label>
-                            </div>
-                            <div class="flex gap-2">
-                                <button type="button" data-act="refresh"
-                                        class="px-3 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs sm:text-sm inline-flex items-center gap-1">
-                                    <i class="fa-solid fa-rotate"></i> Làm mới
-                                </button>
-                                <button type="button" data-act="clear"
-                                        class="px-3 py-2 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs sm:text-sm inline-flex items-center gap-1">
-                                    <i class="fa-solid fa-trash"></i> Xoá giỏ
-                                </button>
-                            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+                <div class="lg:col-span-8 space-y-4">
+
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 px-5 py-3 flex items-center justify-between sticky top-[80px] z-20 backdrop-blur-md bg-white/90">
+                        <label class="inline-flex items-center gap-3 cursor-pointer select-none group">
+                            <input id="chkAll" type="checkbox" class="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer" checked />
+                            <span class="text-sm font-bold text-slate-700 group-hover:text-blue-600 transition">Chọn tất cả (@Model.Count)</span>
+                        </label>
+
+                        <div class="flex gap-2">
+                            <button type="button" data-act="refresh" class="text-slate-400 hover:text-blue-600 p-2 rounded-lg transition" title="Làm mới">
+                                <i class="fa-solid fa-rotate"></i>
+                            </button>
+                            <button type="button" data-act="clear" class="text-slate-400 hover:text-rose-600 p-2 rounded-lg transition" title="Xóa tất cả">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
                         </div>
+                    </div>
 
-                        <!-- Items -->
-                        <div class="divide-y divide-slate-100">
-                            @foreach (var it in Model)
-                            {
-                                var line = it.UnitPrice * it.Quantity;
-                                <div class="px-3 sm:px-6 py-4 group" id="row-@it.ProductId"
-                                     data-row data-pid="@it.ProductId" data-unit="@it.UnitPrice">
-                                    <div class="flex gap-3 sm:gap-4">
-                                        <!-- Checkbox -->
-                                        <div class="pt-2">
-                                            <input type="checkbox" class="h-4 w-4 rounded-md border-slate-300 text-sky-600 focus:ring-sky-500"
-                                                   data-select data-pid="@it.ProductId" checked />
-                                        </div>
+                    <div class="space-y-4 pb-10">
+                        @foreach (var it in Model)
+                        {
+                            var line = it.UnitPrice * it.Quantity;
 
-                                        <!-- Image -->
-                                        <a asp-controller="Products" asp-action="Details" asp-route-id="@it.ProductId"
-                                           class="flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-slate-100 shadow-sm ring-1 ring-slate-100">
-                                            <img src="@(string.IsNullOrWhiteSpace(it.ImageUrl) ? "/images/products/placeholder.png" : it.ImageUrl)"
-                                                 alt="@it.Name"
-                                                 class="w-full h-full object-cover"
-                                                 onerror="this.src='/images/products/placeholder.png'">
-                                        </a>
+                            <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-100 group transition hover:border-blue-200 hover:shadow-md relative overflow-hidden"
+                                 id="row-@it.ProductId"
+                                 data-row
+                                 data-pid="@it.ProductId"
+                                 data-unit="@it.UnitPrice.ToString(cultureRaw)">
 
-                                        <!-- Info -->
-                                        <div class="flex-1 min-w-0">
-                                            <div class="flex items-start justify-between gap-3">
-                                                <div class="min-w-0">
-                                                    <a asp-controller="Products" asp-action="Details" asp-route-id="@it.ProductId"
-                                                       class="font-semibold text-slate-900 text-sm sm:text-base line-clamp-2 hover:text-sky-600">
-                                                        @it.Name
-                                                    </a>
-                                                    <div class="mt-1 text-[11px] text-slate-400 uppercase tracking-wide">
-                                                        Mã sản phẩm: <span class="font-semibold text-slate-600">MS-@it.ProductId</span>
-                                                    </div>
-                                                </div>
-                                                <div class="text-right">
-                                                    <div class="font-extrabold text-slate-900 text-sm sm:text-base" data-unit-text>
-                                                        @Vnd(it.UnitPrice)
-                                                    </div>
-                                                    <div class="text-[11px] text-slate-400">Đơn giá</div>
+                                <div class="flex gap-4 sm:gap-6">
+                                    <div class="flex items-center pt-2">
+                                        <input type="checkbox" data-select data-pid="@it.ProductId" class="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer" checked />
+                                    </div>
+
+                                    <a asp-controller="Products" asp-action="Details" asp-route-id="@it.ProductId"
+                                       class="shrink-0 w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden bg-[#F8F9FA] border border-slate-100 p-2 relative block">
+                                        <img src="@(string.IsNullOrWhiteSpace(it.ImageUrl) ? "/images/products/placeholder.png" : it.ImageUrl)"
+                                             alt="@it.Name"
+                                             class="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-500"
+                                             onerror="this.src='/images/products/placeholder.png'">
+                                    </a>
+
+                                    <div class="flex-1 flex flex-col justify-between min-w-0 py-1">
+                                        <div class="flex justify-between items-start gap-4">
+                                            <div class="min-w-0 space-y-1">
+                                                <a asp-controller="Products" asp-action="Details" asp-route-id="@it.ProductId"
+                                                   class="text-base sm:text-lg font-bold text-slate-800 line-clamp-2 hover:text-blue-600 transition leading-snug">
+                                                    @it.Name
+                                                </a>
+
+                                                <div class="flex items-center gap-2">
+                                                    <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                                                        SKU: @(it.SKU ?? "N/A")
+                                                    </span>
                                                 </div>
                                             </div>
 
-                                            <div class="mt-3 flex flex-col md:flex-row md:items-center justify-between gap-3">
-                                                <!-- Qty -->
-                                                <div class="inline-flex items-center rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm">
-                                                    <button type="button" class="px-3 py-2 text-slate-600 hover:bg-slate-50"
-                                                            data-act="dec" data-pid="@it.ProductId" aria-label="Giảm">
-                                                        <i class="fa-solid fa-minus"></i>
+                                            <div class="text-right shrink-0 sm:hidden">
+                                                <div class="font-bold text-slate-900 text-sm">@Vnd(it.UnitPrice)</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mt-3">
+                                            <div class="flex items-center gap-4">
+                                                <div class="flex items-center border border-slate-200 rounded-xl bg-white h-10 shadow-sm">
+                                                    <button type="button" class="w-10 h-full flex items-center justify-center text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-l-xl transition"
+                                                            data-act="dec" data-pid="@it.ProductId">
+                                                        <i class="fa-solid fa-minus text-xs"></i>
                                                     </button>
-                                                    <input type="number" min="1" step="1"
-                                                           class="w-16 text-center py-2 outline-none border-x border-slate-100 text-sm"
+                                                    <input type="number" min="1"
+                                                           class="w-12 h-full text-center bg-transparent border-none p-0 text-sm font-bold text-slate-900 focus:ring-0 appearance-none"
                                                            value="@it.Quantity" data-qty data-pid="@it.ProductId" />
-                                                    <button type="button" class="px-3 py-2 text-slate-600 hover:bg-slate-50"
-                                                            data-act="inc" data-pid="@it.ProductId" aria-label="Tăng">
-                                                        <i class="fa-solid fa-plus"></i>
+                                                    <button type="button" class="w-10 h-full flex items-center justify-center text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-r-xl transition"
+                                                            data-act="inc" data-pid="@it.ProductId">
+                                                        <i class="fa-solid fa-plus text-xs"></i>
                                                     </button>
                                                 </div>
+                                                <button type="button" class="sm:hidden text-xs font-bold text-rose-500 hover:underline"
+                                                        data-act="remove" data-pid="@it.ProductId">
+                                                    Xóa
+                                                </button>
+                                            </div>
 
-                                                <!-- Line total -->
-                                                <div class="text-right md:ml-auto">
-                                                    <div class="font-bold text-slate-900 text-sm sm:text-base"
-                                                         data-line-total data-pid="@it.ProductId">
-                                                        @Vnd(line)
-                                                    </div>
-                                                    <div class="text-[11px] text-slate-400">Tạm tính dòng</div>
+                                            <div class="hidden sm:flex items-center gap-6">
+                                                <div class="text-right">
+                                                    <span class="block text-[11px] text-slate-400 font-semibold uppercase tracking-wider mb-0.5">Thành tiền</span>
+                                                    <span class="text-blue-600 font-extrabold text-xl" data-line-total data-pid="@it.ProductId">@Vnd(line)</span>
                                                 </div>
-
-                                                <!-- Remove -->
                                                 <button type="button"
-                                                        class="px-3 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs sm:text-sm text-slate-600 inline-flex items-center gap-1"
-                                                        data-act="remove" data-pid="@it.ProductId" aria-label="Xoá">
-                                                    <i class="fa-solid fa-xmark"></i> Xoá
+                                                        class="w-9 h-9 flex items-center justify-center rounded-full text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition border border-transparent hover:border-rose-100"
+                                                        data-act="remove" data-pid="@it.ProductId" title="Xóa sản phẩm">
+                                                    <i class="fa-solid fa-trash-can"></i>
                                                 </button>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            }
-                        </div>
-                    </div>
-
-                    <div class="mt-4 flex items-center gap-3">
-                        <a asp-controller="Products" asp-action="Index"
-                           class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl border border-slate-200 bg-white/80 text-slate-700 hover:bg-slate-50 text-sm font-medium shadow-sm">
-                            <i class="fa-solid fa-arrow-left"></i> Tiếp tục mua sắm
-                        </a>
+                            </div>
+                        }
                     </div>
                 </div>
 
-                <!-- SUMMARY -->
-                <aside class="lg:col-span-1">
-                    <div class="bg-white/95 backdrop-blur border border-slate-100 shadow-2xl rounded-2xl p-6 sticky top-24">
-                        <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                            <span class="inline-flex h-8 w-8 rounded-xl bg-sky-500/10 text-sky-600 items-center justify-center">
-                                <i class="fa-solid fa-receipt"></i>
-                            </span>
-                            Tóm tắt đơn
-                        </h3>
-
-                        <dl class="space-y-2 text-sm">
-                            <div class="flex justify-between">
-                                <dt class="text-slate-600">Tổng giỏ hàng</dt>
-                                <dd class="font-semibold text-slate-900" id="sumCart">
-                                    @Vnd(subtotal)
-                                </dd>
+                <div class="lg:col-span-4 relative">
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sticky top-[100px] z-10">
+                        <h3 class="text-lg font-extrabold text-slate-900 mb-6">Thanh toán</h3>
+                        <div class="space-y-4 mb-6">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-slate-500 font-medium">Tổng tiền hàng</span>
+                                <span class="font-bold text-slate-900" id="sumCart">@Vnd(subtotal)</span>
                             </div>
-                            <div class="flex justify-between items-center">
-                                <dt class="text-slate-600">
-                                    Đã chọn thanh toán
-                                    <span class="block text-[11px] text-slate-400" id="selectedCountLabel">
-                                        (@Model.Count sản phẩm)
-                                    </span>
-                                </dt>
-                                <dd class="text-base font-bold text-emerald-600" id="sumSelected">
-                                    @Vnd(subtotal)
-                                </dd>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-slate-500 font-medium">Đã chọn <span class="text-[10px] font-bold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded ml-1" id="selectedCountLabel">(@Model.Count)</span></span>
+                                <span class="font-bold text-slate-900" id="sumSelected">@Vnd(subtotal)</span>
                             </div>
-                            <div class="flex justify-between">
-                                <dt class="text-slate-600">Phí vận chuyển (ước tính)</dt>
-                                <dd class="text-slate-700">Tính ở bước thanh toán</dd>
+                            <div class="relative h-px w-full my-4 bg-slate-100"></div>
+                            <div class="flex justify-between items-end">
+                                <span class="font-bold text-slate-900">Tổng thanh toán</span>
+                                <span class="text-2xl font-extrabold text-[#FD4057]" id="sumTotal">@Vnd(subtotal)</span>
                             </div>
-                            <div class="pt-2 border-t border-slate-200 flex justify-between items-center">
-                                <dt class="text-slate-800 font-semibold">Thành tiền tạm tính</dt>
-                                <dd class="text-xl font-extrabold text-slate-900" id="sumTotal">
-                                    @Vnd(subtotal)
-                                </dd>
-                            </div>
-                        </dl>
-
-                        <div class="mt-6 space-y-2">
-                            <button type="button" id="btnCheckout"
-                                    class="w-full inline-flex justify-center items-center gap-2 py-3 rounded-2xl text-white text-sm font-semibold
-                                                       bg-gradient-to-r from-sky-500 via-indigo-500 to-emerald-500 shadow-[0_18px_35px_rgba(37,99,235,.5)] hover:brightness-110">
-                                <i class="fa-solid fa-lock"></i>
-                                <span>Tiến hành thanh toán</span>
-                            </button>
-
-                            <button type="button" data-act="refresh"
-                                    class="w-full inline-flex justify-center items-center gap-2 py-2.5 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 text-xs sm:text-sm text-slate-700">
-                                <i class="fa-solid fa-rotate"></i> Đồng bộ lại giỏ
-                            </button>
+                            <p class="text-xs text-right text-slate-400">(Đã bao gồm VAT)</p>
                         </div>
 
-                        <p class="mt-3 text-[11px] text-slate-500">
-                            Giá &amp; tồn kho có thể thay đổi. Nhấn “Đồng bộ lại” để cập nhật theo thời gian thực.
-                            Chỉ các mục <span class="font-semibold">được tick chọn</span> mới được chuyển sang bước thanh toán.
-                        </p>
+                        <button type="button" id="btnCheckout"
+                                class="w-full py-4 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-base font-bold rounded-xl shadow-lg shadow-blue-200 transition-all flex items-center justify-center gap-3 transform active:scale-[0.98]">
+                            <span>Tiến hành đặt hàng</span>
+                            <i class="fa-solid fa-arrow-right-long"></i>
+                        </button>
+
+                        <div class="mt-4 flex gap-3 p-3 bg-indigo-50/50 rounded-xl border border-indigo-50 text-xs text-indigo-800 leading-relaxed">
+                            <i class="fa-solid fa-circle-info mt-0.5"></i>
+                            <p>Nhấn <b>"Làm mới"</b> nếu giá có sai lệch. Chỉ những sản phẩm được <b>tick chọn</b> mới được thanh toán.</p>
+                        </div>
                     </div>
-                </aside>
+                </div>
+
             </div>
         }
     </div>
 </section>
 
-<!-- Anti-forgery -->
 <form id="af-cart" class="hidden">@Html.AntiForgeryToken()</form>
 
 @section Scripts {
     <script>
-        // ===== Helpers =====
-        const nf  = new Intl.NumberFormat('vi-VN');
+        // 1. Formatter
+        const nf = new Intl.NumberFormat('vi-VN');
         const vnd = n => nf.format(n ?? 0) + ' ₫';
-        const q   = sel => document.querySelector(sel);
-        const qa  = sel => Array.from(document.querySelectorAll(sel));
-        const token = () =>
-            (window.getCsrf ? window.getCsrf()
-                            : (document.querySelector('#af-cart input[name="__RequestVerificationToken"]')?.value || ''));
+
+        // 2. Helpers
+        const q = sel => document.querySelector(sel);
+        const qa = sel => Array.from(document.querySelectorAll(sel));
+        const token = () => (document.querySelector('#af-cart input[name="__RequestVerificationToken"]')?.value || '');
 
         async function postJson(url, body) {
-            const res = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type':'application/json', 'RequestVerificationToken': token() },
-                body: JSON.stringify(body || {})
-            });
-            let data = {};
-            try { data = await res.json(); } catch {}
-            return { ok: res.ok, data };
+            try {
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token() },
+                    body: JSON.stringify(body || {})
+                });
+                const data = await res.json();
+                return { ok: res.ok, data };
+            } catch (e) {
+                console.error(e);
+                return { ok: false, data: {} };
+            }
         }
 
-        // Cập nhật tổng giỏ hàng (toàn bộ)
+        // 3. Logic
         function updateCartTotal(total) {
             const sumCart = q('#sumCart');
             if (sumCart) sumCart.textContent = vnd(total);
         }
 
-        // Tính lại tổng của các sản phẩm được tick chọn
         function calcSelected() {
             const rows = qa('[data-row]');
             let total = 0;
             let count = 0;
+
             rows.forEach(row => {
                 const cb = row.querySelector('[data-select]');
                 if (cb && cb.checked) {
-                    const pid  = row.dataset.pid;
-                    const unit = Number(row.dataset.unit || 0);
-                    const qtyInput = row.querySelector('input[data-qty][data-pid="'+pid+'"]');
-                    const qty  = Math.max(1, parseInt(qtyInput?.value || '1', 10) || 1);
-                    total += unit * qty;
+                    const pid = row.dataset.pid;
+                    // Lấy số từ cultureRaw (Invariant) -> Fix NaN
+                    const unit = parseFloat(row.dataset.unit || 0);
+                    const qtyInput = row.querySelector(`input[data-qty][data-pid="${pid}"]`);
+                    const qty = Math.max(1, parseInt(qtyInput?.value || '1', 10) || 1);
+
+                    if (!isNaN(unit)) total += unit * qty;
                     count++;
                 }
             });
 
-            const sumSel  = q('#sumSelected');
-            const sumTot  = q('#sumTotal');
+            // Update UI
+            const sumSel = q('#sumSelected');
+            const sumTot = q('#sumTotal');
             if (sumSel) sumSel.textContent = vnd(total);
             if (sumTot) sumTot.textContent = vnd(total);
 
             const lbl = q('#selectedCountLabel');
-            if (lbl) lbl.textContent = `(${count} sản phẩm được chọn)`;
+            if (lbl) lbl.textContent = `(${count})`;
 
             const btn = q('#btnCheckout');
             if (btn) {
-                btn.disabled = (count === 0 || total <= 0);
-                btn.classList.toggle('opacity-60', btn.disabled);
-                btn.classList.toggle('cursor-not-allowed', btn.disabled);
+                const disabled = count === 0 || total <= 0;
+                btn.disabled = disabled;
+                btn.classList.toggle('opacity-50', disabled);
+                btn.classList.toggle('grayscale', disabled);
             }
-
-            return { total, count };
         }
 
-        function removeRow(pid) {
+        function removeRowUI(pid) {
             const row = q(`#row-${pid}`);
-            if (row) row.remove();
-            const lineCount = qa('[data-row]').length;
-            const label1 = q('#cartLineCountTop');
-            if (label1) label1.textContent = lineCount;
-            const label2 = q('#cartLineCount');
-            if (label2) label2.textContent = lineCount;
-            if (lineCount === 0) location.reload();
-            calcSelected();
+            if (row) {
+                row.style.transition = 'all 0.3s ease';
+                row.style.opacity = '0';
+                row.style.transform = 'scale(0.9)';
+                setTimeout(() => {
+                    row.remove();
+                    const remaining = qa('[data-row]').length;
+                    const topCounter = q('#cartLineCountTop');
+                    if(topCounter) topCounter.textContent = remaining;
+
+                    // Cập nhật badge trên Header
+                    if (window.refreshCartBadge) window.refreshCartBadge();
+
+                    if (remaining === 0) location.reload();
+                    else calcSelected();
+                }, 300);
+            }
         }
 
         function setLineTotal(pid, amount) {
@@ -309,158 +295,99 @@
             if (el) el.textContent = vnd(amount);
         }
 
-        function getUnitPrice(pid) {
-            const row = q(`#row-${pid}`);
-            return Number(row?.dataset.unit || 0);
-        }
-
-        async function onInc(pid) {
-            const input = q(`input[data-qty][data-pid="${pid}"]`);
-            const next = Math.max(1, (parseInt(input.value || '1', 10) || 1) + 1);
-            await onSetQty(pid, next);
-        }
-        async function onDec(pid) {
-            const input = q(`input[data-qty][data-pid="${pid}"]`);
-            const next = Math.max(1, (parseInt(input.value || '1', 10) || 1) - 1);
-            await onSetQty(pid, next);
-        }
+        // 4. Actions
         async function onSetQty(pid, qty) {
+            const input = q(`input[data-qty][data-pid="${pid}"]`);
+            if(input) input.value = qty;
+
+            const row = q(`#row-${pid}`);
+            const unit = parseFloat(row?.dataset.unit || 0);
+            if (!isNaN(unit)) setLineTotal(pid, unit * qty);
+
+            calcSelected();
+
+            // Ajax
             const { ok, data } = await postJson('@Url.Action("UpdateQuantity", "Cart")', { productId: pid, quantity: qty });
+
             if (ok && data.success) {
-                const unit = getUnitPrice(pid);
-                setLineTotal(pid, unit * qty);
                 updateCartTotal(data.newTotalAmount);
-                (window.refreshCartBadge && refreshCartBadge());
-                window.toast && toast(data.message || 'Đã cập nhật số lượng', 'success');
+                if (window.refreshCartBadge) window.refreshCartBadge(); // Animation giỏ hàng
             } else {
                 if (typeof data.appliedQty === 'number') {
-                    const input = q(`input[data-qty][data-pid="${pid}"]`);
-                    input.value = data.appliedQty;
-                    const unit = getUnitPrice(pid);
+                    if(input) input.value = data.appliedQty;
                     setLineTotal(pid, unit * data.appliedQty);
-                    updateCartTotal(data.newTotalAmount);
                 }
-                if (data.message) window.toast && toast(data.message, 'warning');
-                if (data.success === false && data.message === 'Sản phẩm không còn bán.') removeRow(pid);
+                calcSelected();
+                updateCartTotal(data.newTotalAmount);
             }
-            calcSelected();
         }
 
         async function onRemove(pid) {
+            if(!confirm('Bạn có chắc muốn xóa?')) return;
             const { ok, data } = await postJson('@Url.Action("RemoveItem", "Cart")', { productId: pid });
             if (ok && data.success) {
-                removeRow(pid);
+                removeRowUI(pid);
                 updateCartTotal(data.newTotalAmount);
-                (window.refreshCartBadge && refreshCartBadge());
-                window.toast && toast(data.message, 'success');
-            } else {
-                window.toast && toast(data.message || 'Không xóa được sản phẩm.', 'error');
             }
         }
 
         async function onClear() {
+            if(!confirm('Xóa hết giỏ hàng?')) return;
             const { ok, data } = await postJson('@Url.Action("Clear", "Cart")');
-            if (ok && data.success) {
-                window.toast && toast(data.message, 'success');
-                (window.refreshCartBadge && refreshCartBadge());
-                location.reload();
-            }
+            if (ok && data.success) location.reload();
         }
 
-        async function onRefresh() {
-            const { ok, data } = await postJson('@Url.Action("Refresh", "Cart")');
-            if (ok && data.success) {
-                updateCartTotal(data.newTotalAmount);
-                location.reload();
-            } else {
-                window.toast && toast(data.message || 'Không làm mới được.', 'error');
-            }
-        }
-
-        // ===== Event binding =====
+        // 5. Events
         document.addEventListener('click', (e) => {
-            const b = e.target.closest('[data-act]');
-            if (!b) return;
-            const act = b.dataset.act;
-            const pid = Number(b.dataset.pid);
-            if (act === 'inc')     onInc(pid);
-            if (act === 'dec')     onDec(pid);
-            if (act === 'remove')  onRemove(pid);
-            if (act === 'clear')   onClear();
-            if (act === 'refresh') onRefresh();
-        });
+            const btn = e.target.closest('[data-act]');
+            if (!btn) return;
+            const act = btn.dataset.act;
+            const pid = Number(btn.dataset.pid);
 
-        // Qty change
-        document.addEventListener('change', (e) => {
-            const inp = e.target.closest('input[data-qty]');
-            if (!inp) return;
-            const pid = Number(inp.dataset.pid);
-            const qty = Math.max(1, parseInt(inp.value || '1', 10) || 1);
-            onSetQty(pid, qty);
-        });
-        document.addEventListener('keydown', (e) => {
-            const inp = e.target.closest('input[data-qty]');
-            if (!inp) return;
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                const pid = Number(inp.dataset.pid);
-                const qty = Math.max(1, parseInt(inp.value || '1', 10) || 1);
-                onSetQty(pid, qty);
+            if (act === 'remove') onRemove(pid);
+            if (act === 'clear') onClear();
+            if (act === 'refresh') location.reload();
+
+            if (act === 'inc' || act === 'dec') {
+                const input = q(`input[data-qty][data-pid="${pid}"]`);
+                if (!input) return;
+                let val = parseInt(input.value || '1', 10);
+                if (act === 'inc') val++; else val--;
+                if (val < 1) val = 1;
+                onSetQty(pid, val);
             }
         });
 
-        // Checkbox chọn từng dòng + chọn tất cả
         document.addEventListener('change', (e) => {
-            const cb = e.target.closest('input[data-select]');
-            if (cb) {
-                const { count } = calcSelected();
-                const all = q('#chkAll');
-                if (all) {
-                    const totalRows = qa('[data-row]').length;
-                    all.checked = (count === totalRows && totalRows > 0);
+            if (e.target.matches('input[data-qty]')) {
+                const pid = Number(e.target.dataset.pid);
+                const val = Math.max(1, parseInt(e.target.value || '1', 10));
+                onSetQty(pid, val);
+            }
+            if (e.target.matches('input[data-select]') || e.target.id === 'chkAll') {
+                if (e.target.id === 'chkAll') {
+                    qa('input[data-select]').forEach(cb => cb.checked = e.target.checked);
+                }
+                calcSelected();
+                // Update check all state if child changed
+                if (e.target.matches('input[data-select]')) {
+                   const all = q('#chkAll');
+                   const total = qa('[data-row]').length;
+                   const checked = qa('input[data-select]:checked').length;
+                   if(all) all.checked = (total > 0 && total === checked);
                 }
             }
         });
 
-        const chkAll = q('#chkAll');
-        if (chkAll) {
-            chkAll.addEventListener('change', () => {
-                const rows = qa('[data-row]');
-                rows.forEach(r => {
-                    const cb = r.querySelector('[data-select]');
-                    if (cb) cb.checked = chkAll.checked;
-                });
-                calcSelected();
-            });
-        }
-
-        // Nút tiến hành thanh toán: chỉ dùng các sản phẩm đã chọn
         const btnCheckout = q('#btnCheckout');
         if (btnCheckout) {
             btnCheckout.addEventListener('click', () => {
-                const selected = qa('[data-row]').filter(r => {
-                    const cb = r.querySelector('[data-select]');
-                    return cb && cb.checked;
-                }).map(r => r.dataset.pid);
-
-                if (selected.length === 0) {
-                    window.toast && toast('Vui lòng chọn ít nhất một sản phẩm để thanh toán.', 'warning');
-                    return;
-                }
-
-                const qs = encodeURIComponent(selected.join(','));
-                const url = '@Url.Action("Index", "Checkout")' + '?selected=' + qs;
-                window.location.href = url;
+                const selected = qa('[data-row]').filter(r => r.querySelector('[data-select]')?.checked).map(r => r.dataset.pid);
+                if (selected.length === 0) return alert('Vui lòng chọn sản phẩm.');
+                window.location.href = '@Url.Action("Index", "Checkout")' + '?selected=' + encodeURIComponent(selected.join(','));
             });
         }
 
-        // Init
-        document.addEventListener('DOMContentLoaded', () => {
-            calcSelected();
-        });
-        // nếu DOMContentLoaded đã bắn trước đó
-        if (document.readyState === 'interactive' || document.readyState === 'complete') {
-            calcSelected();
-        }
+        document.addEventListener('DOMContentLoaded', calcSelected);
     </script>
 }

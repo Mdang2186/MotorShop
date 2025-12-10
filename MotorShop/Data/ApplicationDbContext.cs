@@ -16,6 +16,7 @@ namespace MotorShop.Data
         public DbSet<Product> Products => Set<Product>();
         public DbSet<Brand> Brands => Set<Brand>();
         public DbSet<Category> Categories => Set<Category>();
+        public DbSet<ProductReview> ProductReviews => Set<ProductReview>();
 
         public DbSet<Order> Orders => Set<Order>();
         public DbSet<OrderItem> OrderItems => Set<OrderItem>();
@@ -271,6 +272,38 @@ namespace MotorShop.Data
                     .IsRequired(false) // Allow Null Sender
                     .OnDelete(DeleteBehavior.Restrict);
             });
+            // ===== ProductReview =====
+            b.Entity<ProductReview>(e =>
+            {
+                e.Property(r => r.Rating)
+                    .IsRequired();
+
+                e.Property(r => r.Comment)
+                    .HasMaxLength(1000);
+
+                e.Property(r => r.CreatedAt)
+                    .HasDefaultValueSql("GETUTCDATE()");
+
+                e.HasOne(r => r.Product)
+                    .WithMany(p => p.Reviews)
+                    .HasForeignKey(r => r.ProductId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                e.HasOne(r => r.User)
+                    .WithMany() // Nếu sau này muốn: WithMany(u => u.ProductReviews)
+                    .HasForeignKey(r => r.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                e.HasOne(r => r.Order)
+                    .WithMany() // Có thể đổi thành Order.Reviews nếu bạn muốn
+                    .HasForeignKey(r => r.OrderId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                // 1 user chỉ review 1 lần cho một product trong 1 order
+                e.HasIndex(r => new { r.ProductId, r.UserId, r.OrderId })
+                    .IsUnique();
+            });
+
         }
 
         // ====== Auto audit + slug ======

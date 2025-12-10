@@ -1,0 +1,171 @@
+﻿@model MotorShop.Models.ProductReview
+@{
+    ViewData["Title"] = "Đánh giá sản phẩm";
+    var product = ViewBag.Product as MotorShop.Models.Product;
+    // Lấy review từ Model (nếu post lại khi lỗi) hoặc từ ViewBag (khi load lần đầu)
+    var review = Model ?? ViewBag.Review as MotorShop.Models.ProductReview;
+    var orderId = ViewBag.OrderId;
+}
+
+@section Head {
+    <style>
+        /* Background & Glass Effect đồng bộ với History */
+        body {
+            background: radial-gradient(circle at top, #e0f2fe 0, #f9fafb 40%, #ffffff 100%);
+            min-height: 100vh;
+        }
+
+        .card-glass {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(16px) saturate(160%);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 20px 45px rgba(15, 23, 42, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+        }
+
+        /* Nút bấm Neon */
+        .btn-neon {
+            background: linear-gradient(135deg, #0ea5e9, #6366f1, #22c55e);
+            color: white;
+            border: none;
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+            transition: all 0.2s ease;
+        }
+
+            .btn-neon:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 15px 30px rgba(37, 99, 235, 0.5);
+            }
+
+        /* LOGIC SAO ĐÁNH GIÁ (FIX LỖI) */
+        /* Ẩn input radio mặc định */
+        .star-rating input {
+            display: none;
+        }
+
+        /* Màu mặc định của sao (xám) */
+        .star-rating label {
+            color: #cbd5e1; /* slate-300 */
+            transition: color 0.2s;
+            cursor: pointer;
+        }
+
+        /* Khi hover vào group: tất cả sao chuyển sang vàng nhạt (preview) */
+        .star-rating:not(:checked) > label:hover,
+        .star-rating:not(:checked) > label:hover ~ label {
+            color: #fde047; /* yellow-300 */
+        }
+
+        /* Khi đã chọn (checked): sao được chọn và các sao phía sau (do flex-reverse) chuyển vàng đậm */
+        .star-rating input:checked ~ label {
+            color: #fbbf24; /* amber-400 */
+            text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+        }
+
+        /* Hiệu ứng scale nhẹ khi hover */
+        .star-rating label:hover {
+            transform: scale(1.1);
+        }
+    </style>
+}
+
+<div class="relative py-12 px-4 sm:px-6 lg:px-8 flex justify-center items-center">
+    <div aria-hidden="true" class="pointer-events-none absolute top-10 left-10 w-72 h-72 rounded-full blur-3xl bg-sky-200/50 -z-10"></div>
+    <div aria-hidden="true" class="pointer-events-none absolute bottom-10 right-10 w-80 h-80 rounded-full blur-3xl bg-indigo-200/40 -z-10"></div>
+
+    <div class="card-glass w-full max-w-2xl overflow-hidden relative">
+
+        <div class="text-center pt-8 pb-4 border-b border-slate-100/50">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold border border-indigo-100 mb-2">
+                <i class="fa-solid fa-pen-nib"></i> Viết đánh giá
+            </div>
+            <h1 class="text-2xl md:text-3xl font-extrabold text-slate-800">Chia sẻ trải nghiệm</h1>
+            <p class="text-slate-500 text-sm mt-1">Đơn hàng <span class="font-mono font-bold text-slate-700">#@orderId</span></p>
+        </div>
+
+        <form asp-action="SubmitReview" method="post" class="p-6 md:p-8">
+            <input type="hidden" name="orderId" value="@orderId" />
+            <input type="hidden" name="productId" value="@product.Id" />
+
+            <div class="flex items-center gap-4 bg-white/60 p-4 rounded-2xl border border-white/60 shadow-sm mb-8">
+                <div class="w-20 h-20 shrink-0 bg-white rounded-xl border border-slate-100 p-1 flex items-center justify-center">
+                    <img src="@product.ImageUrl" class="w-full h-full object-contain" alt="@product.Name" />
+                </div>
+                <div>
+                    <h3 class="font-bold text-slate-900 text-base line-clamp-1">@product.Name</h3>
+                    <p class="text-xs text-slate-500 mt-1">Bạn thấy sản phẩm này thế nào?</p>
+                </div>
+            </div>
+
+            <div class="mb-8 text-center">
+                <label class="block text-sm font-bold text-slate-600 uppercase tracking-wider mb-3">Mức độ hài lòng</label>
+
+                <div class="star-rating flex flex-row-reverse justify-center gap-2 text-4xl sm:text-5xl">
+                    <input type="radio" id="star5" name="rating" value="5" @(review?.Rating == 5 ? "checked" : "") required />
+                    <label for="star5" title="Tuyệt vời - 5 sao"><i class="fa-solid fa-star"></i></label>
+
+                    <input type="radio" id="star4" name="rating" value="4" @(review?.Rating == 4 ? "checked" : "") />
+                    <label for="star4" title="Hài lòng - 4 sao"><i class="fa-solid fa-star"></i></label>
+
+                    <input type="radio" id="star3" name="rating" value="3" @(review?.Rating == 3 ? "checked" : "") />
+                    <label for="star3" title="Bình thường - 3 sao"><i class="fa-solid fa-star"></i></label>
+
+                    <input type="radio" id="star2" name="rating" value="2" @(review?.Rating == 2 ? "checked" : "") />
+                    <label for="star2" title="Không hài lòng - 2 sao"><i class="fa-solid fa-star"></i></label>
+
+                    <input type="radio" id="star1" name="rating" value="1" @(review?.Rating == 1 ? "checked" : "") />
+                    <label for="star1" title="Tệ - 1 sao"><i class="fa-solid fa-star"></i></label>
+                </div>
+                <div class="mt-2 text-xs font-medium text-slate-400" id="rating-label">Chọn số sao để đánh giá</div>
+            </div>
+
+            <div class="mb-8">
+                <label for="comment" class="block text-sm font-bold text-slate-700 mb-2 ml-1">Nội dung đánh giá</label>
+                <div class="relative">
+                    <textarea name="comment" id="comment" rows="4"
+                              class="w-full bg-white/80 border border-slate-200 rounded-2xl p-4 text-slate-700 text-sm focus:outline-none focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 transition resize-none shadow-inner"
+                              placeholder="Hãy chia sẻ những điều bạn thích về sản phẩm này nhé...">@(review?.Comment)</textarea>
+                    <div class="absolute bottom-3 right-3 text-slate-300 text-xs pointer-events-none">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-4">
+                <a asp-action="History" class="flex-1 py-3.5 rounded-xl border border-slate-300 text-slate-600 font-bold text-sm text-center hover:bg-slate-50 transition">
+                    Hủy bỏ
+                </a>
+                <button type="submit" class="flex-1 btn-neon py-3.5 rounded-xl font-bold text-sm text-center">
+                    Gửi đánh giá <i class="fa-solid fa-paper-plane ml-1"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Script nhỏ để hiển thị text trạng thái khi chọn sao (Optional)
+        const labels = {
+            1: "Rất tệ 😞",
+            2: "Không hài lòng 😐",
+            3: "Bình thường 🙂",
+            4: "Hài lòng 😀",
+            5: "Tuyệt vời 😍"
+        };
+        const ratingLabel = document.getElementById('rating-label');
+        const inputs = document.querySelectorAll('input[name="rating"]');
+
+        inputs.forEach(input => {
+            input.addEventListener('change', function() {
+                ratingLabel.textContent = labels[this.value];
+                ratingLabel.classList.add('text-indigo-600');
+            });
+            // Set init label if value exists
+            if(input.checked) {
+                ratingLabel.textContent = labels[input.value];
+                ratingLabel.classList.add('text-indigo-600');
+            }
+        });
+    </script>
+}

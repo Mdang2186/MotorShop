@@ -61,6 +61,7 @@ namespace MotorShop.Utilities
 
             // 3.5 Đơn hàng mẫu
             await OrderSeeder.SeedAsync(_context, _userManager);
+            await ReviewSeeder.SeedAsync(_context);
         }
 
         /// <summary>

@@ -432,7 +432,92 @@ namespace MotorShop.Controllers
 
             return Ok(new { success = true, subtotal, shipping, total });
         }
+        // File: Controllers/OrderController.cs
 
+        // 1. GET: Trang viết đánh giá
+        [HttpGet]
+        public async Task<IActionResult> WriteReview(int orderId, int productId)
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            // Kiểm tra đơn hàng có tồn tại và thuộc về user không
+            var order = await _db.Orders
+                .Include(o => o.OrderItems).ThenInclude(i => i.Product)
+                .FirstOrDefaultAsync(o => o.Id == orderId && o.UserId == user.Id);
+
+            if (order == null) return NotFound();
+
+            // Kiểm tra trạng thái hoàn tất
+            if (order.Status != OrderStatus.Completed)
+            {
+                TempData[SD.Temp_Warning] = "Đơn hàng chưa hoàn tất, chưa thể đánh giá.";
+                return RedirectToAction(nameof(History));
+            }
+
+            // Kiểm tra sản phẩm có trong đơn không
+            var item = order.OrderItems.FirstOrDefault(i => i.ProductId == productId);
+            if (item == null) return NotFound();
+
+            // Kiểm tra đã đánh giá chưa
+            var existingReview = await _db.ProductReviews
+                .FirstOrDefaultAsync(r => r.OrderId == orderId && r.ProductId == productId);
+
+            // Dùng ViewModel hoặc ViewBag để truyền dữ liệu sang View
+            ViewBag.Review = existingReview; // Nếu null là chưa đánh giá
+            ViewBag.Product = item.Product;
+            ViewBag.OrderId = orderId;
+
+            return View();
+        }
+
+        // 2. POST: Lưu đánh giá
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SubmitReview(int orderId, int productId, int rating, string comment)
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            // Validate cơ bản
+            if (rating < 1 || rating > 5)
+            {
+                TempData[SD.Temp_Error] = "Vui lòng chọn số sao.";
+                return RedirectToAction(nameof(WriteReview), new { orderId, productId });
+            }
+
+            // Check lại quyền
+            var order = await _db.Orders.FirstOrDefaultAsync(o => o.Id == orderId && o.UserId == user.Id && o.Status == OrderStatus.Completed);
+            if (order == null) return Forbid();
+
+            var existingReview = await _db.ProductReviews
+                .FirstOrDefaultAsync(r => r.OrderId == orderId && r.ProductId == productId);
+
+            if (existingReview != null)
+            {
+                // Cập nhật
+                existingReview.Rating = rating;
+                existingReview.Comment = comment;
+                existingReview.UpdatedAt = DateTime.UtcNow;
+                TempData[SD.Temp_Success] = "Đã cập nhật đánh giá.";
+            }
+            else
+            {
+                // Tạo mới
+                var review = new ProductReview
+                {
+                    ProductId = productId,
+                    UserId = user.Id,
+                    OrderId = orderId,
+                    Rating = rating,
+                    Comment = comment,
+                    CreatedAt = DateTime.UtcNow
+                };
+                _db.ProductReviews.Add(review);
+                TempData[SD.Temp_Success] = "Đánh giá thành công!";
+            }
+
+            await _db.SaveChangesAsync();
+            return RedirectToAction(nameof(History), new { status = OrderStatus.Completed });
+        }
         // =====================================================
         // POST: /Order/UpdateDelivery (đổi phương thức giao nhận)
         // =====================================================
@@ -598,4 +683,5 @@ td:last-child,th:last-child{{text-align:right}}
         // PickupAtStore
         public int? PickupBranchId { get; set; }
     }
+
 }

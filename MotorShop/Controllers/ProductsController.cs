@@ -1,13 +1,16 @@
-﻿using System.Text.RegularExpressions;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using MotorShop.Data;
 using MotorShop.Models;
+using MotorShop.Models.Enums;
 using MotorShop.Services;
 using MotorShop.Utilities;
 using MotorShop.ViewModels;
+using System.Text.RegularExpressions;
 
 namespace MotorShop.Controllers
 {
@@ -19,6 +22,7 @@ namespace MotorShop.Controllers
         private readonly CartService _cart;
         private readonly ILogger<ProductsController> _logger;
 
+        private readonly UserManager<ApplicationUser> _userManager;
         private const string RecentlyViewedCookie = "rv";
         private const int RecentlyViewedMax = 10;
 
@@ -29,12 +33,13 @@ namespace MotorShop.Controllers
             ApplicationDbContext db,
             IMemoryCache cache,
             CartService cart,
-            ILogger<ProductsController> logger)
+            ILogger<ProductsController> logger,UserManager<ApplicationUser> userManager)
         {
             _db = db;
             _cache = cache;
             _cart = cart;
             _logger = logger;
+            _userManager = userManager;
         }
 
         // =========================================================
@@ -107,6 +112,9 @@ namespace MotorShop.Controllers
             {
                 "price-low" => productsQuery.OrderBy(p => p.Price).ThenByDescending(p => p.CreatedAt),
                 "price-high" => productsQuery.OrderByDescending(p => p.Price).ThenByDescending(p => p.CreatedAt),
+                // === THÊM CASE NÀY ===
+                "rating" => productsQuery.OrderByDescending(p => p.AverageRating).ThenByDescending(p => p.ReviewCount),
+                // =====================
                 "name-asc" => productsQuery.OrderBy(p => p.Name),
                 "name-desc" => productsQuery.OrderByDescending(p => p.Name),
                 _ => productsQuery.OrderByDescending(p => p.CreatedAt).ThenByDescending(p => p.Id)
@@ -248,11 +256,12 @@ namespace MotorShop.Controllers
                 .Include(p => p.Images)
                 .Include(p => p.Specifications)
                 .Include(p => p.ProductTags).ThenInclude(pt => pt.Tag)
+                .Include(p => p.Reviews).ThenInclude(r => r.User) // Load User để hiển thị avatar/tên
                 .FirstOrDefaultAsync(p => p.Id == id && p.IsPublished, ct);
 
             if (product == null) return NotFound();
 
-            // Canonical slug
+            // Canonical slug check
             var expected = ToSlug(product.Name);
             if (!string.IsNullOrWhiteSpace(slug) &&
                 !string.Equals(slug, expected, StringComparison.OrdinalIgnoreCase))
@@ -260,24 +269,46 @@ namespace MotorShop.Controllers
                 return RedirectToActionPermanent(nameof(Details), new { id, slug = expected });
             }
 
-            // Sản phẩm liên quan cùng Category
+            // --- LOGIC MỚI: Check quyền & Lấy đánh giá của tôi ---
+            bool canReview = false;
+            ProductReview? myReview = null;
+            string? currentUserId = null;
+
+            if (User.Identity.IsAuthenticated)
+            {
+                currentUserId = _userManager.GetUserId(User);
+
+                // 1. Check quyền review (Đã mua + Hoàn tất)
+                canReview = await _db.Orders
+                    .AsNoTracking()
+                    .AnyAsync(o => o.UserId == currentUserId &&
+                                   o.Status == OrderStatus.Completed &&
+                                   o.OrderItems.Any(oi => oi.ProductId == id), ct);
+
+                // 2. Tìm đánh giá cũ của user này (nếu có)
+                // Lưu ý: Lấy từ list product.Reviews đã include ở trên để đỡ query lại, 
+                // hoặc query riêng nếu muốn chắc chắn. Ở đây filter trên list đã load.
+                myReview = product.Reviews.FirstOrDefault(r => r.UserId == currentUserId);
+            }
+
+            ViewBag.CanReview = canReview;
+            ViewBag.MyReview = myReview;         // Truyền đánh giá của tôi sang View
+            ViewBag.CurrentUserId = currentUserId; // Để lọc list hiển thị
+                                                   // ----------------------------------------------------
+
+            // Related products logic...
             var related = await _db.Products
                 .AsNoTracking()
                 .Include(p => p.Brand)
                 .Include(p => p.Images)
-                .Where(p => p.CategoryId == product.CategoryId &&
-                            p.Id != id &&
-                            p.IsPublished)
+                .Where(p => p.CategoryId == product.CategoryId && p.Id != id && p.IsPublished)
                 .OrderByDescending(p => p.CreatedAt)
                 .Take(4)
                 .ToListAsync(ct);
 
             TrackRecentlyViewed(id);
 
-            var branches = await _db.Branches
-                .AsNoTracking()
-                .Where(b => b.IsActive)
-                .ToListAsync(ct);
+            var branches = await _db.Branches.AsNoTracking().Where(b => b.IsActive).ToListAsync(ct);
 
             var vm = new ProductDetailViewModel
             {
@@ -286,13 +317,35 @@ namespace MotorShop.Controllers
                 Branches = branches
             };
 
-            // Nếu là phụ tùng thì dùng view PartDetails
-            var viewName = product.Category != null &&
-                           product.Category.Name == PartsCategoryName
+            var viewName = product.Category != null && product.Category.Name == SD.Category_PartsName // Hoặc check string cứng nếu chưa có const
                 ? "PartDetails"
                 : "Details";
 
             return View(viewName, vm);
+        }
+
+        // --- THÊM ACTION XÓA ĐÁNH GIÁ ---
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteReview(int productId)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
+
+            var review = await _db.ProductReviews
+                .FirstOrDefaultAsync(r => r.ProductId == productId && r.UserId == user.Id);
+
+            if (review != null)
+            {
+                _db.ProductReviews.Remove(review);
+                await _db.SaveChangesAsync();
+                TempData[SD.Temp_Success] = "Đã xóa đánh giá của bạn.";
+            }
+            // === THÊM DÒNG NÀY ===
+            await UpdateProductStat(productId);
+            // =====================
+            return RedirectToAction(nameof(Details), new { id = productId });
         }
 
         // =========================================================
@@ -487,5 +540,92 @@ namespace MotorShop.Controllers
                 // best-effort
             }
         }
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddReview(int productId, int rating, string? comment)
+        {
+            if (rating < 1 || rating > 5)
+            {
+                TempData[SD.Temp_Error] = "Vui lòng chọn số sao đánh giá.";
+                return RedirectToAction(nameof(Details), new { id = productId });
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
+
+            // 1. Kiểm tra: User đã mua sản phẩm này và đơn hàng đã Hoàn thành (Completed) chưa?
+            var order = await _db.Orders
+                .Include(o => o.OrderItems)
+                .Where(o => o.UserId == user.Id && o.Status == OrderStatus.Completed) // Chỉ đơn hoàn thành mới được review
+                .Where(o => o.OrderItems.Any(i => i.ProductId == productId))
+                .OrderByDescending(o => o.OrderDate)
+                .FirstOrDefaultAsync();
+
+            if (order == null)
+            {
+                TempData[SD.Temp_Error] = "Bạn cần mua sản phẩm này và hoàn tất đơn hàng trước khi đánh giá.";
+                return RedirectToAction(nameof(Details), new { id = productId });
+            }
+
+            // 2. Kiểm tra xem đã đánh giá chưa (Tránh spam)
+            var existingReview = await _db.ProductReviews
+                .FirstOrDefaultAsync(r => r.ProductId == productId && r.UserId == user.Id && r.OrderId == order.Id);
+
+            if (existingReview != null)
+            {
+                // Nếu đã có thì cập nhật lại
+                existingReview.Rating = rating;
+                existingReview.Comment = comment;
+                existingReview.UpdatedAt = DateTime.UtcNow;
+                TempData[SD.Temp_Success] = "Đã cập nhật đánh giá của bạn.";
+            }
+            else
+            {
+                // Tạo mới
+                var review = new ProductReview
+                {
+                    ProductId = productId,
+                    UserId = user.Id,
+                    OrderId = order.Id, // Gắn vào đơn hàng hợp lệ tìm được
+                    Rating = rating,
+                    Comment = comment,
+                    CreatedAt = DateTime.UtcNow
+                };
+                _db.ProductReviews.Add(review);
+                TempData[SD.Temp_Success] = "Cảm ơn bạn đã đánh giá sản phẩm!";
+            }
+
+            await _db.SaveChangesAsync();
+            // === THÊM DÒNG NÀY ===
+            await UpdateProductStat(productId);
+            // =====================
+            return RedirectToAction(nameof(Details), new { id = productId });
+        }// ... các hàm private khác ...
+
+        private async Task UpdateProductStat(int productId)
+        {
+            var product = await _db.Products
+                .Include(p => p.Reviews) // Load review để tính toán
+                .FirstOrDefaultAsync(p => p.Id == productId);
+
+            if (product != null)
+            {
+                if (product.Reviews != null && product.Reviews.Any())
+                {
+                    product.ReviewCount = product.Reviews.Count;
+                    product.AverageRating = Math.Round(product.Reviews.Average(r => r.Rating), 1); // Làm tròn 1 số thập phân
+                }
+                else
+                {
+                    product.ReviewCount = 0;
+                    product.AverageRating = 0;
+                }
+
+                _db.Products.Update(product);
+                await _db.SaveChangesAsync();
+            }
+        }
     }
-}
+
+} 

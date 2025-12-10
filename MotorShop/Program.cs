@@ -48,7 +48,25 @@ builder.Services
     })
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
+// File: Program.cs
 
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    // Cấu hình đường dẫn
+    options.LoginPath = "/Identity/Account/Login";
+    options.LogoutPath = "/Identity/Account/Logout";
+    options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+
+    // Cấu hình Cookie
+    options.Cookie.Name = "MotorShop.Auth";
+    options.Cookie.HttpOnly = true;
+    options.ExpireTimeSpan = TimeSpan.FromDays(30);
+    options.SlidingExpiration = true;
+
+    // QUAN TRỌNG: Để chạy được trên localhost không có HTTPS chuẩn
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+});
 // Authorization
 builder.Services.AddAuthorization(options =>
 {

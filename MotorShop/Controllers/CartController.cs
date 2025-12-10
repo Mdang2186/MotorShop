@@ -46,12 +46,15 @@ namespace MotorShop.Controllers
         }
 
         // Helper: Map cart session -> ViewModel (kèm dữ liệu tươi từ DB)
+        // Trong CartController.cs, tìm hàm BuildVmAsync
         private async Task<List<CartItemVm>> BuildVmAsync(CancellationToken ct)
         {
             var snapshot = cartService.GetCartItems();
             if (snapshot.Count == 0) return [];
 
             var ids = snapshot.Select(i => i.ProductId).Distinct().ToArray();
+
+            // 1. SELECT THÊM p.SKU
             var products = await context.Products
                 .AsNoTracking()
                 .Where(p => ids.Contains(p.Id) && p.IsPublished)
@@ -62,7 +65,7 @@ namespace MotorShop.Controllers
                     p.Price,
                     p.ImageUrl,
                     p.StockQuantity,
-                    p.Slug
+                    p.SKU // <--- Thêm cái này
                 })
                 .ToListAsync(ct);
 
@@ -80,7 +83,7 @@ namespace MotorShop.Controllers
                     ImageUrl = string.IsNullOrWhiteSpace(p.ImageUrl) ? "/images/products/placeholder.png" : p.ImageUrl,
                     UnitPrice = p.Price,
                     Quantity = it.Quantity,
-                    // Có thể map thêm MaxStock nếu view cần validation
+                    SKU = p.SKU // <--- Gán giá trị vào đây
                 });
             }
             return list;

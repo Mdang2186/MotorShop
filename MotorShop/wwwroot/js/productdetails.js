@@ -205,6 +205,58 @@
             });
         }
     }
+    document.addEventListener('DOMContentLoaded', () => {
+        // Tìm tất cả nút có thuộc tính data-add-to-cart
+        const addCartBtns = document.querySelectorAll('[data-add-to-cart]');
 
+        addCartBtns.forEach(btn => {
+            btn.addEventListener('click', async function () {
+                const pid = this.getAttribute('data-id');
+                const qty = parseInt(this.getAttribute('data-qty')) || 1; // Lấy số lượng từ attribute (được cập nhật bởi input số lượng)
+
+                // Hiệu ứng loading trên nút
+                const originalHtml = this.innerHTML;
+                this.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang thêm...';
+                this.disabled = true;
+
+                try {
+                    const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+                    const res = await fetch('/Cart/AddToCart', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': token
+                        },
+                        body: JSON.stringify({ productId: parseInt(pid), quantity: qty })
+                    });
+
+                    const data = await res.json();
+
+                    if (res.ok && data.success) {
+                        // === GỌI HEADER CẬP NHẬT SỐ ===
+                        if (window.refreshCartBadge) {
+                            await window.refreshCartBadge();
+                        }
+
+                        // Hiệu ứng thành công tạm thời trên nút
+                        this.innerHTML = '<i class="fa-solid fa-check"></i> Đã thêm';
+                        setTimeout(() => {
+                            this.innerHTML = originalHtml;
+                            this.disabled = false;
+                        }, 2000);
+                    } else {
+                        alert(data.message || "Không thể thêm vào giỏ.");
+                        this.innerHTML = originalHtml;
+                        this.disabled = false;
+                    }
+                } catch (e) {
+                    console.error(e);
+                    alert("Lỗi kết nối.");
+                    this.innerHTML = originalHtml;
+                    this.disabled = false;
+                }
+            });
+        });
+    });
     // ... (Giữ nguyên các code khác như Tabs, Modal, Gallery nếu có)
 });

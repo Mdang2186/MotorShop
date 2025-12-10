@@ -66,5 +66,14 @@ namespace MotorShop.Models
                    ?? Images!.OrderBy(i => i.SortOrder).First().ImageUrl)
                 : null)
             ?? ImageUrl;
+        // ...
+
+        public ICollection<ProductReview> Reviews { get; set; } = new List<ProductReview>();
+
+        // ===== Helper rating =====
+        // Đổi thành property thường để lưu vào Database.
+        public double AverageRating { get; set; } = 0;
+
+        public int ReviewCount { get; set; } = 0;
     }
 }

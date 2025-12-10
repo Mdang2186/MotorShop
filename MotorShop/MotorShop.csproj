@@ -46,6 +46,7 @@
     <Compile Include="Models\OrderItem.cs" />
     <Compile Include="Models\Product.cs" />
     <Compile Include="Models\ProductImage.cs" />
+    <Compile Include="Models\ProductReview.cs" />
     <Compile Include="Models\ProductSpecification.cs" />
     <Compile Include="Models\ProductTag.cs" />
     <Compile Include="Models\Shipper.cs" />

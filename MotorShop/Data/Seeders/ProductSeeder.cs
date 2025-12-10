@@ -1446,6 +1446,414 @@ new()
         "Trang bị & tiện ích", "Nhiều chế độ lái, kiểm soát lực kéo, ABS Pro, hỗ trợ lên/xuống số, kiểm soát hành trình, chế độ Off-road, sưởi tay lái (tùy gói), chuẩn bị sẵn cho thùng hông & thùng sau"
     )
 },
+// ==================== SYM (6 Xe) ====================
+new()
+{
+    Name = "SYM Attila 125 EFI",
+    SKU = "SYM-ATTILA-125",
+    Price = 33700000,
+    Stock = 40,
+    Year = 2024,
+    BrandId = GetBrandId("SYM"),
+    CategoryId = GetCatId("Xe Tay Ga"),
+    ImageName = "sym-attila-125-white.png",
+    Specs = NewDictionary(
+        // --- KÍCH THƯỚC & TRỌNG LƯỢNG ---
+        "Khối lượng bản thân", "115 kg",
+        "Kích thước (D x R x C)", "1.880 x 680 x 1.120 mm",
+        "Khoảng cách trục bánh xe", "1.320 mm",
+        "Chiều cao yên", "765 mm",
+        "Khoảng sáng gầm xe", "110 mm",
+
+        // --- DUNG TÍCH & LỐP ---
+        "Dung tích bình xăng", "6,2 lít (nắp xăng phía trước)",
+        "Kích cỡ lốp trước", "110/70-12 (không săm)",
+        "Kích cỡ lốp sau", "120/70-12 (không săm)",
+        "Phuộc trước", "Ống lồng, giảm chấn thủy lực",
+        "Phuộc sau", "Lò xo trụ đôi, giảm chấn thủy lực",
+
+        // --- ĐỘNG CƠ & VẬN HÀNH ---
+        "Loại động cơ", "E-Power 125cc, 4 kỳ, phun xăng điện tử EFI",
+        "Dung tích xy-lanh", "124,6 cm³",
+        "Công suất tối đa", "7,7 kW / 8.500 vòng/phút",
+        "Mô-men xoắn cực đại", "9,4 N.m / 6.500 vòng/phút",
+        "Làm mát", "Làm mát bằng gió cưỡng bức",
+        "Mức tiêu thụ nhiên liệu", "≈ 1,9 lít/100 km",
+
+        // --- TIỆN ÍCH ---
+        "Hệ thống đèn", "Đèn pha LED, đèn hậu LED 3D",
+        "Tiện ích nổi bật", "Cổng sạc USB tay lái, cốp rộng 27L chứa được 2 mũ bảo hiểm, nắp xăng tiện lợi"
+    )
+},
+new()
+{
+    Name = "SYM Shark 125",
+    SKU = "SYM-SHARK-125",
+    Price = 25000000,
+    Stock = 50,
+    Year = 2024,
+    BrandId = GetBrandId("SYM"),
+    CategoryId = GetCatId("Xe Tay Ga"),
+    ImageName = "sym-shark-125-grey.png",
+    Specs = NewDictionary(
+        "Khối lượng bản thân", "108 kg",
+        "Kích thước (D x R x C)", "1.940 x 715 x 1.105 mm",
+        "Chiều cao yên", "790 mm (gầm cao 135mm)",
+        "Dung tích bình xăng", "5,2 lít",
+        "Kích cỡ lốp", "Bánh lớn 14 inch, lốp không săm",
+        "Động cơ", "125cc, 4 thì, làm mát bằng không khí",
+        "Công suất tối đa", "7,1 kW / 8.000 vòng/phút",
+        "Mô-men xoắn cực đại", "10,1 N.m / 6.000 vòng/phút",
+        "Tiện ích", "Sàn để chân phẳng rộng rãi, đèn định vị LED, cốp chứa mũ bảo hiểm nửa đầu"
+    )
+},
+new()
+{
+    Name = "SYM Tuscany 150",
+    SKU = "SYM-TUSCANY-150",
+    Price = 45000000,
+    Stock = 20,
+    Year = 2024,
+    BrandId = GetBrandId("SYM"),
+    CategoryId = GetCatId("Xe Tay Ga"),
+    ImageName = "sym-tuscany-150-white.png",
+    Specs = NewDictionary(
+        "Phong cách", "Thiết kế Ý cổ điển, sang trọng",
+        "Động cơ", "149,6cc, 4 thì, phun xăng điện tử",
+        "Công suất tối đa", "8,5 kW / 8.000 vòng/phút",
+        "Dung tích bình xăng", "5,7 lít",
+        "Trọng lượng", "123 kg",
+        "Hệ thống khóa", "Smart Key thông minh",
+        "Phanh", "Phanh đĩa trước/sau, kết hợp CBS",
+        "Tiện ích", "Cổng sạc QC 3.0, màn hình LCD, cốp rộng 27 lít"
+    )
+},
+new()
+{
+    Name = "SYM Galaxy 125",
+    SKU = "SYM-GALAXY-125",
+    Price = 26500000,
+    Stock = 40,
+    Year = 2023,
+    BrandId = GetBrandId("SYM"),
+    CategoryId = GetCatId("Xe Côn Tay"),
+    ImageName = "sym-galaxy-125-blue.png",
+    Specs = NewDictionary(
+        "Loại xe", "Underbone côn tay thể thao",
+        "Động cơ", "123cc, 4 thì, xy-lanh đơn",
+        "Hộp số", "5 cấp số (1-N-2-3-4-5)",
+        "Công suất tối đa", "7,5 kW / 8.000 vòng/phút",
+        "Mô-men xoắn cực đại", "9,8 N.m / 6.000 vòng/phút",
+        "Tiêu thụ nhiên liệu", "1,7 lít/100 km",
+        "Phanh", "Đĩa trước, đĩa sau",
+        "Tiện ích", "Hộc chứa đồ nhỏ dưới yên, khóa từ chống trộm"
+    )
+},
+new()
+{
+    Name = "SYM Elegant 110",
+    SKU = "SYM-ELEGANT-110",
+    Price = 17000000,
+    Stock = 60,
+    Year = 2024,
+    BrandId = GetBrandId("SYM"),
+    CategoryId = GetCatId("Xe Số"),
+    ImageName = "sym-elegant-110-red.png",
+    Specs = NewDictionary(
+        "Động cơ", "110cc, bền bỉ, tiết kiệm xăng",
+        "Công suất", "5,3 kW / 7.500 vòng/phút",
+        "Trọng lượng", "96 kg (nhẹ, dễ điều khiển)",
+        "Hộp số", "4 số tròn",
+        "Tiêu thụ nhiên liệu", "1,44 lít/100 km (rất tiết kiệm)",
+        "Phuộc nhún", "Chịu tải tốt, êm ái",
+        "Bảo hành", "3 năm hoặc 30.000 km"
+    )
+},
+new()
+{
+    Name = "SYM Elite 50",
+    SKU = "SYM-ELITE-50",
+    Price = 23000000,
+    Stock = 50,
+    Year = 2024,
+    BrandId = GetBrandId("SYM"),
+    CategoryId = GetCatId("Xe Tay Ga"),
+    ImageName = "sym-elite-50-red-white.png",
+    Specs = NewDictionary(
+        "Dung tích xy-lanh", "49,5 cc (không cần bằng lái)",
+        "Phong cách", "Hoài cổ, nhỏ gọn, thời trang",
+        "Trọng lượng", "84 kg (rất nhẹ)",
+        "Chiều cao yên", "740 mm (phù hợp học sinh, nữ giới)",
+        "Sàn để chân", "Rộng, phẳng",
+        "Động cơ", "4 thì, làm mát bằng không khí",
+        "Tiện ích", "Nắp xăng ngoài tiện lợi, cốp rộng, móc treo đồ"
+    )
+},
+
+// ==================== KAWASAKI (6 Xe) ====================
+new()
+{
+    Name = "Kawasaki Ninja ZX-25R SE",
+    SKU = "KW-ZX25R",
+    Price = 197300000,
+    Stock = 5,
+    Year = 2024,
+    BrandId = GetBrandId("Kawasaki"),
+    CategoryId = GetCatId("Sportbike"),
+    ImageName = "ninja-zx25r-krt.png",
+    Specs = NewDictionary(
+        // --- KÍCH THƯỚC & TRỌNG LƯỢNG ---
+        "Khối lượng", "184 kg",
+        "Chiều cao yên", "785 mm",
+        "Dung tích bình xăng", "15 lít",
+
+        // --- ĐỘNG CƠ & HIỆU SUẤT ---
+        "Loại động cơ", "4 xy-lanh thẳng hàng (Inline-4), DOHC, 16 van, làm mát bằng dung dịch",
+        "Dung tích xy-lanh", "249,8 cc",
+        "Công suất tối đa", "51 PS / 15.500 rpm (với Ram Air)",
+        "Mô-men xoắn", "22,9 N.m / 14.500 rpm",
+        "Redline", "17.000 vòng/phút (âm thanh phấn khích)",
+
+        // --- CÔNG NGHỆ ---
+        "Hộp số", "6 cấp, hỗ trợ Quickshifter 2 chiều (KQS)",
+        "Chế độ lái", "Full / Low Power Modes",
+        "Kiểm soát lực kéo", "KTRC (Kawasaki Traction Control) - 3 mức",
+        "Phuộc trước", "Showa SFF-BP đường kính 37mm",
+        "Phanh", "Heo phanh Monobloc Radial Mount, đĩa 310mm"
+    )
+},
+new()
+{
+    Name = "Kawasaki Z1000 ABS",
+    SKU = "KW-Z1000",
+    Price = 435500000,
+    Stock = 3,
+    Year = 2023,
+    BrandId = GetBrandId("Kawasaki"),
+    CategoryId = GetCatId("Naked Bike"),
+    ImageName = "z1000-abs-green.png",
+    Specs = NewDictionary(
+        "Ngôn ngữ thiết kế", "Sugomi - hầm hố, mạnh mẽ",
+        "Động cơ", "4 xy-lanh, DOHC, 1.043 cc",
+        "Công suất tối đa", "142 PS / 10.000 rpm",
+        "Mô-men xoắn", "111 N.m / 7.300 rpm",
+        "Chiều cao yên", "815 mm",
+        "Trọng lượng", "221 kg",
+        "Phanh", "Đĩa đôi 300mm, heo Tokico 4 piston, ABS",
+        "Bình xăng", "17 lít",
+        "Tiện ích", "Đèn pha LED Projector, đồng hồ kỹ thuật số"
+    )
+},
+new()
+{
+    Name = "Kawasaki Ninja 400",
+    SKU = "KW-NINJA400",
+    Price = 159000000,
+    Stock = 8,
+    Year = 2023,
+    BrandId = GetBrandId("Kawasaki"),
+    CategoryId = GetCatId("Sportbike"),
+    ImageName = "ninja-400-krt.png",
+    Specs = NewDictionary(
+        "Động cơ", "2 xy-lanh song song (Parallel Twin), 399cc",
+        "Công suất", "45 PS / 10.000 rpm",
+        "Mô-men xoắn", "38 N.m / 8.000 rpm",
+        "Trọng lượng", "168 kg (nhẹ nhất phân khúc)",
+        "Chiều cao yên", "785 mm (phù hợp người Việt)",
+        "Hộp số", "6 cấp, ly hợp chống trượt (Assist & Slipper Clutch)",
+        "Phanh", "Đĩa trước 310mm, ABS 2 kênh",
+        "Đối tượng", "Lựa chọn hàng đầu cho người mới chơi PKL (Entry-level)"
+    )
+},
+new()
+{
+    Name = "Kawasaki Z900 ABS",
+    SKU = "KW-Z900",
+    Price = 320900000,
+    Stock = 5,
+    Year = 2023,
+    BrandId = GetBrandId("Kawasaki"),
+    CategoryId = GetCatId("Naked Bike"),
+    ImageName = "z900-metallic-spark-black.png",
+    Specs = NewDictionary(
+        "Động cơ", "4 xy-lanh thẳng hàng, 948cc",
+        "Công suất", "125 PS / 9.500 rpm",
+        "Mô-men xoắn", "98,6 N.m / 7.700 rpm",
+        "Khung sườn", "Trellis siêu nhẹ, trọng lượng xe 212 kg",
+        "Công nghệ", "KTRC (Traction Control), Power Mode, màn hình TFT màu có kết nối Bluetooth",
+        "Hệ thống treo", "Phuộc trước Upside Down có thể điều chỉnh",
+        "Đèn", "Full LED toàn bộ xe"
+    )
+},
+new()
+{
+    Name = "Kawasaki W175 SE",
+    SKU = "KW-W175",
+    Price = 77500000,
+    Stock = 10,
+    Year = 2023,
+    BrandId = GetBrandId("Kawasaki"),
+    CategoryId = GetCatId("Classic"),
+    ImageName = "w175-se-black.png",
+    Specs = NewDictionary(
+        "Phong cách", "Retro cổ điển, đèn tròn, bình xăng giọt nước",
+        "Động cơ", "Xy-lanh đơn, 177cc, làm mát bằng khí",
+        "Hệ thống nhiên liệu", "Chế hòa khí (bình xăng con) - dễ sửa chữa",
+        "Công suất", "13 PS / 7.500 rpm",
+        "Hộp số", "5 cấp",
+        "Trọng lượng", "126 kg",
+        "Chiều cao yên", "765 mm",
+        "Thích hợp", "Người yêu thích phong cách hoài cổ, độ xe Cafe Racer/Tracker"
+    )
+},
+new()
+{
+    Name = "Kawasaki Vulcan S",
+    SKU = "KW-VULCAN-S",
+    Price = 241000000,
+    Stock = 4,
+    Year = 2023,
+    BrandId = GetBrandId("Kawasaki"),
+    CategoryId = GetCatId("Cruiser"),
+    ImageName = "vulcan-s-matte-black.png",
+    Specs = NewDictionary(
+        "Loại xe", "Sport Cruiser hiện đại",
+        "Động cơ", "2 xy-lanh song song, 649cc (chung máy Ninja 650)",
+        "Công suất", "61 PS / 7.500 rpm",
+        "Công nghệ Ergo-Fit", "Tùy chỉnh vị trí tay lái, yên xe, gác chân theo vóc dáng",
+        "Chiều cao yên", "705 mm (rất thấp, chống chân thoải mái)",
+        "Phanh", "Đĩa trước/sau, ABS",
+        "Trọng lượng", "229 kg"
+    )
+},
+
+// ==================== PIAGGIO (6 Xe) ====================
+new()
+{
+    Name = "Piaggio Liberty S 125 ABS",
+    SKU = "PG-LIB-S-125",
+    Price = 57700000,
+    Stock = 20,
+    Year = 2023,
+    BrandId = GetBrandId("Piaggio"),
+    CategoryId = GetCatId("Xe Tay Ga"),
+    ImageName = "liberty-s-125-nero-meteora.png",
+    Specs = NewDictionary(
+        // --- KÍCH THƯỚC & THIẾT KẾ ---
+        "Kích thước", "1.945 x 690 mm",
+        "Chiều cao yên", "790 mm",
+        "Trọng lượng", "120 kg (khô)",
+        "Bánh xe", "Bánh lớn 16 inch (trước) / 14 inch (sau) giúp vận hành ổn định",
+
+        // --- ĐỘNG CƠ & CÔNG NGHỆ ---
+        "Động cơ", "i-Get, 4 kỳ, 3 van, phun xăng điện tử",
+        "Dung tích", "124,5 cc",
+        "Công suất", "7.6 kW / 7.600 rpm",
+        "Phanh", "Phanh đĩa trước tích hợp ABS an toàn",
+        "Tiện ích", "Cốp mở điện, màn hình LCD, cảm biến nghiêng tắt máy",
+        "Mức tiêu hao", "2.74 lít/100km"
+    )
+},
+new()
+{
+    Name = "Piaggio Medley S 150",
+    SKU = "PG-MEDLEY-150",
+    Price = 96800000,
+    Stock = 10,
+    Year = 2024,
+    BrandId = GetBrandId("Piaggio"),
+    CategoryId = GetCatId("Xe Tay Ga"),
+    ImageName = "medley-s-150-black.png",
+    Specs = NewDictionary(
+        "Phân khúc", "Xe tay ga bánh lớn cao cấp",
+        "Động cơ", "i-Get 150cc, 4 van, làm mát bằng dung dịch",
+        "Công suất", "11 kW / 7.750 rpm (mạnh mẽ hàng đầu phân khúc)",
+        "Phanh", "ABS 2 kênh (trước & sau)",
+        "Tiện ích", "Cốp siêu rộng (36L) đựng 2 nón fullface, cổng sạc USB",
+        "Công nghệ", "Start-Stop (tắt máy tạm thời), kết nối điện thoại Piaggio MIA",
+        "Bánh xe", "Trước 16 inch, sau 14 inch"
+    )
+},
+new()
+{
+    Name = "Piaggio Medley 125 S",
+    SKU = "PG-MEDLEY-125",
+    Price = 81500000,
+    Stock = 15,
+    Year = 2024,
+    BrandId = GetBrandId("Piaggio"),
+    CategoryId = GetCatId("Xe Tay Ga"),
+    ImageName = "medley-125-white.png",
+    Specs = NewDictionary(
+        "Động cơ", "i-Get 125cc, 4 van, phun xăng điện tử",
+        "Công suất", "9 kW / 8.250 rpm",
+        "Hệ thống phanh", "ABS 2 kênh an toàn tối đa",
+        "Cốp xe", "Rộng rãi 36 lít",
+        "Đèn", "Full LED 2 tầng hiện đại",
+        "Màn hình", "LCD kỹ thuật số hoàn toàn",
+        "Tiện ích khác", "Móc treo đồ, ngăn chứa đồ phía trước có cổng USB"
+    )
+},
+new()
+{
+    Name = "Piaggio Liberty One 125",
+    SKU = "PG-LIB-ONE",
+    Price = 48300000,
+    Stock = 25,
+    Year = 2023,
+    BrandId = GetBrandId("Piaggio"),
+    CategoryId = GetCatId("Xe Tay Ga"),
+    ImageName = "liberty-one-125-black.png",
+    Specs = NewDictionary(
+        "Phiên bản", "Liberty One (Tem thiết kế nghệ thuật)",
+        "Động cơ", "i-Get 125cc, 3 van, làm mát không khí",
+        "Công suất", "7.6 kW",
+        "Phanh", "Phanh đĩa trước (Không có ABS - bản tiết kiệm)",
+        "Trọng lượng", "116 kg",
+        "Chiều cao yên", "780 mm",
+        "Đặc điểm", "Thiết kế thời trang, nhẹ nhàng, giá thành hợp lý nhất dòng Liberty"
+    )
+},
+new()
+{
+    Name = "Piaggio Beverly S 400 HPE",
+    SKU = "PG-BEV-400",
+    Price = 235000000,
+    Stock = 3,
+    Year = 2023,
+    BrandId = GetBrandId("Piaggio"),
+    CategoryId = GetCatId("Xe Tay Ga"),
+    ImageName = "beverly-s-400-orange.png",
+    Specs = NewDictionary(
+        "Phân khúc", "Urban Crossover (Xe tay ga phân khối lớn)",
+        "Động cơ", "HPE 400cc, xy-lanh đơn, 4 kỳ, 4 van",
+        "Công suất", "26 kW (35.4 HP) / 7.500 rpm",
+        "Mô-men xoắn", "37.7 N.m / 5.500 rpm",
+        "Công nghệ", "Hệ thống kiểm soát lực kéo ASR, Phanh ABS 2 kênh",
+        "Tiện ích", "Khóa thông minh Keyless, màn hình LCD 5.5 inch kết nối MIA",
+        "Hệ thống treo", "Showale giảm chấn kép"
+    )
+},
+new()
+{
+    Name = "Piaggio Fly 125 3V i.e",
+    SKU = "PG-FLY-125",
+    Price = 41900000,
+    Stock = 5,
+    Year = 2022,
+    BrandId = GetBrandId("Piaggio"),
+    CategoryId = GetCatId("Xe Tay Ga"),
+    ImageName = "fly-125-blue.png",
+    Specs = NewDictionary(
+        "Động cơ", "3 van, 4 kỳ, 125cc",
+        "Hệ thống nhiên liệu", "Phun xăng điện tử",
+        "Chiều cao yên", "760 mm (rất thấp, phù hợp nữ giới)",
+        "Cốp xe", "Rộng, chứa được 2 mũ bảo hiểm",
+        "Bình xăng", "Nằm dưới sàn để chân, nạp xăng tiện lợi",
+        "Vành xe", "12 inch lốp không săm",
+        "Đặc điểm", "Vận hành êm ái, đầm chắc, tiện dụng cho gia đình"
+    )
+},
 // ==================== PHỤ TÙNG & LINH KIỆN (PHU TUNG) ====================
 new()
 {

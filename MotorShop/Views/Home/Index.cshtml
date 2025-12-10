@@ -1113,29 +1113,42 @@
             initMap();
         });
         // === 2. CART AJAX ===
+                // === 2. CART AJAX (TRANG CHỦ) ===
         async function addToCart(productId) {
             try {
-                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+                // Hiệu ứng loading con trỏ
                 document.body.style.cursor = 'wait';
+
+                // Lấy token chống giả mạo
+                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
                 const res = await fetch('/Cart/AddToCart', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token
+                    },
                     body: JSON.stringify({ productId: productId, quantity: 1 })
                 });
+
                 const data = await res.json();
                 document.body.style.cursor = 'default';
 
                 if (res.ok && data.success) {
-                    const badge = document.getElementById('cart-badge');
-                    if (badge && data.cartCount) badge.innerText = data.cartCount;
-                    alert("✅ Đã thêm vào giỏ hàng thành công!");
+                    // === QUAN TRỌNG: GỌI HÀM CẬP NHẬT HEADER TẠI ĐÂY ===
+                    if (window.refreshCartBadge) {
+                        await window.refreshCartBadge();
+                    }
+
+                    // Thông báo (Có thể thay bằng Toast đẹp hơn nếu muốn)
+                    // alert("✅ Đã thêm vào giỏ hàng thành công!");
                 } else {
-                    alert("❌ " + (data.message || "Lỗi."));
+                    alert("❌ " + (data.message || "Lỗi khi thêm giỏ hàng."));
                 }
             } catch (err) {
                 console.error(err);
                 document.body.style.cursor = 'default';
-                alert("Lỗi kết nối.");
+                alert("Lỗi kết nối server.");
             }
         }
     </script>

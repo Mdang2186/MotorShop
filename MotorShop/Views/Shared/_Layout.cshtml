@@ -1,24 +1,30 @@
 ﻿@using MotorShop.Utilities
+@using Microsoft.AspNetCore.Identity
+@using MotorShop.Models
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
 @{
-    // Lấy cả Controller và Action
     var ctrl = (ViewContext.RouteData.Values["controller"]?.ToString() ?? "").ToLowerInvariant();
     var act = (ViewContext.RouteData.Values["action"]?.ToString() ?? "").ToLowerInvariant();
 
-    // Hàm kiểm tra Active nâng cao
     bool Active(string name)
     {
         name = name.ToLowerInvariant();
-        if (name == "parts") return ctrl == "products" && act == "parts"; // Riêng cho trang Phụ tùng
-        if (name == "products") return ctrl == "products" && act == "index"; // Riêng cho trang Sản phẩm
-        return ctrl == name; // Các trang khác (Home, Order...)
+        if (name == "parts") return ctrl == "products" && act == "parts";
+        if (name == "products") return ctrl == "products" && act == "index";
+        return ctrl == name;
     }
 
-    string NavClass(string name) => (Active(name) ? "text-blue-600 font-bold" : "text-slate-600 hover:text-blue-600 font-medium")
-                                    + " px-3 py-2 rounded-md text-sm transition whitespace-nowrap";
+    string NavClass(string name) => (Active(name) ? "text-blue-600 font-bold bg-blue-50" : "text-slate-600 hover:text-blue-600 hover:bg-slate-50 font-medium")
+                                    + " px-3 py-2 rounded-lg text-sm transition-all whitespace-nowrap";
 
-    // 2. Xử lý Toast Notification
-    string? toast = TempData[SD.Temp_Success] as string ?? TempData[SD.Temp_Info] as string ?? TempData[SD.Temp_Warning] as string ?? TempData[SD.Temp_Error] as string;
-    string toastType = TempData[SD.Temp_Success] != null ? "success" : TempData[SD.Temp_Info] != null ? "info" : TempData[SD.Temp_Warning] != null ? "warning" : "error";
+    // Toast logic
+    string? toast = TempData[SD.Temp_Success] as string ?? TempData[SD.Temp_Info] as string ??
+                    TempData[SD.Temp_Warning] as string ?? TempData[SD.Temp_Error] as string;
+    string toastType = TempData[SD.Temp_Success] != null ? "success" : TempData[SD.Temp_Info] != null ?
+                       "info" : TempData[SD.Temp_Warning] != null ? "warning" : "error";
     string ToastBg(string t) => t switch
     {
         "success" => "from-emerald-500 to-emerald-600 shadow-emerald-300/40",
@@ -27,6 +33,7 @@
         _ => "from-rose-500 to-rose-600 shadow-rose-300/40"
     };
 }
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -41,19 +48,135 @@
     @RenderSection("Head", required: false)
 
     <style>
-        /* Nền trang */
-        body.bg-future {
-            background: radial-gradient(900px 600px at 12% 8%, #eaf2ff 0, transparent 60%), radial-gradient(900px 600px at 88% 6%, #e6fbff 0, transparent 62%), linear-gradient(180deg, #ffffff 0, #f7fbff 100%);
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
         }
 
-        .nav-glass {
-            background: rgba(255, 255, 255, .95);
-            backdrop-filter: blur(6px);
+            body.bg-future {
+                background: radial-gradient(900px 600px at 12% 8%, #eaf2ff 0, transparent 60%), radial-gradient(900px 600px at 88% 6%, #e6fbff 0, transparent 62%), linear-gradient(180deg, #ffffff 0, #f7fbff 100%);
+            }
+
+        /* === 1. USER PILL EFFECT (HIỆU ỨNG TRƯỢT AVATAR) === */
+        .user-pill-btn {
+            display: flex;
+            align-items: center;
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 3px; /* Padding nhỏ để ôm sát avatar */
+            border-radius: 9999px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); /* Easing mượt */
+            max-width: 42px; /* Mặc định chỉ hiện Avatar (36px + padding) */
+            overflow: hidden;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
 
-        /* === CSS HIỆU ỨNG NÚT AI (VIỀN XOAY CẦU VỒNG) === */
+            /* Khi Hover: Mở rộng chiều ngang */
+            .user-pill-btn:hover {
+                max-width: 240px;
+                padding-right: 16px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+                border-color: #cbd5e1;
+            }
 
-        /* 1. Định nghĩa animation xoay */
+        /* Avatar tròn */
+        .user-pill-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563eb, #06b6d4);
+            color: white;
+            display: grid;
+            place-items: center;
+            font-weight: 700;
+            font-size: 14px;
+            flex-shrink: 0; /* Không bị co lại */
+        }
+
+        /* Thông tin User (Tên + Role) */
+        .user-pill-info {
+            opacity: 0;
+            white-space: nowrap;
+            margin-left: 0;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+            transition: all 0.3s ease;
+            transform: translateX(10px); /* Dịch nhẹ để tạo hiệu ứng bay vào */
+            pointer-events: none;
+        }
+
+        /* Hiện thông tin khi Hover nút cha */
+        .user-pill-btn:hover .user-pill-info {
+            opacity: 1;
+            margin-left: 10px;
+            transform: translateX(0);
+            pointer-events: auto;
+        }
+
+        /* Dropdown Animation */
+        .header-dropdown {
+            transform-origin: top right;
+            transition: all 0.2s ease-out;
+        }
+
+            .header-dropdown.hidden {
+                opacity: 0;
+                transform: scale(0.95) translateY(-10px);
+                pointer-events: none;
+                display: block; /* Giữ block để transition hoạt động, dùng opacity ẩn */
+                visibility: hidden;
+            }
+
+            .header-dropdown:not(.hidden) {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+                visibility: visible;
+            }
+
+        /* === 2. GIỎ HÀNG THINKPRO === */
+        @@keyframes cart-pop {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.15);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .cart-pop-active {
+            animation: cart-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .bg-thinkpro {
+            background-color: #00F0FF;
+            color: #1a1a1a;
+        }
+
+        .badge-count {
+            background-color: #FF5000;
+            color: white;
+            font-weight: 700;
+            border: 2px solid white;
+            min-width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            font-size: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+        }
+
+        /* === 3. AI BUTTON ROTATE === */
         @@keyframes spin-gradient {
             0% {
                 transform: rotate(0deg);
@@ -64,55 +187,47 @@
             }
         }
 
-        /* 2. Container bọc ngoài (Tạo hình dáng viên thuốc) */
         .ai-btn-wrapper {
             position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden; /* Cắt phần thừa của gradient xoay */
+            overflow: hidden;
             border-radius: 999px;
-            padding: 2px; /* ĐỘ DÀY VIỀN MÀU (Khoảng cách giữa inner và outer) */
+            padding: 2px;
             cursor: pointer;
-            text-decoration: none;
             transition: transform 0.2s ease;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
 
             .ai-btn-wrapper:hover {
-                transform: scale(1.02); /* Phóng to nhẹ khi hover */
-                box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+                transform: scale(1.05);
             }
 
-            /* 3. Lớp giả tạo nền gradient xoay (Nằm dưới cùng) */
             .ai-btn-wrapper::before {
                 content: "";
                 position: absolute;
                 top: -50%;
                 left: -50%;
                 width: 200%;
-                height: 200%; /* To hơn nút để khi xoay vẫn phủ kín */
-                /* Dải màu cầu vồng giống Google */
-                background: conic-gradient( #ea4335, #fbbc04, #34a853, #4285f4, #9b72cb, #ea4335 );
-                animation: spin-gradient 3s linear infinite; /* Xoay liên tục */
+                height: 200%;
+                background: conic-gradient(#ea4335, #fbbc04, #34a853, #4285f4, #9b72cb, #ea4335);
+                animation: spin-gradient 3s linear infinite;
                 z-index: 0;
             }
 
-        /* 4. Lớp nội dung bên trong (Nền trắng đè lên) */
         .ai-btn-inner {
             position: relative;
             z-index: 1;
-            background: white; /* Che gradient ở giữa */
+            background: white;
             width: 100%;
             height: 100%;
-            border-radius: 999px; /* Bo tròn trùng khớp wrapper */
+            border-radius: 999px;
             display: flex;
             align-items: center;
             gap: 6px;
-            padding: 6px 10px; /* Khoảng cách lề trong nút */
+            padding: 6px 12px;
         }
 
-        /* 5. Chữ Gradient đẹp mắt */
         .ai-text-gradient {
             background: linear-gradient(90deg, #4f46e5, #ec4899);
             -webkit-background-clip: text;
@@ -122,111 +237,220 @@
         }
     </style>
 </head>
-<body class="bg-future text-slate-800 antialiased">
+<body class="bg-future text-slate-800 antialiased flex flex-col min-h-screen">
 
-    <header class="sticky top-0 z-50">
-        <div class="nav-glass border-b border-slate-100 shadow-sm/50 shadow-[0_5px_25px_rgba(15,23,42,0.04)]">
-            <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex h-16 items-center justify-between gap-4">
+    <header class="sticky top-0 z-[60] w-full bg-white/90 backdrop-blur-md border-b border-slate-100 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] transition-all duration-300">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex h-20 items-center justify-between gap-6">
 
-                    <a asp-controller="Home" asp-action="Index" class="flex items-center gap-2 shrink-0" aria-label="Về trang chủ">
-                        <div class="relative">
-                            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 grid place-items-center text-white shadow-lg">
-                                <i class="fa-solid fa-motorcycle text-sm"></i>
-                            </div>
-                            <div class="absolute inset-0 rounded-xl bg-blue-400/40 blur-md -z-10"></div>
+                <a asp-controller="Home" asp-action="Index" class="group flex items-center gap-3 outline-none" aria-label="Trang chủ">
+
+                    <div class="relative w-11 h-11 flex items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/30 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 group-hover:shadow-blue-600/40">
+                        <i class="fa-solid fa-motorcycle text-lg drop-shadow-md"></i>
+
+                        <div class="absolute inset-0 rounded-xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    </div>
+
+                    <div class="hidden sm:flex flex-col">
+                        <span class="text-xl font-black tracking-tight text-slate-900 leading-none transition-colors group-hover:text-blue-700">
+                            Motor<span class="text-blue-600 group-hover:text-indigo-600">Shop</span>
+                        </span>
+                        <span class="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 mt-0.5 group-hover:text-blue-400 transition-colors">
+                            Genuine Parts
+                        </span>
+                    </div>
+                </a>
+
+                <div class="hidden lg:flex flex-1 items-center justify-center max-w-2xl gap-4">
+                    <div class="flex items-center gap-1 bg-slate-50/50 p-1 rounded-xl border border-slate-100">
+                        <a asp-controller="Home" asp-action="Index" class="@NavClass("home")">Trang chủ</a>
+                        <a asp-controller="Products" asp-action="Index" class="@NavClass("products")">Xe máy</a>
+                        <a asp-controller="Products" asp-action="Parts" class="@NavClass("parts")">Phụ tùng</a>
+                    </div>
+
+                    <form asp-controller="Products" asp-action="Index" method="get" class="flex-1 relative group">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-500 transition-colors">
+                            <i class="fa-solid fa-magnifying-glass"></i>
                         </div>
-                        <div class="leading-tight hidden sm:block">
-                            <span class="block font-extrabold text-lg tracking-tight text-slate-900">
-                                Motor<span class="text-blue-600">Shop</span>
-                            </span>
+                        <input type="search" name="searchString" placeholder="Tìm kiếm sản phẩm..."
+                               class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-sm group-hover:bg-white">
+                    </form>
+                </div>
+
+                <div class="flex items-center gap-3 sm:gap-4 shrink-0">
+
+                    <a href="@Url.Action("Index", "Ai")" class="hidden md:block ai-btn-wrapper" title="Hỏi trợ lý ảo">
+                        <div class="ai-btn-inner">
+                            <i class="fa-solid fa-sparkles text-indigo-500"></i>
+                            <span class="text-xs ai-text-gradient">AI Chat</span>
                         </div>
                     </a>
 
-                    <form id="global-search-form" asp-controller="Products" asp-action="Index" method="get"
-                          class="hidden md:flex flex-1 max-w-xl items-center relative z-10" role="search">
+                    <a asp-controller="Cart" asp-action="Index" id="header-cart-btn"
+                       class="relative inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-thinkpro font-bold hover:brightness-105 transition-all shadow-sm group no-underline">
+                        <i class="fa-solid fa-bag-shopping text-lg sm:text-xl text-slate-900"></i>
+                        <span id="cart-total-price" class="text-slate-900 text-xs sm:text-sm pt-0.5 hidden sm:inline font-extrabold">0 ₫</span>
+                        <span id="cart-badge" class="badge-count transform scale-0 transition-transform duration-300">0</span>
+                    </a>
 
-                        <div class="w-full flex items-center bg-white rounded-full border border-slate-200 shadow-sm focus-within:shadow-md transition-all p-1">
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        var user = await UserManager.GetUserAsync(User);
+                        var fullName = user?.FullName ?? User.Identity?.Name ?? "User";
+                        var email = user?.Email ?? "email@example.com";
+                        var avatarChar = fullName.Substring(0, 1).ToUpper();
 
-                            <div class="pl-3 text-slate-400">
-                                <i class="fa-solid fa-magnifying-glass"></i>
-                            </div>
+                        // --- 1. XỬ LÝ LOGIC PHÂN QUYỀN ---
+                        bool isAdmin = User.IsInRole("Admin");
 
-                            <input id="global-search-input"
-                                   name="searchString"
-                                   type="search"
-                                   autocomplete="off"
-                                   placeholder="Tìm xe, hãng, dòng…"
-                                   class="w-full bg-transparent border-none py-1.5 px-3 text-sm text-slate-700 placeholder-slate-400 focus:ring-0 focus:outline-none" />
+                        // --- 2. CẤU HÌNH MÀU SẮC & TEXT ---
+                        string roleLabel, avatarColor, badgeClass, ringClass;
 
-                            <a href="@Url.Action("Index", "Ai")" class="ai-btn-wrapper mr-0.5 shrink-0" title="Hỏi trợ lý ảo AI">
-                                <div class="ai-btn-inner">
-                                    <i class="fa-solid fa-wand-magic-sparkles text-sm text-indigo-500"></i>
-                                    <span class="text-xs ai-text-gradient whitespace-nowrap">Chế độ AI</span>
+                        if (isAdmin)
+                        {
+                            roleLabel = "Quản trị viên";
+                            avatarColor = "bg-orange-600"; // Avatar màu Cam đậm cho Admin
+                            badgeClass = "bg-red-50 text-red-600 border-red-100"; // Huy hiệu màu đỏ
+                            ringClass = "focus:ring-red-500";
+                        }
+                        else
+                        {
+                            roleLabel = "Thành viên";
+                            avatarColor = "bg-blue-600";   // Avatar màu Xanh cho User
+                            badgeClass = "bg-slate-50 text-slate-500 border-slate-100"; // Huy hiệu màu xám
+                            ringClass = "focus:ring-blue-500";
+                        }
+
+                        <div class="relative z-50">
+                            <button id="userBtn" class="user-pill-btn group/btn outline-none ring-offset-2 focus:ring-2 @ringClass">
+
+                                <div class="w-[36px] h-[36px] rounded-full @avatarColor flex items-center justify-center text-white font-bold text-sm shrink-0 shadow-sm ring-2 ring-white transition-transform group-hover/btn:scale-105">
+                                    @avatarChar
                                 </div>
+
+                                <div class="user-pill-info flex flex-col items-start min-w-[90px]">
+                                    <span class="text-xs font-bold text-slate-700 truncate max-w-[130px]">@fullName</span>
+
+                                    <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-md border mt-0.5 @badgeClass">
+                                        @roleLabel
+                                    </span>
+                                </div>
+
+                                <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 mt-1 ml-2 opacity-60"></i>
+                            </button>
+
+                            <div id="userDropdown" class="header-dropdown hidden absolute right-0 top-full mt-2 w-[280px] bg-white rounded-xl shadow-2xl border border-slate-100 overflow-hidden">
+
+                                <div class="p-4 border-b border-slate-100 bg-white">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-12 h-12 rounded-full @avatarColor text-white flex items-center justify-center font-bold text-xl shadow-md shrink-0">
+                                            @avatarChar
+                                        </div>
+                                        <div class="overflow-hidden">
+                                            <p class="text-sm font-bold text-slate-900 truncate" title="@fullName">@fullName</p>
+                                            <p class="text-xs text-slate-500 truncate mb-1" title="@email">@email</p>
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-100">
+                                                Email đã xác minh
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="py-2 max-h-[450px] overflow-y-auto custom-scrollbar">
+
+                                    <div class="px-4 py-2 mt-1">
+                                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Tài khoản</p>
+                                        <a asp-controller="Manage" asp-action="Index" class="flex items-center gap-3 py-2 text-sm text-slate-600 hover:text-blue-600 transition-colors">
+                                            <i class="fa-solid fa-id-card w-5 text-center text-slate-400"></i> Hồ sơ cá nhân
+                                        </a>
+                                        <a asp-controller="Manage" asp-action="ChangePassword" class="flex items-center gap-3 py-2 text-sm text-slate-600 hover:text-blue-600 transition-colors">
+                                            <i class="fa-solid fa-key w-5 text-center text-slate-400"></i> Đổi mật khẩu
+                                        </a>
+<a asp-controller="Manage" asp-action="Email" class="flex items-center gap-3 py-2 text-sm font-medium text-slate-600 hover:text-blue-600 hover:bg-slate-50 rounded-lg transition-colors">
+                        <i class="fa-solid fa-envelope w-5 text-center text-slate-400"></i> Quản lý Email
+                    </a>
+                                    </div>
+
+                                    <div class="px-4 py-2">
+                                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Đơn hàng</p>
+                                        <a asp-controller="Order" asp-action="History" class="flex items-center gap-3 py-2 text-sm text-slate-600 hover:text-blue-600 transition-colors">
+                                            <i class="fa-solid fa-clock-rotate-left w-5 text-center text-slate-400"></i> Lịch sử đơn hàng
+                                        </a>
+                                        <a asp-controller="Cart" asp-action="Index" class="flex items-center gap-3 py-2 text-sm text-slate-600 hover:text-blue-600 transition-colors">
+                                            <i class="fa-solid fa-cart-shopping w-5 text-center text-slate-400"></i> Giỏ hàng của tôi
+                                        </a>
+                                    </div>
+
+                                    @if (isAdmin)
+                                    {
+                                        <div class="px-4 py-2 bg-orange-50/50 border-t border-dashed border-slate-200 mt-1">
+                                            <p class="text-[10px] font-bold text-orange-500 uppercase tracking-wider mb-1">Quản trị</p>
+                                            <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="flex items-center gap-3 py-2 text-sm text-slate-700 hover:text-orange-600 transition-colors font-medium">
+                                                <i class="fa-solid fa-gauge-high w-5 text-center text-orange-400"></i> Admin Dashboard
+                                            </a>
+                                            
+                                        </div>
+                                    }
+                                </div>
+
+                                <div class="p-3 border-t border-slate-100 bg-slate-50/30">
+                                    <form asp-controller="Account" asp-action="Logout" method="post">
+                                        <button type="submit" class="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-100 hover:text-slate-900 rounded-lg transition-all shadow-sm">
+                                            <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="flex items-center gap-2">
+                            <a asp-controller="Account" asp-action="Login" class="text-sm font-bold text-slate-600 hover:text-blue-600 px-3 py-2">Đăng nhập</a>
+                            <a asp-controller="Account" asp-action="Register" class="hidden sm:inline-flex items-center px-5 py-2 text-sm font-bold text-white bg-slate-900 rounded-full hover:bg-slate-800 transition-all shadow-lg shadow-slate-200">
+                                Đăng ký
                             </a>
-
                         </div>
-                    </form>
+                    }
 
-                    <div class="flex items-center gap-1 sm:gap-2 shrink-0">
-                        <div class="hidden lg:flex items-center space-x-1">
-                            <a asp-controller="Home" asp-action="Index" class="@NavClass("home")">Trang chủ</a>
-                            <a asp-controller="Products" asp-action="Index" class="@NavClass("products")">Xe máy</a>
-
-                            <a asp-controller="Products" asp-action="Parts" class="@NavClass("Parts")">Phụ tùng & phụ kiện</a>
-
-                            <a asp-controller="Order" asp-action="History" class="@NavClass("order")">Đơn hàng</a>
-                        </div>
-
-                        <a asp-controller="Cart" asp-action="Index"
-                           class="relative inline-flex items-center gap-2 px-2.5 py-2 rounded-xl hover:bg-slate-50 text-slate-700"
-                           aria-label="Giỏ hàng">
-                            <i class="fa-solid fa-cart-shopping text-lg"></i>
-                            <span id="cart-badge"
-                                  class="min-w-[20px] px-1.5 h-5 text-[10px] grid place-items-center rounded-full bg-blue-600 text-white shadow">
-                                0
-                            </span>
-                        </a>
-
-                        <partial name="_LoginPartial" />
-
-                        <button id="mobile-menu-button" class="lg:hidden p-2 text-slate-600 hover:text-blue-600">
-                            <i class="fa-solid fa-bars text-lg"></i>
-                        </button>
-                    </div>
+                    <button id="mobile-menu-btn" class="lg:hidden p-2 text-slate-600 hover:text-blue-600 rounded-lg hover:bg-slate-50">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
                 </div>
-            </nav>
-        </div>
+            </div>
+        </nav>
 
-        <div id="mobile-menu" class="lg:hidden hidden bg-white border-b border-slate-100">
-            <div class="px-4 py-3 space-y-2">
-                <a href="@Url.Action("Index", "Ai")" class="block w-full text-center py-2 rounded-lg bg-indigo-50 text-indigo-700 font-bold border border-indigo-100">
-                    <i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Chế độ AI
+        <div id="mobile-menu" class="hidden lg:hidden bg-white border-t border-slate-100 absolute w-full left-0 shadow-xl">
+            <div class="p-4 space-y-2">
+                <form asp-controller="Products" asp-action="Index" method="get" class="relative mb-4">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400"></i>
+                    <input type="search" name="searchString" placeholder="Tìm kiếm..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm">
+                </form>
+                <a asp-controller="Home" asp-action="Index" class="block px-4 py-3 rounded-xl hover:bg-slate-50 font-medium text-slate-700">Trang chủ</a>
+                <a asp-controller="Products" asp-action="Index" class="block px-4 py-3 rounded-xl hover:bg-slate-50 font-medium text-slate-700">Xe máy</a>
+                <a asp-controller="Products" asp-action="Parts" class="block px-4 py-3 rounded-xl hover:bg-slate-50 font-medium text-slate-700">Phụ tùng</a>
+                <a href="@Url.Action("Index", "Ai")" class="block px-4 py-3 rounded-xl bg-indigo-50 text-indigo-600 font-bold mt-2">
+                    <i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Trợ lý AI
                 </a>
-                <a asp-controller="Home" asp-action="Index" class="block py-2 text-slate-700 font-medium">Trang chủ</a>
-                <a asp-controller="Products" asp-action="Index" class="block py-2 text-slate-700 font-medium">Sản phẩm</a>
             </div>
         </div>
     </header>
 
-    <main role="main" class="relative">
+    <main role="main" class="flex-grow relative">
         @RenderBody()
     </main>
-    @* Chỉ hiển thị Footer nếu không có cờ 'HideFooter' *@
+
     @if (ViewData["HideFooter"] == null || !(bool)ViewData["HideFooter"])
     {
         <partial name="_FooterPartial" />
     }
 
-    <div id="notification"
-         class="fixed top-[84px] right-5 z-[1000] min-w-[280px] max-w-sm transition-all duration-500 ease-in-out
-              @(toast == null ? "opacity-0 translate-x-full pointer-events-none" : "opacity-100 translate-x-0")">
+    <div id="notification" class="fixed top-24 right-5 z-[1000] min-w-[300px] max-w-sm transition-all duration-500 ease-in-out opacity-0 translate-x-full pointer-events-none">
         @if (toast != null)
         {
-            <div class="flex items-start gap-3 text-white px-4 py-3 rounded-2xl shadow-2xl bg-gradient-to-br @ToastBg(toastType)">
+            <div class="flex items-start gap-3 text-white px-5 py-4 rounded-2xl shadow-xl bg-gradient-to-br @ToastBg(toastType)">
                 <i class="fa-solid @(toastType == "success" ? "fa-circle-check" : toastType == "info" ? "fa-circle-info" : toastType == "warning" ? "fa-triangle-exclamation" : "fa-circle-exclamation") text-xl mt-0.5"></i>
-                <div class="toast-text text-sm leading-5">@toast</div>
+                <div class="toast-text text-sm font-medium leading-relaxed">@toast</div>
             </div>
         }
     </div>
@@ -237,97 +461,162 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     <script>
-        // === TOAST HELPER ===
-        window.getCsrf = () => document.querySelector('#af-global input[name="__RequestVerificationToken"]')?.value || '';
+        // === 1. TOAST LOGIC ===
+        const toastEl = document.getElementById('notification');
+        if (@(toast != null ? "true" : "false")) {
+            setTimeout(() => {
+                toastEl.classList.remove('opacity-0', 'translate-x-full', 'pointer-events-none');
+            }, 100);
+            setTimeout(() => {
+                toastEl.classList.add('opacity-0', 'translate-x-full', 'pointer-events-none');
+            }, 4000);
+        }
 
         window.showToast = (msg, type = "info") => {
-          const toast = document.getElementById('notification');
-          if (!toast) return alert(msg);
+            if(!toastEl) return alert(msg);
+            let box = toastEl.querySelector('.bg-gradient-to-br');
 
-          // Template HTML cho toast
-          let box = toast.querySelector('.bg-gradient-to-br');
-          if (!box) {
-             toast.innerHTML = '<div class="flex items-start gap-3 text-white px-4 py-3 rounded-2xl shadow-2xl bg-gradient-to-br"><i class="fa-solid fa-circle-info text-xl mt-0.5"></i><div class="toast-text text-sm leading-5"></div></div>';
-             box = toast.querySelector('.bg-gradient-to-br');
-          }
+            // Map styles
+            const styles = {
+                success: 'from-emerald-500 to-emerald-600 shadow-emerald-300/40',
+                error: 'from-rose-500 to-rose-600 shadow-rose-300/40',
+                warning: 'from-amber-500 to-amber-600 shadow-amber-300/40',
+                info: 'from-blue-600 to-blue-700 shadow-blue-300/40'
+            };
+            const icons = {
+                success: 'fa-circle-check', error: 'fa-circle-exclamation', warning: 'fa-triangle-exclamation', info: 'fa-circle-info'
+            };
 
-          // Set màu sắc
-          const map = {
-            success: 'from-emerald-500 to-emerald-600 shadow-emerald-300/40',
-            warning: 'from-amber-500 to-amber-600 shadow-amber-300/40',
-            error:   'from-rose-500 to-rose-600 shadow-rose-300/40',
-            info:    'from-blue-600 to-blue-700 shadow-blue-300/40'
-          };
-          box.className = 'flex items-start gap-3 text-white px-4 py-3 rounded-2xl shadow-2xl bg-gradient-to-br ' + (map[type] || map.info);
-
-          // Set Icon & Text
-          const icon = box.querySelector('i');
-          icon.className = 'fa-solid ' + (type==='success' ? 'fa-circle-check' : type==='warning' ? 'fa-triangle-exclamation' : type==='error' ? 'fa-circle-exclamation' : 'fa-circle-info') + ' text-xl mt-0.5';
-          box.querySelector('.toast-text').textContent = msg || '';
-
-          // Hiển thị
-          toast.classList.remove('pointer-events-none','opacity-0','translate-x-full');
-          toast.classList.add('opacity-100','translate-x-0');
-
-          // Tự ẩn sau 3.4s
-          clearTimeout(window.__toastTimer);
-          window.__toastTimer = setTimeout(()=>{
-            toast.classList.add('opacity-0','translate-x-full');
-          }, 3400);
-        };
-
-        // === CART HELPER ===
-        window.refreshCartBadge = async () => {
-          try {
-            const r = await fetch('@Url.Action("Summary", "Cart")', { headers: { 'Accept':'application/json' }});
-            const j = await r.json();
-            const el = document.getElementById('cart-badge');
-            if (el) el.textContent = j.cartCount ?? 0;
-          } catch {}
-        };
-
-        // Sự kiện thêm vào giỏ hàng
-        document.addEventListener('click', async (e) => {
-          const btn = e.target.closest('[data-add-to-cart]');
-          if (!btn) return;
-          e.preventDefault(); e.stopPropagation();
-
-          const pid = Number(btn.getAttribute('data-id'));
-          const qty = Number(btn.getAttribute('data-qty') || '1');
-          const html = btn.innerHTML;
-
-          btn.disabled = true;
-          btn.classList.add('opacity-70');
-          btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>...</span>';
-
-          try {
-            const res = await fetch('@Url.Action("AddToCart", "Cart")', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'RequestVerificationToken': getCsrf() },
-              body: JSON.stringify({ productId: pid, quantity: qty })
-            });
-
-            let j = {};
-            const ct = res.headers.get('content-type') || '';
-            if (ct.includes('application/json')) j = await res.json();
-
-            if (res.ok && j.success) {
-                showToast(j.message || 'Đã thêm vào giỏ', 'success');
-                refreshCartBadge();
+            // Create box if not exists
+            if (!box) {
+                toastEl.innerHTML = `<div class="flex items-start gap-3 text-white px-5 py-4 rounded-2xl shadow-xl bg-gradient-to-br ${styles[type]}"><i class="fa-solid ${icons[type]} text-xl mt-0.5"></i><div class="toast-text text-sm font-medium leading-relaxed">${msg}</div></div>`;
             } else {
-                showToast(j.message || 'Không thể thêm vào giỏ', 'error');
+                box.className = `flex items-start gap-3 text-white px-5 py-4 rounded-2xl shadow-xl bg-gradient-to-br ${styles[type] || styles.info}`;
+                box.querySelector('i').className = `fa-solid ${icons[type] || icons.info} text-xl mt-0.5`;
+                box.querySelector('.toast-text').textContent = msg;
             }
-          } catch {
-              showToast('Lỗi kết nối.', 'error');
-          } finally {
-              btn.disabled = false;
-              btn.classList.remove('opacity-70');
-              btn.innerHTML = html;
-          }
+
+            toastEl.classList.remove('opacity-0', 'translate-x-full', 'pointer-events-none');
+            clearTimeout(window._tTimer);
+            window._tTimer = setTimeout(() => {
+                toastEl.classList.add('opacity-0', 'translate-x-full', 'pointer-events-none');
+            }, 3500);
+        };
+
+        // === 2. USER DROPDOWN LOGIC ===
+        document.addEventListener('DOMContentLoaded', () => {
+            const userBtn = document.getElementById('userBtn');
+            const userDropdown = document.getElementById('userDropdown');
+            const mobileBtn = document.getElementById('mobile-menu-button'); // Fix ID selector below
+            const mobileMenu = document.getElementById('mobile-menu');
+
+            // Dropdown Toggle
+            if (userBtn && userDropdown) {
+                userBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    userDropdown.classList.toggle('hidden');
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!userBtn.contains(e.target) && !userDropdown.contains(e.target)) {
+                        userDropdown.classList.add('hidden');
+                    }
+                });
+            }
+
+            // Mobile Menu Toggle
+            const mobBtn = document.getElementById('mobile-menu-btn'); // Correct ID
+            if(mobBtn && mobileMenu) {
+                mobBtn.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
         });
 
-        // Init Cart Badge
+        // === 3. CART ANIMATION LOGIC ===
+            const nfGlobal = new Intl.NumberFormat('vi-VN');
+        const formatMoney = (n) => nfGlobal.format(n) + ' ₫';
+
+        // Hàm chuyển đổi chuỗi tiền "100.000 ₫" thành số 100000 để tính toán
+        const parseMoney = (str) => {
+            if (!str) return 0;
+            return parseInt(str.replace(/[^0-9]/g, '')) || 0;
+        };
+
+        // Hàm tạo hiệu ứng số chạy (Rolling Number) giống ThinkPro
+        function animateNumber(element, start, end, duration, isMoney = false) {
+            if (start === end) {
+                element.textContent = isMoney ? formatMoney(end) : end;
+                return;
+            }
+
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+
+                // Easing function: easeOutExpo (chạy nhanh lúc đầu, chậm dần lúc cuối)
+                const easeProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+
+                const currentVal = Math.floor(easeProgress * (end - start) + start);
+
+                element.textContent = isMoney ? formatMoney(currentVal) : currentVal;
+
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                } else {
+                    element.textContent = isMoney ? formatMoney(end) : end;
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        // === 2. HÀM CẬP NHẬT GIỎ HÀNG TOÀN CỤC ===
+        // Hàm này sẽ được gọi từ bất kỳ trang nào sau khi thêm giỏ hàng thành công
+        window.refreshCartBadge = async () => {
+            try {
+                // Gọi API lấy thông tin giỏ hàng mới nhất
+                const r = await fetch('@Url.Action("Summary", "Cart")', {
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                if (r.ok) {
+                    const j = await r.json();
+
+                    const btn = document.getElementById('header-cart-btn');
+                    const elPrice = document.getElementById('cart-total-price');
+                    const elBadge = document.getElementById('cart-badge');
+
+                    if (btn && elPrice && elBadge) {
+                        // 1. Hiệu ứng chạy số tiền
+                        const oldPrice = parseMoney(elPrice.textContent);
+                        const newPrice = j.newTotalAmount ?? 0;
+                        animateNumber(elPrice, oldPrice, newPrice, 1000, true);
+
+                        // 2. Hiệu ứng chạy số lượng badge
+                        const oldBadge = parseInt(elBadge.textContent) || 0;
+                        const newCount = j.cartCount ?? 0;
+                        animateNumber(elBadge, oldBadge, newCount, 500, false);
+
+                        // 3. Ẩn hiện badge
+                        elBadge.style.transform = newCount > 0 ? 'scale(1)' : 'scale(0)';
+
+                        // 4. Hiệu ứng nảy (Pop) cho nút giỏ hàng
+                        btn.classList.remove('cart-pop-active');
+                        void btn.offsetWidth; // Trigger Reflow
+                        btn.classList.add('cart-pop-active');
+                    }
+                }
+            } catch (e) {
+                console.error("Lỗi cập nhật giỏ hàng:", e);
+            }
+        };
+
+        // Gọi lần đầu khi tải trang
         window.addEventListener('DOMContentLoaded', refreshCartBadge);
+
+        // Helper lấy Token CSRF cho các form POST
+        window.getCsrf = () => document.querySelector('#af-global input[name="__RequestVerificationToken"]')?.value || '';
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)
